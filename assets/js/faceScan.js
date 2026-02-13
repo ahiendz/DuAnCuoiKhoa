@@ -8,6 +8,7 @@ const scanStatus = document.getElementById("scanStatus");
 const faceVideo = document.getElementById("faceVideo");
 const captureCanvas = document.getElementById("captureCanvas");
 const faceResult = document.getElementById("faceResult");
+const liveRecognitionBody = document.getElementById("liveRecognitionBody");
 
 attendanceDate.value = new Date().toISOString().slice(0, 10);
 
@@ -47,13 +48,26 @@ function setScanStatus(message, css = "text-primary") {
   scanStatus.textContent = message;
 }
 
+function renderLiveRecognition(result) {
+  if (!liveRecognitionBody) return;
+  const time = new Date().toTimeString().slice(0, 8);
+  liveRecognitionBody.innerHTML = `
+    <tr>
+      <td>${result.student_code || ""}</td>
+      <td>${result.full_name || ""}</td>
+      <td>${time}</td>
+      <td>${result.confidence ?? ""}</td>
+    </tr>
+  `;
+}
+
 function updateButton() {
   if (isRunning) {
-    startBtn.textContent = "Stop Scanning";
+    startBtn.textContent = "Dừng quét";
     startBtn.classList.remove("btn-primary");
     startBtn.classList.add("btn-danger");
   } else {
-    startBtn.textContent = "Start Scanning";
+    startBtn.textContent = "Bắt đầu quét";
     startBtn.classList.add("btn-primary");
     startBtn.classList.remove("btn-danger");
   }
@@ -143,20 +157,20 @@ function startDetectLoop() {
 
     if (!hasFace) {
       confirmStartAt = null;
-      setScanStatus("No face detected. Waiting...", "text-muted");
+      setScanStatus("Chưa thấy khuôn mặt, vui lòng đứng vào khung...", "text-muted");
       return;
     }
 
     if (!confirmStartAt) {
       confirmStartAt = now;
       mode = Modes.CONFIRMING;
-      setScanStatus("Face detected. Hold still...", "text-primary");
+      setScanStatus("Đã phát hiện, giữ ổn định...", "text-primary");
       return;
     }
 
     const elapsed = now - confirmStartAt;
     const remaining = Math.max(0, CONFIRM_MS - elapsed);
-    setScanStatus(`Face stable: ${Math.ceil(remaining / 1000)}s`, "text-primary");
+    setScanStatus(`Ổn định khuôn mặt: ${Math.ceil(remaining / 1000)}s`, "text-primary");
 
     if (elapsed >= CONFIRM_MS) {
       mode = Modes.VERIFYING;
@@ -168,22 +182,23 @@ function startDetectLoop() {
 
 async function doVerify(base64) {
   try {
-    setScanStatus("Verifying...", "text-warning");
+    setScanStatus("Đang xác thực...", "text-warning");
     const res = await callVerify(base64);
     if (res.status === "success") {
-      setResult("success", `Y - ${res.full_name} (${res.class_name}) | Do tin cay: ${res.confidence}`);
+      setResult("success", `Y - ${res.full_name} (${res.class_name}) | Độ tin cậy: ${res.confidence}`);
+      renderLiveRecognition(res);
       console.log("Y", res.full_name, res.class_name);
     } else {
-      setResult("fail", res.message || "No match found");
+      setResult("fail", res.message || "Không khớp dữ liệu");
       console.log("N");
     }
   } catch (e) {
-    setResult("fail", `Verify error: ${e.message}`);
+    setResult("fail", `Lỗi xác thực: ${e.message}`);
     console.log("N");
   } finally {
     mode = Modes.COOLDOWN;
     cooldownUntil = Date.now() + COOLDOWN_MS;
-    setScanStatus("Cooldown 2s...", "text-secondary");
+    setScanStatus("Chờ 2s để quét lại...", "text-secondary");
   }
 }
 
@@ -195,8 +210,8 @@ async function startScanning() {
     isRunning = true;
     mode = Modes.SCANNING;
     updateButton();
-    setResult("info", "Dang quet khuon mat lien tuc...");
-    setScanStatus("Scanner started. Waiting for face...", "text-primary");
+    setResult("info", "Đang quét khuôn mặt liên tục...");
+    setScanStatus("Đang mở camera, chờ khuôn mặt...", "text-primary");
     startDetectLoop();
   } catch (e) {
     isRunning = false;

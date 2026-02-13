@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Điểm danh | Admin</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<script>
+  const u = JSON.parse(sessionStorage.getItem("currentUser"));
+  if (!u || u.role !== "admin") location.href = "../login.html";
+</script>
+
+<header class="header">
+  <div class="container header-inner">
+    <div class="logo">School Manager Pro</div>
+    <a href="../login.html" class="btn btn-outline">Đăng xuất</a>
+  </div>
+</header>
+
+<div class="dashboard container">
+  <aside class="sidebar">
+    <h3>Admin</h3>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html">📊 Tổng quan</a>
+      <a href="classes.html">🏫 Lớp học</a>
+      <a href="teachers.html">👩‍🏫 Giáo viên</a>
+      <a href="students.html">👨‍🎓 Học sinh</a>
+      <a href="attendance.html" class="active">🗓️ Điểm danh</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <h2>Điểm danh hôm nay</h2>
+    <p class="subtext">Danh sách học sinh đã được nhận diện theo ngày và lớp</p>
+
+    <div class="card">
+      <div class="form-row wrap">
+        <input id="attDateFilter" type="date">
+        <select id="attClassFilter">
+          <option value="">Tất cả lớp</option>
+        </select>
+        <button class="btn btn-primary" onclick="loadAttendance()">Lọc dữ liệu</button>
+      </div>
+      <div class="divider"></div>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Mã học sinh</th>
+            <th>Họ tên</th>
+            <th>Lớp</th>
+            <th>Ngày</th>
+            <th>Giờ</th>
+            <th>Độ tin cậy</th>
+          </tr>
+        </thead>
+        <tbody id="attendanceTable"></tbody>
+      </table>
+      <p id="attendanceNotice" class="muted" style="margin-top:8px;"></p>
+    </div>
+  </main>
+</div>
+
+<script src="attendance.js"></script>
+</body>
+</html>

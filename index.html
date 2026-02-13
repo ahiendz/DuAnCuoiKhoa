@@ -18,11 +18,11 @@
     <div class="container header-inner">
       <div class="logo">School Manager Pro</div>
       <nav class="nav">
-        <a href="#">Trang chu</a>
-        <a href="#features">Tinh nang</a>
-        <a href="#face-id">Nhan dien khuon mat</a>
-        <a href="#support">Ho tro</a>
-        <a href="login.html" class="btn btn-outline">Dang nhap</a>
+        <a href="#">Trang chủ</a>
+        <a href="#features">Tính năng</a>
+        <a href="attendance.html">Điểm danh</a>
+        <a href="#support">Hỗ trợ</a>
+        <a href="login.html" class="btn btn-outline">Đăng nhập</a>
       </nav>
     </div>
   </header>
@@ -30,11 +30,12 @@
   <section class="hero">
     <div class="container hero-inner">
       <div class="hero-text">
-        <h1>Nen tang quan ly truong hoc hien dai</h1>
-        <p>So hoa quan ly lop hoc, hoc sinh, giao vien va diem so tren mot he thong duy nhat.</p>
+        <div class="status-badge">Phiên bản Beta thân thiện</div>
+        <h1>Nền tảng quản lý trường học hiện đại</h1>
+        <p>Số hoá lớp học, học sinh, giáo viên và điểm số trên một hệ thống duy nhất.</p>
         <div class="hero-actions">
-          <a href="login.html" class="btn btn-primary">Bat dau ngay</a>
-          <a href="#features" class="btn btn-ghost">Xem tinh nang</a>
+          <a href="login.html" class="btn btn-primary">Bắt đầu ngay</a>
+          <a href="#features" class="btn btn-ghost">Xem tính năng</a>
         </div>
       </div>
       <div class="hero-image">
@@ -43,21 +44,41 @@
     </div>
   </section>
 
-  <section id="features" class="section">
+  <section class="section">
     <div class="container">
-      <h2 class="section-title">Tinh nang noi bat</h2>
+      <h2 class="section-title">Số liệu nổi bật</h2>
       <div class="features">
         <div class="feature-card">
-          <h3>Quan ly hoc sinh</h3>
-          <p>Danh sach, ho so, phan lop, import CSV nhanh gon.</p>
+          <h3 id="stat-classes">-- lớp</h3>
+          <p class="muted">Tổng số lớp đã cấu hình với đủ giáo viên.</p>
         </div>
         <div class="feature-card">
-          <h3>Bang diem va diem danh</h3>
-          <p>Nhap diem, theo doi hoc luc, thong ke theo thoi gian.</p>
+          <h3 id="stat-teachers">-- giáo viên</h3>
+          <p class="muted">Hạn mức 4 lớp/giáo viên, 1 GVCN duy nhất.</p>
         </div>
         <div class="feature-card">
-          <h3>Bao cao va thong ke</h3>
-          <p>Xuat bao cao PDF/CSV chuyen nghiep.</p>
+          <h3 id="stat-students">-- học sinh</h3>
+          <p class="muted">Mã học sinh duy nhất, hỗ trợ nhập CSV.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" class="section">
+    <div class="container">
+      <h2 class="section-title">Tính năng nổi bật</h2>
+      <div class="features">
+        <div class="feature-card">
+          <h3>Quản lý học sinh</h3>
+          <p>Danh sách, hồ sơ, phân lớp, import CSV nhanh gọn.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Bảng điểm và điểm danh</h3>
+          <p>Nhập điểm, theo dõi học lực, thống kê theo thời gian.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Báo cáo và thống kê</h3>
+          <p>Xuất báo cáo PDF/CSV chuyên nghiệp.</p>
         </div>
       </div>
     </div>
@@ -65,24 +86,24 @@
 
   <section id="face-id" class="section section-light">
     <div class="container">
-      <h2 class="section-title">Nhan dien khuon mat</h2>
+      <h2 class="section-title">Nhận diện khuôn mặt</h2>
       <div class="card shadow-sm border-0">
         <div class="card-body">
           <div class="row g-3 align-items-end">
             <div class="col-md-4">
-              <label for="attendanceDate" class="form-label">Ngay diem danh</label>
+              <label for="attendanceDate" class="form-label">Ngày điểm danh</label>
               <input type="date" class="form-control" id="attendanceDate" />
             </div>
             <div class="col-md-4">
-              <button id="startFaceBtn" class="btn btn-primary w-100">Start Scanning</button>
+              <button id="startFaceBtn" class="btn btn-primary w-100">Bắt đầu quét</button>
             </div>
             <div class="col-md-4">
-              <button id="trainFaceBtn" class="btn btn-outline-secondary w-100">Train Faces</button>
+              <button id="trainFaceBtn" class="btn btn-outline-secondary w-100">Huấn luyện khuôn mặt</button>
             </div>
           </div>
 
           <div class="mt-4 text-center">
-            <div id="scanStatus" class="scan-status text-primary">Scanner is idle.</div>
+            <div id="scanStatus" class="scan-status text-primary">Máy quét đang chờ.</div>
           </div>
 
           <div class="mt-3 text-center">
@@ -91,7 +112,7 @@
           </div>
 
           <div id="faceResult" class="alert alert-secondary mt-3 mb-0" role="alert">
-            San sang nhan dien.
+            Sẵn sàng nhận diện.
           </div>
         </div>
       </div>
@@ -100,8 +121,8 @@
 
   <section id="support" class="section section-light">
     <div class="container">
-      <h2 class="section-title">Ho tro</h2>
-      <p class="center-text">Doi ngu ho tro ky thuat san sang dong hanh cung nha truong trong suot qua trinh su dung he thong.</p>
+      <h2 class="section-title">Hỗ trợ</h2>
+      <p class="center-text">Đội ngũ hỗ trợ kỹ thuật sẵn sàng đồng hành cùng nhà trường trong suốt quá trình sử dụng hệ thống.</p>
     </div>
   </section>
 
@@ -112,5 +133,28 @@
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/face_detection.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
   <script type="module" src="assets/js/faceScan.js"></script>
+  <script>
+    (() => {
+      const dateInput = document.getElementById("attendanceDate");
+      if (dateInput) {
+        dateInput.value = new Date().toISOString().slice(0, 10);
+      }
+
+      fetch("/api/summary")
+        .then(res => res.json())
+        .then(data => {
+          if (data.classes !== undefined) {
+            document.getElementById("stat-classes").innerText = `${data.classes} lớp`;
+          }
+          if (data.teachers !== undefined) {
+            document.getElementById("stat-teachers").innerText = `${data.teachers} giáo viên`;
+          }
+          if (data.students !== undefined) {
+            document.getElementById("stat-students").innerText = `${data.students} học sinh`;
+          }
+        })
+        .catch(() => {});
+    })();
+  </script>
 </body>
 </html>

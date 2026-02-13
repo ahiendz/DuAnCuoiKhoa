@@ -11,27 +11,21 @@
   <h2>Đăng nhập hệ thống</h2>
 
   <div class="tabs">
-    <button class="tab active"
-      onclick="switchRole('admin', this)">Admin</button>
-    <button class="tab"
-      onclick="switchRole('teacher', this)">Teacher</button>
-    <button class="tab"
-      onclick="switchRole('parent', this)">Parent</button>
+    <button class="tab active" onclick="switchRole('admin', this)">Admin</button>
+    <button class="tab" onclick="switchRole('teacher', this)">Teacher</button>
+    <button class="tab" onclick="switchRole('parent', this)">Parent</button>
   </div>
 
   <form onsubmit="login(event)">
     <input type="hidden" id="role" value="admin">
 
     <label>Email</label>
-    <input id="email" type="email"
-           placeholder="admin@school.edu.vn" required>
+    <input id="email" type="email" placeholder="admin@school.edu.vn" required>
 
     <label>Mật khẩu</label>
     <input id="password" type="password" required>
 
-    <button class="btn btn-primary full">
-      Đăng nhập
-    </button>
+    <button class="btn btn-primary full">Đăng nhập</button>
   </form>
 
   <p id="error" class="error"></p>

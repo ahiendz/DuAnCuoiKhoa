@@ -214,5 +214,61 @@
     "date": "2026-02-13",
     "time": "16:31:34",
     "confidence": 0.75
+  },
+  {
+    "student_code": "HS2025-01",
+    "full_name": "Lý Anh Hiển",
+    "class_name": "9A1",
+    "date": "2026-02-13",
+    "time": "19:43:55",
+    "confidence": 0.52
+  },
+  {
+    "student_code": "HS2025-01",
+    "full_name": "Lý Anh Hiển",
+    "class_name": "9A1",
+    "date": "2026-02-13",
+    "time": "22:12:29",
+    "confidence": 0.67
+  },
+  {
+    "student_code": "HS2025-01",
+    "full_name": "Lý Anh Hiển",
+    "class_name": "9A1",
+    "date": "2026-02-13",
+    "time": "23:47:48",
+    "confidence": 0.67
+  },
+  {
+    "student_code": "HS2025-01",
+    "full_name": "Lý Anh Hiển",
+    "class_name": "9A1",
+    "date": "2026-02-13",
+    "time": "23:48:27",
+    "confidence": 0.56
+  },
+  {
+    "student_code": "HS2025-01",
+    "full_name": "Lý Anh Hiển",
+    "class_name": "9A1",
+    "date": "2026-02-13",
+    "time": "23:48:54",
+    "confidence": 0.51
+  },
+  {
+    "student_code": "HS2025-02",
+    "full_name": "Trần Thị Phương Mai",
+    "class_name": "9A1",
+    "date": "2026-02-13",
+    "time": "23:49:20",
+    "confidence": 0.84
+  },
+  {
+    "student_code": "HS2025-01",
+    "full_name": "Lý Anh Hiển",
+    "class_name": "9A1",
+    "date": "2026-02-13",
+    "time": "23:51:55",
+    "confidence": 0.59
   }
 ]

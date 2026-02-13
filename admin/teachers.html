@@ -7,7 +7,6 @@
 </head>
 <body>
 
-<!-- PROTECT ADMIN -->
 <script>
   const u = JSON.parse(sessionStorage.getItem("currentUser"));
   if (!u || u.role !== "admin") {
@@ -15,7 +14,6 @@
   }
 </script>
 
-<!-- HEADER -->
 <header class="header">
   <div class="container header-inner">
     <div class="logo">School Manager Pro</div>
@@ -23,10 +21,7 @@
   </div>
 </header>
 
-<!-- DASHBOARD -->
 <div class="dashboard container">
-
-  <!-- SIDEBAR -->
   <aside class="sidebar">
     <h3>Admin</h3>
     <nav class="sidebar-nav">
@@ -34,42 +29,71 @@
       <a href="classes.html">🏫 Lớp học</a>
       <a href="teachers.html" class="active">👩‍🏫 Giáo viên</a>
       <a href="students.html">👨‍🎓 Học sinh</a>
+      <a href="attendance.html">🗓️ Điểm danh</a>
     </nav>
   </aside>
 
-  <!-- MAIN -->
   <main class="main">
     <h2>Quản lý giáo viên</h2>
-    <p class="subtext">Tạo và quản lý tài khoản giáo viên</p>
+    <p class="subtext">Tạo mới, chỉnh sửa và kiểm soát hạn mức phân lớp</p>
 
-    <!-- ADD TEACHER -->
     <div class="card">
-      <h3>➕ Thêm giáo viên</h3>
-      <div class="form-row">
-        <input id="tName" placeholder="Tên giáo viên">
-        <input id="tEmail" type="email" placeholder="Email">
-        <input id="tPassword" type="password" placeholder="Mật khẩu">
-        <button class="btn btn-primary" onclick="addTeacher()">Thêm</button>
+      <div class="form-row" style="justify-content: space-between; align-items:center;">
+        <div>
+          <p class="muted" style="margin:0;">Xuất danh sách giáo viên theo CSV.</p>
+        </div>
+        <button class="btn btn-outline" onclick="window.location.href='/api/teachers/export'">Export CSV</button>
       </div>
     </div>
 
-    <!-- LIST TEACHERS -->
+    <div class="card">
+      <h3>➕ Thêm / Cập nhật giáo viên</h3>
+      <div class="form-row wrap">
+        <input id="tName" placeholder="Họ và tên">
+        <select id="tGender">
+          <option value="">Giới tính</option>
+          <option value="female">Nữ</option>
+          <option value="male">Nam</option>
+          <option value="other">Khác</option>
+        </select>
+        <select id="tSubject">
+          <option value="">Môn giảng dạy</option>
+          <option value="Toán">Toán</option>
+          <option value="Văn">Văn</option>
+          <option value="Anh">Anh</option>
+          <option value="KHTN">KHTN</option>
+        </select>
+        <input id="tEmail" type="email" placeholder="Email (bắt buộc)">
+        <div style="display:flex; gap:6px; flex:1 1 220px; align-items:center;">
+          <input id="tPassword" type="password" placeholder="Mật khẩu (để trống sẽ tự tạo)" style="flex:1;">
+          <button type="button" class="btn btn-outline" onclick="togglePassword(event)">Hiện</button>
+        </div>
+      </div>
+      <p id="teacherError" class="error" style="margin-top:10px;"></p>
+      <p id="teacherNotice" class="muted" style="margin-top:6px;"></p>
+      <div style="margin-top:12px;">
+        <button class="btn btn-primary" onclick="addTeacher()">Lưu giáo viên</button>
+        <button class="btn btn-outline" onclick="resetTeacherForm()">Hủy</button>
+      </div>
+      <p class="muted" style="margin-top:10px;">Hệ thống tự chặn giáo viên dạy quá 4 lớp hoặc trùng GVCN.</p>
+    </div>
+
     <div class="card">
       <h3>📋 Danh sách giáo viên</h3>
       <table class="table">
         <thead>
           <tr>
             <th>Tên</th>
+            <th>Môn</th>
+            <th>GVCN</th>
+            <th>Số lớp</th>
             <th>Email</th>
             <th>Hành động</th>
           </tr>
         </thead>
-        <tbody id="teacherTable">
-          <!-- render bằng JS -->
-        </tbody>
+        <tbody id="teacherTable"></tbody>
       </table>
     </div>
-
   </main>
 </div>
 

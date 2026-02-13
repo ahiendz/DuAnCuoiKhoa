@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Quản lý học sinh</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<script>
+  const u = JSON.parse(sessionStorage.getItem("currentUser"));
+  if (!u || u.role !== "admin") location.href = "../login.html";
+</script>
+
+<header class="header">
+  <div class="container header-inner">
+    <div class="logo">School Manager Pro</div>
+    <a href="../login.html" class="btn btn-outline">Đăng xuất</a>
+  </div>
+</header>
+
+<div class="dashboard container">
+  <aside class="sidebar">
+    <h3>Admin</h3>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html">📊 Tổng quan</a>
+      <a href="classes.html">🏫 Lớp học</a>
+      <a href="teachers.html">👩‍🏫 Giáo viên</a>
+      <a href="students.html" class="active">👨‍🎓 Học sinh</a>
+      <a href="attendance.html">🗓️ Điểm danh</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <h2>Quản lý học sinh</h2>
+    <p class="subtext">Thêm thủ công hoặc nhập CSV theo lớp</p>
+
+    <div class="card">
+      <h3>➕ Thêm học sinh (tự tạo mã)</h3>
+      <div class="form-row wrap">
+        <input id="sFullName" placeholder="Họ và tên">
+        <input id="sDob" type="date" placeholder="Ngày sinh">
+        <select id="sGender">
+          <option value="">Giới tính</option>
+          <option value="female">Nữ</option>
+          <option value="male">Nam</option>
+          <option value="other">Khác</option>
+        </select>
+        <select id="sClass">
+          <option value="">Chọn lớp</option>
+        </select>
+      </div>
+      <p id="studentError" class="error" style="margin-top:10px;"></p>
+      <p id="studentNotice" class="muted" style="margin-top:6px;"></p>
+      <div style="margin-top:12px;">
+        <button class="btn btn-primary" onclick="submitStudent()">Lưu học sinh</button>
+        <button class="btn btn-outline" onclick="resetStudentForm()">Hủy</button>
+      </div>
+      <p class="muted" style="margin-top:8px;">Mã học sinh tự động dạng <code>HSYYYY-XXX</code>.</p>
+    </div>
+
+    <div class="card">
+      <h3>📥 Nhập CSV</h3>
+      <div class="form-row wrap" style="margin-top:6px; align-items:center;">
+        <label style="display:flex; align-items:center; gap:6px;">
+          <input type="radio" name="csvMode" value="merge" checked>
+          Gộp (Merge)
+        </label>
+        <label style="display:flex; align-items:center; gap:6px;">
+          <input type="radio" name="csvMode" value="replace">
+          Thay thế toàn bộ lớp (Replace)
+        </label>
+      </div>
+      <p id="replaceWarning" class="error" style="margin-top:6px; display:none;">
+        Tất cả học sinh của lớp này sẽ bị xoá trước khi nhập mới.
+      </p>
+      <div class="form-row wrap">
+        <select id="csvClass">
+          <option value="">Chọn lớp</option>
+        </select>
+        <input id="csvInput" type="file" accept=".csv">
+        <button id="csvImportBtn" class="btn btn-outline" disabled>Nhập CSV</button>
+      </div>
+      <p class="muted" style="margin-top:8px;">Định dạng: <code>student_code,full_name,dob,gender,class_id</code>. class_id phải trùng lớp đã chọn.</p>
+      <div class="divider"></div>
+      <div id="csvPreviewWrap" style="display:none;">
+        <h4 style="margin:0 0 12px 0;">Xem trước dữ liệu</h4>
+        <table class="table">
+          <thead id="csvPreviewHead"></thead>
+          <tbody id="csvPreviewBody"></tbody>
+        </table>
+        <p id="csvPreviewNote" class="muted" style="margin-top:8px;"></p>
+      </div>
+      <p id="csvImportSummary" class="muted" style="margin-top:10px;"></p>
+    </div>
+
+    <div class="card">
+      <h3>📋 Danh sách học sinh</h3>
+      <div class="form-row" style="margin-bottom:12px;">
+        <select id="filterClass">
+          <option value="">Tất cả lớp</option>
+        </select>
+        <button id="filterBtn" class="btn btn-outline">Lọc</button>
+      </div>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Mã</th>
+            <th>Họ tên</th>
+            <th>Ngày sinh</th>
+            <th>Giới tính</th>
+            <th>Lớp</th>
+          </tr>
+        </thead>
+        <tbody id="studentTable"></tbody>
+      </table>
+      <p id="studentListNote" class="muted" style="margin-top:8px;"></p>
+    </div>
+  </main>
+</div>
+
+<script src="students.js"></script>
+</body>
+</html>

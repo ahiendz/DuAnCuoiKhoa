@@ -1,0 +1,86 @@
+{
+  "teachers": [
+    {
+      "id": 50101,
+      "full_name": "Nguyễn Minh Anh",
+      "gender": "female",
+      "subject": "Toán",
+      "contact_email": "anh.nguyen@school.edu.vn",
+      "is_homeroom": true,
+      "homeroom_class_id": 901,
+      "teaching_classes": [
+        901,
+        902,
+        1770991259537,
+        1770991280385
+      ]
+    },
+    {
+      "id": 50102,
+      "full_name": "Trần Thu Hà",
+      "gender": "female",
+      "subject": "Văn",
+      "contact_email": "ha.tran@school.edu.vn",
+      "is_homeroom": false,
+      "homeroom_class_id": null,
+      "teaching_classes": [
+        901,
+        1770991280385
+      ]
+    },
+    {
+      "id": 50103,
+      "full_name": "Lê Hoàng Nam",
+      "gender": "male",
+      "subject": "Anh",
+      "contact_email": "nam.le@school.edu.vn",
+      "is_homeroom": true,
+      "homeroom_class_id": 1770991280385,
+      "teaching_classes": [
+        901,
+        902,
+        1770991280385
+      ]
+    },
+    {
+      "id": 50104,
+      "full_name": "Phạm Quang Huy",
+      "gender": "male",
+      "subject": "KHTN",
+      "contact_email": "huy.pham@school.edu.vn",
+      "is_homeroom": true,
+      "homeroom_class_id": 1770991259537,
+      "teaching_classes": [
+        901,
+        902,
+        1770991259537,
+        1770991280385
+      ]
+    },
+    {
+      "id": 50105,
+      "full_name": "Đặng Thị Lan",
+      "gender": "female",
+      "subject": "Văn",
+      "contact_email": "lan.dang@school.edu.vn",
+      "is_homeroom": true,
+      "homeroom_class_id": 902,
+      "teaching_classes": [
+        902,
+        1770991259537
+      ]
+    },
+    {
+      "id": 1770991068302,
+      "full_name": "Trần Tú",
+      "gender": "male",
+      "subject": "Anh",
+      "contact_email": "",
+      "is_homeroom": false,
+      "homeroom_class_id": null,
+      "teaching_classes": [
+        1770991259537
+      ]
+    }
+  ]
+}

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Điểm danh | School Manager Pro</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .scan-status {
+      min-height: 2rem;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="container header-inner">
+      <div class="logo">School Manager Pro</div>
+      <nav class="nav">
+        <a href="index.html">Trang chủ</a>
+        <a href="index.html#features">Tính năng</a>
+        <a href="attendance.html" class="btn btn-ghost">Điểm danh</a>
+        <a href="login.html" class="btn btn-outline">Đăng nhập</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="section section-light">
+    <div class="container">
+      <h2 class="section-title">Điểm danh bằng khuôn mặt</h2>
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <div class="row g-3 align-items-end">
+            <div class="col-md-4">
+              <label for="attendanceDate" class="form-label">Ngày điểm danh</label>
+              <input type="date" class="form-control" id="attendanceDate" />
+            </div>
+            <div class="col-md-4">
+              <button id="startFaceBtn" class="btn btn-primary w-100">Bắt đầu quét</button>
+            </div>
+            <div class="col-md-4">
+              <button id="trainFaceBtn" class="btn btn-outline-secondary w-100">Huấn luyện khuôn mặt</button>
+            </div>
+          </div>
+
+          <div class="mt-4 text-center">
+            <div id="scanStatus" class="scan-status text-primary">Máy quét đang chờ.</div>
+          </div>
+
+          <div class="mt-3 text-center">
+            <video id="faceVideo" autoplay playsinline class="rounded border" style="max-width: 100%; width: 560px; display: none;"></video>
+            <canvas id="captureCanvas" style="display: none;"></canvas>
+          </div>
+
+          <div id="faceResult" class="alert alert-secondary mt-3 mb-0" role="alert">
+            Sẵn sàng nhận diện.
+          </div>
+
+          <div class="divider"></div>
+          <h4 style="margin:0 0 12px 0;">Kết quả nhận diện gần nhất</h4>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Mã học sinh</th>
+                <th>Họ tên</th>
+                <th>Giờ</th>
+                <th>Độ tin cậy</th>
+              </tr>
+            </thead>
+            <tbody id="liveRecognitionBody">
+              <tr>
+                <td colspan="4" class="muted">Chưa có dữ liệu.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <h2 class="section-title">Bản ghi điểm danh</h2>
+      <div class="card">
+        <div class="form-row wrap">
+          <input id="recordDate" type="date">
+          <select id="recordClass">
+            <option value="">Tất cả lớp</option>
+          </select>
+          <button class="btn btn-primary" onclick="loadRecords()">Lọc dữ liệu</button>
+        </div>
+        <div class="divider"></div>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Mã học sinh</th>
+              <th>Họ tên</th>
+              <th>Lớp</th>
+              <th>Ngày</th>
+              <th>Giờ</th>
+              <th>Độ tin cậy</th>
+            </tr>
+          </thead>
+          <tbody id="recordTable"></tbody>
+        </table>
+        <p id="recordCount" class="muted" style="margin-top:8px;"></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-light">
+    <div class="container">
+      <h2 class="section-title">Phân tích điểm danh</h2>
+      <div class="card">
+        <div class="form-row wrap">
+          <div>
+            <p class="muted" style="margin:0 0 4px 0;">Có mặt hôm nay</p>
+            <div id="presentCount" style="font-size:20px; font-weight:600;">0</div>
+          </div>
+          <div>
+            <p class="muted" style="margin:0 0 4px 0;">Vắng hôm nay</p>
+            <div id="absentCount" style="font-size:20px; font-weight:600;">-</div>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="form-row wrap">
+          <div style="flex:1 1 320px;">
+            <h4 style="margin:0 0 12px 0;">Theo lớp</h4>
+            <canvas id="classChart" height="200"></canvas>
+          </div>
+          <div style="flex:1 1 320px;">
+            <h4 style="margin:0 0 12px 0;">7 ngày gần nhất</h4>
+            <canvas id="trendChart" height="200"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">2026 School Manager Pro. All rights reserved.</div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script type="module" src="assets/js/faceScan.js"></script>
+  <script src="assets/js/attendancePage.js"></script>
+</body>
+</html>

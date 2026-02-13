@@ -7,11 +7,10 @@
 </head>
 <body>
 
-<!-- PROTECT -->
 <script>
   const u = JSON.parse(sessionStorage.getItem("currentUser"));
   if (!u || u.role !== "admin") location.href = "../login.html";
-</script> 
+</script>
 
 <header class="header">
   <div class="container header-inner">
@@ -21,8 +20,6 @@
 </header>
 
 <div class="dashboard container">
-
-  <!-- SIDEBAR -->
   <aside class="sidebar">
     <h3>Admin</h3>
     <nav class="sidebar-nav">
@@ -30,25 +27,55 @@
       <a href="classes.html" class="active">🏫 Lớp học</a>
       <a href="teachers.html">👩‍🏫 Giáo viên</a>
       <a href="students.html">👨‍🎓 Học sinh</a>
+      <a href="attendance.html">🗓️ Điểm danh</a>
     </nav>
   </aside>
 
-  <!-- MAIN -->
   <main class="main">
     <h2>Quản lý lớp học</h2>
-    <p class="subtext">Tạo và quản lý các lớp trong trường</p>
+    <p class="subtext">Tạo và quản lý lớp với đủ giáo viên theo quy định</p>
 
-    <!-- ADD CLASS -->
     <div class="card">
-      <h3>➕ Thêm lớp mới</h3>
-      <div class="form-row">
-        <input id="className" placeholder="Tên lớp (VD: 9A1)">
-        <input id="classGrade" type="number" placeholder="Khối">
-        <button class="btn btn-primary" onclick="addClass()">Thêm</button>
+      <div class="form-row" style="justify-content: space-between; align-items:center;">
+        <div>
+          <p class="muted" style="margin:0;">Xuất danh sách lớp theo CSV.</p>
+        </div>
+        <button class="btn btn-outline" onclick="window.location.href='/api/classes/export'">Export CSV</button>
       </div>
     </div>
 
-    <!-- LIST -->
+    <div class="card">
+      <h3>➕ Thêm / Cập nhật lớp</h3>
+      <div class="form-row">
+        <input id="className" placeholder="Tên lớp (VD: 9A1)">
+        <input id="classGrade" type="number" min="1" max="12" placeholder="Khối">
+      </div>
+      <div class="divider"></div>
+      <div class="form-row wrap">
+        <select id="homeroomSelect">
+          <option value="">Chọn GVCN</option>
+        </select>
+        <select id="teacherToan">
+          <option value="">Giáo viên Toán</option>
+        </select>
+        <select id="teacherVan">
+          <option value="">Giáo viên Văn</option>
+        </select>
+        <select id="teacherAnh">
+          <option value="">Giáo viên Anh</option>
+        </select>
+        <select id="teacherKHTN">
+          <option value="">Giáo viên KHTN</option>
+        </select>
+      </div>
+      <p id="classError" class="error" style="margin-top:10px;"></p>
+      <div style="margin-top:12px;">
+        <button class="btn btn-primary" onclick="submitClass()" id="classSubmitBtn">Lưu lớp</button>
+        <button class="btn btn-outline" onclick="resetForm()">Hủy</button>
+      </div>
+      <p class="muted" style="margin-top:10px;">Quy tắc: GVCN duy nhất, giáo viên bộ môn tối đa 4 lớp.</p>
+    </div>
+
     <div class="card">
       <h3>📋 Danh sách lớp</h3>
       <table class="table">
@@ -56,6 +83,11 @@
           <tr>
             <th>Lớp</th>
             <th>Khối</th>
+            <th>GVCN</th>
+            <th>Toán</th>
+            <th>Văn</th>
+            <th>Anh</th>
+            <th>KHTN</th>
             <th>Hành động</th>
           </tr>
         </thead>
@@ -63,9 +95,8 @@
       </table>
     </div>
   </main>
-
 </div>
 
-<script src="admin.js"></script>
+<script src="classes.js"></script>
 </body>
 </html>

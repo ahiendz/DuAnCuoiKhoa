@@ -1,10 +1,45 @@
 {
   "users": [
     {
-      "id": 1769778168773,
-      "name": "đâff2t522",
-      "email": "42f",
-      "password": "dư",
+      "id": 1,
+      "name": "Administrator",
+      "email": "admin@school.edu.vn",
+      "password": "$2b$10$RCOVwsfo4iXlcsTGppQHKObMmFQsEhleHoa3wLFkse6x6eIvLnfEC",
+      "role": "admin"
+    },
+    {
+      "id": 50101,
+      "name": "Nguyễn Minh Anh",
+      "email": "anh.nguyen@school.edu.vn",
+      "password": "$2b$10$MevJhASAxKwuVQz2q3iZnOKrx0LAJaHnOZW8cvyqaoR.OM8fZ8o22",
+      "role": "teacher"
+    },
+    {
+      "id": 50102,
+      "name": "Trần Thu Hà",
+      "email": "ha.tran@school.edu.vn",
+      "password": "$2b$10$MevJhASAxKwuVQz2q3iZnOKrx0LAJaHnOZW8cvyqaoR.OM8fZ8o22",
+      "role": "teacher"
+    },
+    {
+      "id": 50103,
+      "name": "Lê Hoàng Nam",
+      "email": "nam.le@school.edu.vn",
+      "password": "$2b$10$MevJhASAxKwuVQz2q3iZnOKrx0LAJaHnOZW8cvyqaoR.OM8fZ8o22",
+      "role": "teacher"
+    },
+    {
+      "id": 50104,
+      "name": "Phạm Quang Huy",
+      "email": "huy.pham@school.edu.vn",
+      "password": "$2b$10$MevJhASAxKwuVQz2q3iZnOKrx0LAJaHnOZW8cvyqaoR.OM8fZ8o22",
+      "role": "teacher"
+    },
+    {
+      "id": 50105,
+      "name": "Đặng Thị Lan",
+      "email": "lan.dang@school.edu.vn",
+      "password": "$2b$10$MevJhASAxKwuVQz2q3iZnOKrx0LAJaHnOZW8cvyqaoR.OM8fZ8o22",
       "role": "teacher"
     }
   ]

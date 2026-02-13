@@ -7,7 +7,11 @@
 </head>
 <body>
 
-<!-- HEADER -->
+<script>
+  const u = JSON.parse(sessionStorage.getItem("currentUser"));
+  if (!u || u.role !== "admin") location.href = "../login.html";
+</script>
+
 <header class="header">
   <div class="container header-inner">
     <div class="logo">School Manager Pro</div>
@@ -15,10 +19,7 @@
   </div>
 </header>
 
-<!-- DASHBOARD -->
 <div class="dashboard container">
-
-  <!-- SIDEBAR -->
   <aside class="sidebar">
     <h3>Admin</h3>
     <nav class="sidebar-nav">
@@ -26,37 +27,48 @@
       <a href="classes.html">🏫 Lớp học</a>
       <a href="teachers.html">👩‍🏫 Giáo viên</a>
       <a href="students.html">👨‍🎓 Học sinh</a>
+      <a href="attendance.html">🗓️ Điểm danh</a>
     </nav>
   </aside>
 
-  <!-- MAIN -->
   <main class="main">
     <h2>Xin chào Admin 👋</h2>
     <p class="subtext">Quản lý toàn bộ hệ thống trường học</p>
 
-    <!-- STATS -->
     <div class="stats">
       <div class="stat-card">
-        <h3>🏫 Lớp học</h3>
-        <p>Quản lý & phân lớp</p>
+        <p class="status-badge">Lớp học</p>
+        <h3 id="countClasses">--</h3>
+        <p>Đủ 4 môn Toán, Văn, Anh, KHTN</p>
         <a href="classes.html" class="btn btn-ghost">Xem</a>
       </div>
-
       <div class="stat-card">
-        <h3>👩‍🏫 Giáo viên</h3>
-        <p>Quản lý giáo viên</p>
-        <a href="teachers.html" class="btn btn-ghost">Xem</a>
+        <p class="status-badge">Giáo viên</p>
+        <h3 id="countTeachers">--</h3>
+        <p>Tối đa 4 lớp/giáo viên, 1 GVCN duy nhất</p>
+        <a href="teachers.html" class="btn btn-ghost">Quản lý</a>
       </div>
-
       <div class="stat-card">
-        <h3>👨‍🎓 Học sinh</h3>
-        <p>Danh sách học sinh</p>
-        <a href="students.html" class="btn btn-ghost">Xem</a>
+        <p class="status-badge">Học sinh</p>
+        <h3 id="countStudents">--</h3>
+        <p>Mã học sinh duy nhất, hỗ trợ nhập CSV</p>
+        <a href="students.html" class="btn btn-ghost">Xem danh sách</a>
       </div>
     </div>
-  </main>
 
+    <div class="card">
+      <h3>Quy tắc nghiệp vụ</h3>
+      <div class="divider"></div>
+      <ul>
+        <li>• Mỗi lớp cần 1 GVCN và 4 giáo viên bộ môn cố định (Toán, Văn, Anh, KHTN).</li>
+        <li>• GVCN chỉ được quản lý 1 lớp; giáo viên bộ môn tối đa 4 lớp.</li>
+        <li>• Mã học sinh (student_code) phải duy nhất trên toàn hệ thống.</li>
+        <li>• Có thể nhập học sinh bằng CSV: <code>student_code,full_name,dob,gender,class_id</code>.</li>
+      </ul>
+    </div>
+  </main>
 </div>
 
+<script src="dashboard.js"></script>
 </body>
 </html>

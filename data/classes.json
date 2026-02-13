@@ -1,9 +1,52 @@
 {
   "classes": [
     {
-      "id": 1769777323062,
-      "name": "6a22",
-      "grade": 6
+      "id": 901,
+      "name": "9A1",
+      "grade_level": 9,
+      "homeroom_teacher_id": 50101,
+      "subject_teachers": {
+        "Toán": 50101,
+        "Văn": 50102,
+        "Anh": 50103,
+        "KHTN": 50104
+      }
+    },
+    {
+      "id": 902,
+      "name": "8A1",
+      "grade_level": 8,
+      "homeroom_teacher_id": 50105,
+      "subject_teachers": {
+        "Toán": 50101,
+        "Văn": 50105,
+        "Anh": 50103,
+        "KHTN": 50104
+      }
+    },
+    {
+      "id": 1770991259537,
+      "name": "8A2",
+      "grade_level": 8,
+      "homeroom_teacher_id": 50104,
+      "subject_teachers": {
+        "Toán": 50101,
+        "Văn": 50105,
+        "Anh": 1770991068302,
+        "KHTN": 50104
+      }
+    },
+    {
+      "id": 1770991280385,
+      "name": "9A3",
+      "grade_level": 9,
+      "homeroom_teacher_id": 50103,
+      "subject_teachers": {
+        "Toán": 50101,
+        "Văn": 50102,
+        "Anh": 50103,
+        "KHTN": 50104
+      }
     }
   ]
 }

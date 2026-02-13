@@ -3,15 +3,19 @@ const fs = require("fs");
 const path = require("path");
 const cors = require("cors");
 const { spawn } = require("child_process");
+const bcrypt = require("bcrypt");
 const { sendToArduino } = require("./backend/iot/arduino.service");
+const classService = require("./backend/services/classService");
+const teacherService = require("./backend/services/teacherService");
+const studentService = require("./backend/services/studentService");
+const { readData, writeData, generateId } = require("./backend/services/dataStore");
+const { SUBJECTS } = classService;
 
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.static(__dirname));
 
-const USERS_PATH = path.join(__dirname, "data", "users.json");
-const CLASSES_PATH = path.join(__dirname, "data", "classes.json");
 const BACKEND_DIR = path.join(__dirname, "backend");
 const FACE_DIR = path.join(BACKEND_DIR, "face");
 const FACE_ENGINE_PATH = path.join(FACE_DIR, "face_engine.py");
@@ -42,6 +46,40 @@ function readJSONOrDefault(filePath, defaultValue) {
 function writeJSON(filePath, data) {
   ensureDir(path.dirname(filePath));
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
+}
+
+function readManualAttendance() {
+  const data = readData("attendance.json", { entries: [] });
+  return data.entries || [];
+}
+
+function writeManualAttendance(entries) {
+  writeData("attendance.json", { entries });
+}
+
+function readUsers() {
+  const data = readData("users.json", { users: [] });
+  return data.users || [];
+}
+
+function writeUsers(users) {
+  writeData("users.json", { users });
+}
+
+function isBcryptHash(value) {
+  return typeof value === "string" && value.startsWith("$2");
+}
+
+function buildCsvRow(values) {
+  return values
+    .map(value => {
+      const safe = value === null || value === undefined ? "" : String(value);
+      if (safe.includes(",") || safe.includes("\"") || safe.includes("\n")) {
+        return `"${safe.replace(/"/g, "\"\"")}"`;
+      }
+      return safe;
+    })
+    .join(",");
 }
 
 function parseDataUrlImage(dataUrl) {
@@ -165,71 +203,302 @@ function appendAttendance(result, pickedDate) {
   writeJSON(ATTENDANCE_DEBUG_PATH, items);
 }
 
+app.get("/api/subjects", (req, res) => {
+  res.json({ subjects: SUBJECTS });
+});
+
 app.get("/api/teachers", (req, res) => {
-  const db = readJSON(USERS_PATH);
-  const teachers = db.users.filter(u => u.role === "teacher");
-  res.json(teachers);
+  return res.json(teacherService.loadTeachers());
 });
 
 app.post("/api/teachers", (req, res) => {
-  const { name, email, password } = req.body;
-  if (!name || !email || !password) {
-    return res.status(400).json({ error: "Missing required fields" });
+  try {
+    const result = teacherService.createTeacher(req.body || {});
+    return res.status(201).json(result);
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
   }
+});
 
-  const db = readJSON(USERS_PATH);
-  if (db.users.find(u => u.email === email)) {
-    return res.status(409).json({ error: "Email already exists" });
+app.put("/api/teachers/:id", (req, res) => {
+  try {
+    const teacher = teacherService.updateTeacher(req.params.id, req.body || {});
+    return res.json(teacher);
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
   }
-
-  db.users.push({
-    id: Date.now(),
-    name,
-    email,
-    password,
-    role: "teacher"
-  });
-
-  writeJSON(USERS_PATH, db);
-  return res.json({ success: true });
 });
 
 app.delete("/api/teachers/:id", (req, res) => {
-  const id = Number(req.params.id);
-  const db = readJSON(USERS_PATH);
-  db.users = db.users.filter(u => u.id !== id);
-  writeJSON(USERS_PATH, db);
-  return res.json({ success: true });
+  try {
+    teacherService.deleteTeacher(req.params.id, {
+      classes: classService.loadClasses()
+    });
+    return res.json({ success: true });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+});
+
+app.get("/api/teachers/export", (req, res) => {
+  const teachers = teacherService.loadTeachers();
+  const header = [
+    "name",
+    "email",
+    "gender",
+    "subject",
+    "class_count",
+    "is_homeroom"
+  ];
+  const rows = teachers.map(t =>
+    buildCsvRow([
+      t.full_name,
+      t.contact_email || "",
+      t.gender || "",
+      t.subject || "",
+      (t.teaching_classes || []).length,
+      t.is_homeroom ? "yes" : "no"
+    ])
+  );
+  const csv = [buildCsvRow(header), ...rows].join("\n");
+  res.setHeader("Content-Type", "text/csv; charset=utf-8");
+  res.setHeader("Content-Disposition", "attachment; filename=teachers.csv");
+  res.send(csv);
 });
 
 app.get("/api/classes", (req, res) => {
-  const db = readJSON(CLASSES_PATH);
-  res.json(db.classes);
+  return res.json(classService.loadClasses());
 });
 
 app.post("/api/classes", (req, res) => {
-  const { name, grade } = req.body;
-  if (!name || !grade) {
-    return res.status(400).json({ error: "Missing required fields" });
+  try {
+    const cls = classService.createClass(req.body || {});
+    return res.status(201).json(cls);
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
   }
+});
 
-  const db = readJSON(CLASSES_PATH);
-  db.classes.push({
-    id: Date.now(),
-    name,
-    grade,
-    teacherId: null
-  });
-  writeJSON(CLASSES_PATH, db);
-  return res.json({ success: true });
+app.put("/api/classes/:id", (req, res) => {
+  try {
+    const cls = classService.updateClass(req.params.id, req.body || {});
+    return res.json(cls);
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
 });
 
 app.delete("/api/classes/:id", (req, res) => {
-  const id = Number(req.params.id);
-  const db = readJSON(CLASSES_PATH);
-  db.classes = db.classes.filter(c => c.id !== id);
-  writeJSON(CLASSES_PATH, db);
-  return res.json({ success: true });
+  try {
+    classService.deleteClass(req.params.id);
+    return res.json({ success: true });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+});
+
+app.get("/api/classes/export", (req, res) => {
+  const classes = classService.loadClasses();
+  const teachers = teacherService.loadTeachers();
+  const teacherName = id => {
+    const t = teachers.find(x => String(x.id) === String(id));
+    return t ? t.full_name : "";
+  };
+  const header = [
+    "class_name",
+    "grade_level",
+    "homeroom_teacher",
+    "math",
+    "lit",
+    "eng",
+    "science"
+  ];
+  const rows = classes.map(cls =>
+    buildCsvRow([
+      cls.name,
+      cls.grade_level,
+      teacherName(cls.homeroom_teacher_id),
+      teacherName(cls.subject_teachers?.["Toán"]),
+      teacherName(cls.subject_teachers?.["Văn"]),
+      teacherName(cls.subject_teachers?.["Anh"]),
+      teacherName(cls.subject_teachers?.["KHTN"])
+    ])
+  );
+  const csv = [buildCsvRow(header), ...rows].join("\n");
+  res.setHeader("Content-Type", "text/csv; charset=utf-8");
+  res.setHeader("Content-Disposition", "attachment; filename=classes.csv");
+  res.send(csv);
+});
+
+app.get("/api/students", (req, res) => {
+  const { class_id } = req.query;
+  try {
+    const students = studentService.listStudents({ class_id });
+    res.setHeader("Content-Type", "application/json; charset=utf-8");
+    return res.json(students);
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+});
+
+app.post("/api/students", (req, res) => {
+  try {
+    const student = studentService.createStudent(req.body || {});
+    res.setHeader("Content-Type", "application/json; charset=utf-8");
+    return res.status(201).json(student);
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+});
+
+app.put("/api/students/:id", (req, res) => {
+  try {
+    const student = studentService.updateStudent(req.params.id, req.body || {});
+    res.setHeader("Content-Type", "application/json; charset=utf-8");
+    return res.json(student);
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+});
+
+app.delete("/api/students/:id", (req, res) => {
+  try {
+    studentService.deleteStudent(req.params.id);
+    res.setHeader("Content-Type", "application/json; charset=utf-8");
+    return res.json({ success: true });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+});
+
+app.post("/api/students/import", (req, res) => {
+  const rows = req.body && req.body.rows;
+  const mode = req.body && req.body.mode;
+  const class_id = req.body && req.body.class_id;
+  if (!Array.isArray(rows)) {
+    return res.status(400).json({ error: "Dữ liệu CSV không hợp lệ" });
+  }
+  try {
+    const result = studentService.importStudents(rows, mode || "merge", class_id);
+    res.setHeader("Content-Type", "application/json; charset=utf-8");
+    return res.json(result);
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+});
+
+app.get("/api/summary", (req, res) => {
+  const classes = classService.loadClasses();
+  const teachers = teacherService.loadTeachers();
+  const students = studentService.listStudents();
+  res.json({
+    classes: classes.length,
+    teachers: teachers.length,
+    students: students.length
+  });
+});
+
+app.get("/api/attendance", (req, res) => {
+  const { date, class_id } = req.query;
+  const entries = readManualAttendance().filter(
+    e =>
+      (!date || e.date === date) &&
+      (!class_id || String(e.class_id) === String(class_id))
+  );
+  res.json(entries);
+});
+
+app.get("/api/attendance/face", (req, res) => {
+  const { date, class_name } = req.query;
+  const rows = readJSONOrDefault(ATTENDANCE_DEBUG_PATH, []);
+  const filtered = rows.filter(
+    r =>
+      (!date || r.date === date) &&
+      (!class_name || r.class_name === class_name)
+  );
+  const latestMap = new Map();
+  filtered.forEach(item => {
+    const key = `${item.student_code}-${item.date}`;
+    const existing = latestMap.get(key);
+    if (!existing || item.time > existing.time) {
+      latestMap.set(key, item);
+    }
+  });
+  res.json(Array.from(latestMap.values()));
+});
+
+app.post("/api/attendance", (req, res) => {
+  const { date, class_id, records } = req.body || {};
+  if (!date || !class_id || !Array.isArray(records)) {
+    return res.status(400).json({ error: "Thiếu thông tin điểm danh" });
+  }
+
+  const classes = classService.loadClasses();
+  const classExists = classes.find(c => String(c.id) === String(class_id));
+  if (!classExists) {
+    return res.status(400).json({ error: "Lớp không tồn tại" });
+  }
+
+  const allowedStatus = ["present", "absent", "late", "excused"];
+  const entries = readManualAttendance();
+  let saved = 0;
+  const students = studentService.listStudents({ class_id });
+
+  records.forEach(rec => {
+    if (!rec.student_id) return;
+    const studentFound = students.find(
+      s => String(s.id) === String(rec.student_id)
+    );
+    if (!studentFound) return;
+    const status = allowedStatus.includes(rec.status) ? rec.status : "present";
+    entries.push({
+      id: generateId(),
+      student_id: rec.student_id,
+      class_id,
+      date,
+      status,
+      note: rec.note || ""
+    });
+    saved += 1;
+  });
+
+  writeManualAttendance(entries);
+  res.json({ saved });
+});
+
+app.post("/api/auth/login", (req, res) => {
+  const { email, password, role } = req.body || {};
+  if (!email || !password || !role) {
+    return res.status(400).json({ error: "Thiếu thông tin đăng nhập" });
+  }
+
+  const users = readUsers();
+  const user = users.find(
+    u => u.email === email && u.role === role
+  );
+
+  if (!user) {
+    return res.status(401).json({ error: "Sai tài khoản hoặc mật khẩu" });
+  }
+
+  if (isBcryptHash(user.password)) {
+    const ok = bcrypt.compareSync(password, user.password);
+    if (!ok) {
+      return res.status(401).json({ error: "Sai tài khoản hoặc mật khẩu" });
+    }
+  } else {
+    if (user.password !== password) {
+      return res.status(401).json({ error: "Sai tài khoản hoặc mật khẩu" });
+    }
+    user.password = bcrypt.hashSync(password, 10);
+    writeUsers(users);
+  }
+
+  return res.json({
+    id: user.id,
+    name: user.name,
+    role: user.role
+  });
 });
 
 app.post("/api/face/train", async (req, res) => {
