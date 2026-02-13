@@ -11,7 +11,16 @@
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.6",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "serialport": "^13.0.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ahiendz/DuAnCuoiKhoa.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ahiendz/DuAnCuoiKhoa/issues"
+  },
+  "homepage": "https://github.com/ahiendz/DuAnCuoiKhoa#readme",
   "description": ""
 }

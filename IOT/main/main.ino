@@ -9,18 +9,23 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 Servo doorServo;
 
 /* ===== PIN ===== */
-#define LED_PIN 13
+#define LED_PIN 2
 #define SERVO_PIN 3
 
 /* ===== CONFIG ===== */
 #define SERVO_OPEN_ANGLE 90
 #define SERVO_CLOSE_ANGLE 0
-#define DOOR_OPEN_TIME 5000   // 5 giây
+#define DOOR_OPEN_TIME 5000
+#define ERROR_DISPLAY_TIME 3000
 
-bool waitingForName = false;
+/* ===== STATE ===== */
+unsigned long actionStartTime = 0;
+bool doorOpen = false;
+bool showingError = false;
 
 void setup() {
   Serial.begin(9600);
+  Serial.setTimeout(200);
 
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED_PIN, LOW);
@@ -30,67 +35,173 @@ void setup() {
 
   lcd.init();
   lcd.backlight();
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("HE THONG");
-  lcd.setCursor(0, 1);
-  lcd.print("CHO DIEM DANH");
 
-  Serial.println("Go '1' de diem danh");
+  showReady();
 }
 
 void loop() {
+
   if (Serial.available()) {
     String input = Serial.readStringUntil('\n');
-    input.trim(); // xóa ký tự thừa
+    input.trim();
 
-    // BƯỚC 1: GÕ SỐ 1
-    if (input == "1") {
-      digitalWrite(LED_PIN, HIGH);
-      doorServo.write(SERVO_OPEN_ANGLE);
+    if (input.length() == 0) return;
 
-      lcd.clear();
-      lcd.setCursor(0, 0);
-      lcd.print("MO CUA");
-      lcd.setCursor(0, 1);
-      lcd.print("NHAP TEN HS");
+    String statusValue = extractStatus(input);
 
-      Serial.println("Nhap ten hoc sinh:");
-      waitingForName = true;
-
-      delay(DOOR_OPEN_TIME);
-
-      // Tự động đóng cửa
-      doorServo.write(SERVO_CLOSE_ANGLE);
-      digitalWrite(LED_PIN, LOW);
+    if (statusValue == "Y") {
+      handleSuccess(input);
     }
-
-    // BƯỚC 2: NHẬP TÊN HỌC SINH
-    else if (waitingForName) {
-      waitingForName = false;
-
-      // Giới hạn 12 ký tự
-      if (input.length() > 12) {
-        input = input.substring(0, 12);
-      }
-
-      lcd.clear();
-      lcd.setCursor(0, 0);
-      lcd.print("DA DIEM DANH");
-      lcd.setCursor(0, 1);
-      lcd.print("HS: ");
-      lcd.print(input);
-
-      Serial.print("Diem danh: ");
-      Serial.println(input);
-
-      delay(3000);
-
-      lcd.clear();
-      lcd.setCursor(0, 0);
-      lcd.print("SAN SANG");
-      lcd.setCursor(0, 1);
-      lcd.print("CHO TIEP");
+    else if (statusValue == "N") {
+      handleFail();
     }
   }
+
+  unsigned long currentMillis = millis();
+
+  if (doorOpen && currentMillis - actionStartTime >= DOOR_OPEN_TIME) {
+    closeDoor();
+  }
+
+  if (showingError && currentMillis - actionStartTime >= ERROR_DISPLAY_TIME) {
+    showingError = false;
+    showReady();
+  }
+}
+
+/* ========================= */
+/* ===== SUCCESS =========== */
+/* ========================= */
+
+void handleSuccess(String input) {
+
+  digitalWrite(LED_PIN, HIGH);
+  doorServo.write(SERVO_OPEN_ANGLE);
+
+  String name = extractShortName(input);
+  String className = extractClass(input);
+
+  lcd.clear();
+
+  lcd.setCursor(0, 0);
+  lcd.print("DANG MO CUA");
+
+  lcd.setCursor(0, 1);
+  lcd.print(name);
+
+  int nameLength = name.length();
+  int classPosition = nameLength + 2;
+
+  if (classPosition < 16) {
+    lcd.setCursor(classPosition, 1);
+    lcd.print(className);
+  }
+
+  doorOpen = true;
+  actionStartTime = millis();
+}
+
+/* ========================= */
+/* ===== FAIL ============== */
+/* ========================= */
+
+void handleFail() {
+
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("KHONG NHAN DIEN");
+
+  showingError = true;
+  actionStartTime = millis();
+}
+
+/* ========================= */
+/* ===== CLOSE DOOR ======== */
+/* ========================= */
+
+void closeDoor() {
+  doorServo.write(SERVO_CLOSE_ANGLE);
+  digitalWrite(LED_PIN, LOW);
+
+  doorOpen = false;
+  showReady();
+}
+
+/* ========================= */
+/* ===== READY SCREEN ====== */
+/* ========================= */
+
+void showReady() {
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("HE THONG SAN SANG");
+}
+
+/* ========================= */
+/* ===== EXTRACT STATUS ==== */
+/* ========================= */
+
+String extractStatus(String input) {
+
+  int index = input.indexOf("\"status\"");
+  if (index == -1) return "";
+
+  int colon = input.indexOf(":", index);
+  if (colon == -1) return "";
+
+  int firstQuote = input.indexOf("\"", colon);
+  if (firstQuote == -1) return "";
+
+  int secondQuote = input.indexOf("\"", firstQuote + 1);
+  if (secondQuote == -1) return "";
+
+  return input.substring(firstQuote + 1, secondQuote);
+}
+
+/* ========================= */
+/* ===== EXTRACT NAME ====== */
+/* ========================= */
+
+String extractShortName(String input) {
+
+  int nameIndex = input.indexOf("\"name\"");
+  if (nameIndex == -1) return "UNKNOWN";
+
+  int colon = input.indexOf(":", nameIndex);
+  int firstQuote = input.indexOf("\"", colon);
+  int secondQuote = input.indexOf("\"", firstQuote + 1);
+
+  if (firstQuote == -1 || secondQuote == -1) return "UNKNOWN";
+
+  String fullName = input.substring(firstQuote + 1, secondQuote);
+
+  int lastSpace = fullName.lastIndexOf(" ");
+  if (lastSpace == -1) return fullName;
+
+  int secondLastSpace = fullName.lastIndexOf(" ", lastSpace - 1);
+
+  if (secondLastSpace != -1) {
+    String twoWords = fullName.substring(secondLastSpace + 1);
+    if (twoWords.length() <= 12) return twoWords;
+  }
+
+  return fullName.substring(lastSpace + 1);
+}
+
+/* ========================= */
+/* ===== EXTRACT CLASS ===== */
+/* ========================= */
+
+String extractClass(String input) {
+
+  int classIndex = input.indexOf("\"class\"");
+  if (classIndex == -1) return "";
+
+  int colon = input.indexOf(":", classIndex);
+  int firstQuote = input.indexOf("\"", colon);
+  int secondQuote = input.indexOf("\"", firstQuote + 1);
+
+  if (firstQuote == -1 || secondQuote == -1) return "";
+
+  return input.substring(firstQuote + 1, secondQuote);
 }
