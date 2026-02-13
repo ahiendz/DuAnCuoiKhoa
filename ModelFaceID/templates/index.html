@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face ID Authentication</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes pulse-border {
+            0%, 100% { border-color: rgb(59, 130, 246); }
+            50% { border-color: rgb(147, 197, 253); }
+        }
+        .pulse-border {
+            animation: pulse-border 2s ease-in-out infinite;
+        }
+        .toast {
+            transition: all 0.3s ease-in-out;
+        }
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        .toast.hide {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-4xl">
+        <!-- Header -->
+        <div class="text-center mb-8 relative">
+            <a 
+                href="/admin" 
+                class="absolute right-0 top-0 px-4 py-2 bg-amber-600/80 hover:bg-amber-600 rounded-lg font-medium transition-colors flex items-center gap-2"
+            >
+                ⚙️ Admin
+            </a>
+            <h1 class="text-4xl font-bold mb-2 bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                Face ID Authentication
+            </h1>
+            <p class="text-gray-400">Secure access with liveness detection</p>
+        </div>
+
+        <!-- Main Card -->
+        <div class="bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-8">
+            <!-- Video Container -->
+            <div class="relative mb-6">
+                <div id="videoContainer" class="relative rounded-xl overflow-hidden bg-gray-900">
+                    <video 
+                        id="videoElement" 
+                        autoplay 
+                        playsinline 
+                        class="w-full h-auto max-h-[500px] object-cover"
+                        style="transform: scaleX(-1);"
+                    ></video>
+                    <div id="overlay" class="absolute inset-0 pointer-events-none"></div>
+                </div>
+                
+                <!-- Status Border (changes color based on state) -->
+                <div id="statusBorder" class="absolute inset-0 rounded-xl border-4 border-blue-500 transition-all duration-300 pointer-events-none"></div>
+            </div>
+
+            <!-- Status Display -->
+            <div class="mb-6">
+                <div id="statusMessage" class="text-center text-lg font-semibold mb-2">
+                    <span class="inline-flex items-center">
+                        <span class="animate-spin mr-2">⏳</span>
+                        Initializing camera...
+                    </span>
+                </div>
+                <div id="statusDetails" class="text-center text-sm text-gray-400"></div>
+                <div id="skipLivenessWrap" class="text-center mt-2 hidden">
+                    <button type="button" id="skipLivenessBtn" class="text-sm text-gray-400 hover:text-blue-400 underline">
+                        Bỏ qua bước nháy mắt →
+                    </button>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="space-y-4">
+                <!-- Registration Section -->
+                <div id="registerSection" class="bg-gray-700/50 rounded-lg p-4">
+                    <h3 class="text-lg font-semibold mb-3 text-blue-400">Đăng ký Face ID mới</h3>
+                    <div class="space-y-2 mb-3">
+                        <input 
+                            type="text" 
+                            id="nameInput" 
+                            placeholder="Họ tên *"
+                            class="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg focus:outline-none focus:border-blue-500 text-white"
+                        >
+                        <input 
+                            type="email" 
+                            id="emailInput" 
+                            placeholder="Email"
+                            class="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg focus:outline-none focus:border-blue-500 text-white"
+                        >
+                        <input 
+                            type="tel" 
+                            id="phoneInput" 
+                            placeholder="Số điện thoại"
+                            class="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg focus:outline-none focus:border-blue-500 text-white"
+                        >
+                    </div>
+                    <button 
+                        id="registerBtn" 
+                        class="w-full px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        Đăng ký
+                    </button>
+                </div>
+
+                <!-- User Info Card (shown after verification success) -->
+                <div id="userInfoCard" class="hidden bg-gray-700/50 rounded-lg p-4 mb-4 border border-green-500/30">
+                    <h3 class="text-lg font-semibold mb-3 text-green-400">✅ Thông tin người xác thực</h3>
+                    <div id="userInfoContent" class="space-y-1 text-gray-300"></div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex gap-3">
+                    <button 
+                        id="startBtn" 
+                        class="flex-1 px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        Start Verification
+                    </button>
+                    <button 
+                        id="stopBtn" 
+                        class="flex-1 px-6 py-3 bg-red-600 hover:bg-red-700 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled
+                    >
+                        Stop
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notification Container -->
+        <div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
+    </div>
+
+    <script>
+        // Application State
+        const state = {
+            videoStream: null,
+            isVerifying: false,
+            livenessPassed: false,
+            skipLiveness: false,
+            captureInterval: null,
+            lastStatus: 'idle'
+        };
+
+        // API Base URL - detect and use Flask backend on port 5001
+        const API_BASE_URL = `http://${window.location.hostname}:5001`;
+        console.log(`API Base URL: ${API_BASE_URL}`);
+
+        // DOM Elements
+        const videoElement = document.getElementById('videoElement');
+        const videoContainer = document.getElementById('videoContainer');
+        const statusBorder = document.getElementById('statusBorder');
+        const statusMessage = document.getElementById('statusMessage');
+        const statusDetails = document.getElementById('statusDetails');
+        const nameInput = document.getElementById('nameInput');
+        const emailInput = document.getElementById('emailInput');
+        const phoneInput = document.getElementById('phoneInput');
+        const registerBtn = document.getElementById('registerBtn');
+        const userInfoCard = document.getElementById('userInfoCard');
+        const userInfoContent = document.getElementById('userInfoContent');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const skipLivenessBtn = document.getElementById('skipLivenessBtn');
+        const skipLivenessWrap = document.getElementById('skipLivenessWrap');
+        const toastContainer = document.getElementById('toastContainer');
+
+        // Initialize Camera
+        async function initCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 },
+                        facingMode: 'user'
+                    }
+                });
+                state.videoStream = stream;
+                videoElement.srcObject = stream;
+                updateStatus('Camera ready', 'Waiting for action...', 'blue');
+                showToast('Camera initialized successfully', 'success');
+            } catch (error) {
+                console.error('Camera error:', error);
+                updateStatus('Camera Error', 'Please allow camera access', 'red');
+                showToast('Failed to access camera. Please check permissions.', 'error');
+            }
+        }
+
+        // Hiển thị thông tin người xác thực
+        function showUserInfo(userInfo, confidence) {
+            userInfoCard.classList.remove('hidden');
+            const html = [
+                `<p><strong>Họ tên:</strong> ${userInfo.name || '-'}</p>`,
+                userInfo.email ? `<p><strong>Email:</strong> ${userInfo.email}</p>` : '',
+                userInfo.phone ? `<p><strong>SĐT:</strong> ${userInfo.phone}</p>` : '',
+                `<p><strong>Độ tin cậy:</strong> ${confidence}%</p>`
+            ].filter(Boolean).join('');
+            userInfoContent.innerHTML = html;
+        }
+
+        // Update Status Display
+        function updateStatus(message, details = '', borderColor = 'blue') {
+            statusMessage.innerHTML = message;
+            statusDetails.textContent = details;
+            
+            // Update border color
+            const colorMap = {
+                'blue': 'border-blue-500',
+                'yellow': 'border-yellow-500',
+                'green': 'border-green-500',
+                'red': 'border-red-500',
+                'gray': 'border-gray-500'
+            };
+            
+            statusBorder.className = `absolute inset-0 rounded-xl border-4 ${colorMap[borderColor] || colorMap['blue']} transition-all duration-300 pointer-events-none`;
+            
+            if (borderColor === 'blue') {
+                statusBorder.classList.add('pulse-border');
+            } else {
+                statusBorder.classList.remove('pulse-border');
+            }
+        }
+
+        // Capture Frame and Send to Backend
+        function captureAndSend() {
+            if (!state.isVerifying) return;
+            
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = videoElement.videoWidth;
+            canvas.height = videoElement.videoHeight;
+            
+            // Flip horizontally for natural mirror effect
+            ctx.translate(canvas.width, 0);
+            ctx.scale(-1, 1);
+            ctx.drawImage(videoElement, 0, 0);
+            
+            // Convert to base64
+            const imageData = canvas.toDataURL('image/jpeg', 0.8);
+            
+            // Send to verification endpoint
+            fetch(`${API_BASE_URL}/verify`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    image: imageData,
+                    liveness_passed: state.livenessPassed,
+                    skip_liveness: state.skipLiveness
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                handleVerificationResponse(data);
+            })
+            .catch(error => {
+                console.error('Verification error:', error);
+                updateStatus('Error', 'Failed to verify. Please try again.', 'red');
+            });
+        }
+
+        // Handle Verification Response
+        function handleVerificationResponse(data) {
+            console.log('[VERIFY RESPONSE]', data);
+            
+            switch(data.status) {
+                case 'no_face':
+                    updateStatus('No Face Detected', data.message, 'gray');
+                    state.livenessPassed = false;
+                    skipLivenessWrap.classList.add('hidden');
+                    break;
+                    
+                case 'blink_wait':
+                    updateStatus('🔍 Liveness Check', data.message, 'yellow');
+                    state.livenessPassed = false;
+                    skipLivenessWrap.classList.remove('hidden');
+                    if (data.ear) {
+                        statusDetails.textContent = `EAR: ${data.ear} (cần < 0.22)`;
+                    }
+                    break;
+                    
+                case 'blink_detected':
+                    updateStatus('✓ Blink Detected', data.message, 'blue');
+                    state.livenessPassed = true;
+                    skipLivenessWrap.classList.add('hidden');
+                    break;
+                    
+                case 'success':
+                    skipLivenessWrap.classList.add('hidden');
+                    const name = data.name || 'Unknown';
+                    const confidence = data.confidence ? (data.confidence * 100).toFixed(1) : 'N/A';
+                    const userInfo = data.user_info || {};
+                    updateStatus(
+                        `✅ Xác thực thành công`,
+                        `${name} (Độ tin cậy: ${confidence}%)`,
+                        'green'
+                    );
+                    state.livenessPassed = false;
+                    showToast(`✅ ${name} xác thực thành công!`, 'success');
+                    // Hiển thị thông tin người dùng
+                    showUserInfo(userInfo, confidence);
+                    console.log(`[SUCCESS] Verified: ${name}`, userInfo);
+                    setTimeout(() => stopVerification(), 5000);
+                    break;
+                    
+                case 'denied':
+                    skipLivenessWrap.classList.add('hidden');
+                    const deniedConfidence = data.confidence ? (data.confidence * 100).toFixed(1) : 'N/A';
+                    updateStatus(
+                        '❌ Access Denied',
+                        `Face not recognized (Confidence: ${deniedConfidence}%)`,
+                        'red'
+                    );
+                    state.livenessPassed = false;
+                    showToast('❌ Khuôn mặt không được nhận dạng!', 'error');
+                    console.log(`[DENIED] Confidence: ${deniedConfidence}%`);
+                    break;
+                    
+                case 'error':
+                    skipLivenessWrap.classList.add('hidden');
+                    updateStatus('Error', data.message, 'red');
+                    state.livenessPassed = false;
+                    showToast(`⚠️ Lỗi: ${data.message}`, 'error');
+                    console.error('[ERROR]', data.message);
+                    break;
+            }
+        }
+
+        // Start Verification
+        function startVerification() {
+            if (state.isVerifying) return;
+            
+            state.isVerifying = true;
+            state.livenessPassed = false;
+            state.skipLiveness = false;
+            userInfoCard.classList.add('hidden');
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+            registerBtn.disabled = true;
+            
+            updateStatus('Scanning...', 'Position your face in the frame', 'blue');
+            
+            // Capture every 150ms - faster to catch quick blinks (~100-200ms)
+            state.captureInterval = setInterval(captureAndSend, 150);
+        }
+
+        // Stop Verification
+        function stopVerification() {
+            state.isVerifying = false;
+            state.livenessPassed = false;
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            registerBtn.disabled = false;
+            
+            if (state.captureInterval) {
+                clearInterval(state.captureInterval);
+                state.captureInterval = null;
+            }
+            
+            updateStatus('Stopped', 'Click "Start Verification" to begin', 'gray');
+        }
+
+        // Register Face
+        async function registerFace() {
+            const name = nameInput.value.trim();
+            const email = emailInput.value.trim();
+            const phone = phoneInput.value.trim();
+            if (!name) {
+                showToast('Vui lòng nhập họ tên', 'error');
+                return;
+            }
+            
+            // Check if video is ready
+            if (!videoElement.videoWidth || !videoElement.videoHeight) {
+                showToast('Camera is not ready. Please wait and try again.', 'error');
+                return;
+            }
+            
+            registerBtn.disabled = true;
+            registerBtn.textContent = 'Đang đăng ký...';
+            
+            try {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                if (!ctx) {
+                    throw new Error('Failed to get canvas context');
+                }
+                
+                canvas.width = videoElement.videoWidth;
+                canvas.height = videoElement.videoHeight;
+                
+                // Flip horizontally for natural mirror effect
+                ctx.translate(canvas.width, 0);
+                ctx.scale(-1, 1);
+                ctx.drawImage(videoElement, 0, 0);
+                
+                const imageData = canvas.toDataURL('image/jpeg', 0.8);
+                
+                if (!imageData || imageData.length === 0) {
+                    throw new Error('Failed to capture image from video');
+                }
+                
+                console.log(`Registering face for "${name}", image size: ${imageData.length}`);
+                
+                const response = await fetch(`${API_BASE_URL}/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                body: JSON.stringify({
+                    image: imageData,
+                    name: name,
+                    email: email,
+                    phone: phone
+                })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status} ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    showToast(data.message, 'success');
+                    nameInput.value = '';
+                    emailInput.value = '';
+                    phoneInput.value = '';
+                    updateStatus('Đăng ký thành công', `Face ID đã đăng ký cho "${name}"`, 'green');
+                    setTimeout(() => {
+                        updateStatus('Camera ready', 'Waiting for action...', 'blue');
+                    }, 2000);
+                } else {
+                    showToast(data.message || 'Đăng ký thất bại', 'error');
+                    updateStatus('Đăng ký thất bại', data.message || 'Vui lòng thử lại', 'red');
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                showToast(`Đăng ký thất bại: ${error.message}`, 'error');
+                updateStatus('Error', error.message, 'red');
+            } finally {
+                registerBtn.disabled = false;
+                registerBtn.textContent = 'Đăng ký';
+            }
+        }
+
+        // Show Toast Notification
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-green-600' : 
+                          type === 'error' ? 'bg-red-600' : 'bg-blue-600';
+            
+            toast.className = `${bgColor} text-white px-6 py-3 rounded-lg shadow-lg toast hide mb-2`;
+            toast.textContent = message;
+            
+            toastContainer.appendChild(toast);
+            
+            // Trigger animation
+            setTimeout(() => {
+                toast.classList.remove('hide');
+                toast.classList.add('show');
+            }, 10);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                toast.classList.remove('show');
+                toast.classList.add('hide');
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 3000);
+        }
+
+        // Event Listeners
+        startBtn.addEventListener('click', startVerification);
+        skipLivenessBtn.addEventListener('click', () => {
+            state.skipLiveness = true;
+            skipLivenessWrap.classList.add('hidden');
+            showToast('Đã bỏ qua bước nháy mắt, đang xác thực...', 'info');
+        });
+        stopBtn.addEventListener('click', stopVerification);
+        registerBtn.addEventListener('click', registerFace);
+        nameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                registerFace();
+            }
+        });
+
+        // Initialize on load
+        window.addEventListener('load', () => {
+            initCamera();
+        });
+
+        // Cleanup on unload
+        window.addEventListener('beforeunload', () => {
+            if (state.videoStream) {
+                state.videoStream.getTracks().forEach(track => track.stop());
+            }
+            if (state.captureInterval) {
+                clearInterval(state.captureInterval);
+            }
+        });
+    </script>
+</body>
+</html>

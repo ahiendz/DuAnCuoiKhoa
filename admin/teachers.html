@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Quản lý giáo viên | Admin</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<!-- PROTECT ADMIN -->
+<script>
+  const u = JSON.parse(sessionStorage.getItem("currentUser"));
+  if (!u || u.role !== "admin") {
+    location.href = "../login.html";
+  }
+</script>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="container header-inner">
+    <div class="logo">School Manager Pro</div>
+    <a href="../login.html" class="btn btn-outline">Đăng xuất</a>
+  </div>
+</header>
+
+<!-- DASHBOARD -->
+<div class="dashboard container">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <h3>Admin</h3>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html">📊 Tổng quan</a>
+      <a href="classes.html">🏫 Lớp học</a>
+      <a href="teachers.html" class="active">👩‍🏫 Giáo viên</a>
+      <a href="students.html">👨‍🎓 Học sinh</a>
+    </nav>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <h2>Quản lý giáo viên</h2>
+    <p class="subtext">Tạo và quản lý tài khoản giáo viên</p>
+
+    <!-- ADD TEACHER -->
+    <div class="card">
+      <h3>➕ Thêm giáo viên</h3>
+      <div class="form-row">
+        <input id="tName" placeholder="Tên giáo viên">
+        <input id="tEmail" type="email" placeholder="Email">
+        <input id="tPassword" type="password" placeholder="Mật khẩu">
+        <button class="btn btn-primary" onclick="addTeacher()">Thêm</button>
+      </div>
+    </div>
+
+    <!-- LIST TEACHERS -->
+    <div class="card">
+      <h3>📋 Danh sách giáo viên</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Tên</th>
+            <th>Email</th>
+            <th>Hành động</th>
+          </tr>
+        </thead>
+        <tbody id="teacherTable">
+          <!-- render bằng JS -->
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+</div>
+
+<script src="teachers.js"></script>
+</body>
+</html>

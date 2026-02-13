@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Quản lý lớp học</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<!-- PROTECT -->
+<script>
+  const u = JSON.parse(sessionStorage.getItem("currentUser"));
+  if (!u || u.role !== "admin") location.href = "../login.html";
+</script> 
+
+<header class="header">
+  <div class="container header-inner">
+    <div class="logo">School Manager Pro</div>
+    <a href="../login.html" class="btn btn-outline">Đăng xuất</a>
+  </div>
+</header>
+
+<div class="dashboard container">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <h3>Admin</h3>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html">📊 Tổng quan</a>
+      <a href="classes.html" class="active">🏫 Lớp học</a>
+      <a href="teachers.html">👩‍🏫 Giáo viên</a>
+      <a href="students.html">👨‍🎓 Học sinh</a>
+    </nav>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <h2>Quản lý lớp học</h2>
+    <p class="subtext">Tạo và quản lý các lớp trong trường</p>
+
+    <!-- ADD CLASS -->
+    <div class="card">
+      <h3>➕ Thêm lớp mới</h3>
+      <div class="form-row">
+        <input id="className" placeholder="Tên lớp (VD: 9A1)">
+        <input id="classGrade" type="number" placeholder="Khối">
+        <button class="btn btn-primary" onclick="addClass()">Thêm</button>
+      </div>
+    </div>
+
+    <!-- LIST -->
+    <div class="card">
+      <h3>📋 Danh sách lớp</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Lớp</th>
+            <th>Khối</th>
+            <th>Hành động</th>
+          </tr>
+        </thead>
+        <tbody id="classTable"></tbody>
+      </table>
+    </div>
+  </main>
+
+</div>
+
+<script src="admin.js"></script>
+</body>
+</html>

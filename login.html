@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Đăng nhập | School Manager Pro</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="auth-body">
+
+<div class="auth-box">
+  <h2>Đăng nhập hệ thống</h2>
+
+  <div class="tabs">
+    <button class="tab active"
+      onclick="switchRole('admin', this)">Admin</button>
+    <button class="tab"
+      onclick="switchRole('teacher', this)">Teacher</button>
+    <button class="tab"
+      onclick="switchRole('parent', this)">Parent</button>
+  </div>
+
+  <form onsubmit="login(event)">
+    <input type="hidden" id="role" value="admin">
+
+    <label>Email</label>
+    <input id="email" type="email"
+           placeholder="admin@school.edu.vn" required>
+
+    <label>Mật khẩu</label>
+    <input id="password" type="password" required>
+
+    <button class="btn btn-primary full">
+      Đăng nhập
+    </button>
+  </form>
+
+  <p id="error" class="error"></p>
+
+  <p class="auth-footer">
+    ← <a href="index.html">Quay về trang chủ</a>
+  </p>
+</div>
+
+<script src="assets/js/auth.js"></script>
+</body>
+</html>

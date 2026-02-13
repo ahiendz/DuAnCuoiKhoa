@@ -1,0 +1,75 @@
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 220px;
+  background: #16a34a;
+  color: #fff;
+  padding: 20px;
+}
+
+.sidebar h2 {
+  margin-bottom: 20px;
+}
+
+.sidebar button {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 10px;
+  border: none;
+  background: #22c55e;
+  color: white;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.sidebar .logout {
+  background: #dc2626;
+}
+
+.main {
+  flex: 1;
+  padding: 30px;
+}
+
+.actions {
+  margin-bottom: 20px;
+}
+
+.actions input {
+  padding: 8px;
+  margin-right: 6px;
+}
+
+.actions button {
+  padding: 8px 14px;
+}
+
+.hidden {
+  display: none;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+ul li {
+  background: #f3f4f6;
+  margin-bottom: 8px;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  border: 1px solid #e5e7eb;
+  padding: 8px;
+}
