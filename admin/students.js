@@ -25,6 +25,16 @@ function setCsvSummary(message, isError = false) {
   }
 }
 
+function isValidUrl(value) {
+  if (!value) return false;
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch (e) {
+    return false;
+  }
+}
+
 async function loadClasses() {
   const res = await fetch(CLASS_API);
   const data = await res.json();
@@ -68,6 +78,7 @@ function resetStudentForm() {
   document.getElementById("sDob").value = "";
   document.getElementById("sGender").value = "";
   document.getElementById("sClass").value = "";
+  document.getElementById("sAvatar").value = "";
   document.getElementById("studentError").innerText = "";
   setStudentNotice("");
 }
@@ -81,11 +92,17 @@ async function submitStudent() {
     full_name: document.getElementById("sFullName").value.trim(),
     dob: document.getElementById("sDob").value,
     gender: document.getElementById("sGender").value,
-    class_id: document.getElementById("sClass").value
+    class_id: document.getElementById("sClass").value,
+    avatar_url: document.getElementById("sAvatar").value.trim()
   };
 
   if (!payload.full_name || !payload.class_id) {
     errorEl.innerText = "Cần họ tên và lớp học.";
+    return;
+  }
+
+  if (payload.avatar_url && !isValidUrl(payload.avatar_url)) {
+    errorEl.innerText = "Avatar URL không hợp lệ.";
     return;
   }
 
@@ -129,13 +146,13 @@ function parseCsv(text) {
     first[0] = first[0].replace(/^\uFEFF/, "");
   }
   const headerMatch =
-    first.length >= 5 &&
+    first.length >= 6 &&
     first.map(h => h.trim().toLowerCase()).join(",") ===
-      "student_code,full_name,dob,gender,class_id";
+      "student_code,full_name,dob,gender,class_id,avatar_url";
 
   const header = headerMatch
     ? first.map(h => h.trim())
-    : ["student_code", "full_name", "dob", "gender", "class_id"];
+    : ["student_code", "full_name", "dob", "gender", "class_id", "avatar_url"];
   const start = headerMatch ? 1 : 0;
 
   const rows = lines.slice(start).map(line => {
@@ -145,7 +162,8 @@ function parseCsv(text) {
       full_name: (cells[1] || "").trim(),
       dob: (cells[2] || "").trim(),
       gender: (cells[3] || "").trim(),
-      class_id: (cells[4] || "").trim()
+      class_id: (cells[4] || "").trim(),
+      avatar_url: (cells[5] || "").trim()
     };
   });
 
@@ -198,6 +216,10 @@ function validateRows(rows, selectedClass, mode) {
       rowErrors.class_id = "class_id không đúng lớp đã chọn";
     }
 
+    if (row.avatar_url && !isValidUrl(row.avatar_url)) {
+      rowErrors.avatar_url = "avatar_url không hợp lệ";
+    }
+
     const existing = existingByCode.get(row.student_code);
     if (existing) {
       if (String(existing.class_id) !== String(selectedClass)) {
@@ -235,6 +257,7 @@ function renderPreview(rows, rowErrors) {
       <th>dob</th>
       <th>gender</th>
       <th>class_id</th>
+      <th>avatar_url</th>
     </tr>
   `;
 
@@ -246,7 +269,7 @@ function renderPreview(rows, rowErrors) {
       if (hasError) invalidRows += 1;
       return `
         <tr class="${hasError ? "row-error" : ""}">
-          ${["student_code", "full_name", "dob", "gender", "class_id"].map(field => {
+          ${["student_code", "full_name", "dob", "gender", "class_id", "avatar_url"].map(field => {
             const cellError = errs[field];
             const className = cellError ? "cell-error" : "";
             const title = cellError ? `title="${cellError}"` : "";
@@ -339,7 +362,8 @@ async function importCsv() {
     const summary = [
       `Đã nhập ${data.inserted || 0} học sinh.`,
       data.updated ? `Cập nhật ${data.updated} học sinh.` : "",
-      data.deleted ? `Đã xoá ${data.deleted} học sinh cũ.` : ""
+      data.deleted ? `Đã xoá ${data.deleted} học sinh cũ.` : "",
+      data.skipped ? `Bỏ qua ${data.skipped} dòng lỗi.` : ""
     ].filter(Boolean).join(" ");
     setCsvSummary(summary);
 
@@ -382,8 +406,10 @@ async function loadStudentList() {
 
   note.innerText = `Tổng ${students.length} học sinh.`;
   students.forEach(s => {
+    const avatar = s.avatar_url || "https://placehold.co/40x40";
     tbody.innerHTML += `
       <tr>
+        <td><img src="${avatar}" alt="avatar" style="width:40px;height:40px;border-radius:50%;object-fit:cover;"></td>
         <td>${s.student_code}</td>
         <td>${s.full_name}</td>
         <td>${s.dob || ""}</td>
@@ -399,6 +425,7 @@ function initStudentPage() {
   const csvClass = document.getElementById("csvClass");
   const importBtn = document.getElementById("csvImportBtn");
   const filterBtn = document.getElementById("filterBtn");
+  const exportBtn = document.getElementById("exportBtn");
 
   if (csvInput) csvInput.addEventListener("change", handleCsvFile);
   if (csvClass) {
@@ -416,6 +443,7 @@ function initStudentPage() {
   });
   if (importBtn) importBtn.addEventListener("click", importCsv);
   if (filterBtn) filterBtn.addEventListener("click", loadStudentList);
+  if (exportBtn) exportBtn.addEventListener("click", exportStudents);
 
   loadClasses();
   loadExistingStudents();
@@ -425,3 +453,9 @@ function initStudentPage() {
 }
 
 window.addEventListener("DOMContentLoaded", initStudentPage);
+
+async function exportStudents() {
+  const selectedClass = document.getElementById("filterClass").value;
+  const params = selectedClass ? `?class_id=${encodeURIComponent(selectedClass)}` : "";
+  window.location.href = `${STUDENT_API}/export${params}`;
+}

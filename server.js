@@ -3,12 +3,12 @@ const fs = require("fs");
 const path = require("path");
 const cors = require("cors");
 const { spawn } = require("child_process");
-const bcrypt = require("bcrypt");
 const { sendToArduino } = require("./backend/iot/arduino.service");
 const classService = require("./backend/services/classService");
 const teacherService = require("./backend/services/teacherService");
 const studentService = require("./backend/services/studentService");
-const { readData, writeData, generateId } = require("./backend/services/dataStore");
+const attendanceService = require("./backend/services/attendanceService");
+const authService = require("./backend/services/authService");
 const { SUBJECTS } = classService;
 
 const app = express();
@@ -22,8 +22,6 @@ const FACE_ENGINE_PATH = path.join(FACE_DIR, "face_engine.py");
 const TRAIN_SCRIPT_PATH = path.join(FACE_DIR, "train_faces.py");
 const TEMP_IMAGE_PATH = path.join(FACE_DIR, "temp.jpg");
 const TEMP_DETECT_PATH = path.join(FACE_DIR, "temp_detect.jpg");
-const DATA_DIR = path.join(BACKEND_DIR, "data");
-const ATTENDANCE_DEBUG_PATH = path.join(DATA_DIR, "attendance_debug.json");
 const PYTHON_BIN = process.env.PYTHON_BIN || "python";
 
 function ensureDir(dirPath) {
@@ -32,43 +30,6 @@ function ensureDir(dirPath) {
   }
 }
 
-function readJSON(filePath) {
-  return JSON.parse(fs.readFileSync(filePath, "utf-8"));
-}
-
-function readJSONOrDefault(filePath, defaultValue) {
-  if (!fs.existsSync(filePath)) {
-    return defaultValue;
-  }
-  return JSON.parse(fs.readFileSync(filePath, "utf-8"));
-}
-
-function writeJSON(filePath, data) {
-  ensureDir(path.dirname(filePath));
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
-}
-
-function readManualAttendance() {
-  const data = readData("attendance.json", { entries: [] });
-  return data.entries || [];
-}
-
-function writeManualAttendance(entries) {
-  writeData("attendance.json", { entries });
-}
-
-function readUsers() {
-  const data = readData("users.json", { users: [] });
-  return data.users || [];
-}
-
-function writeUsers(users) {
-  writeData("users.json", { users });
-}
-
-function isBcryptHash(value) {
-  return typeof value === "string" && value.startsWith("$2");
-}
 
 function buildCsvRow(values) {
   return values
@@ -175,73 +136,58 @@ function saveBase64Image(dataUrl, filePath) {
 
 function warmupPython() {
   try {
-    const child = spawn(PYTHON_BIN, [FACE_ENGINE_PATH], { cwd: __dirname, detached: true });
-    child.unref();
+    const child = spawn(PYTHON_BIN, [FACE_ENGINE_PATH], { cwd: __dirname });
     child.on("error", () => {});
   } catch (e) {
     console.error("Python warmup failed:", e.message);
   }
 }
 
-function appendAttendance(result, pickedDate) {
-  ensureDir(DATA_DIR);
-  const now = new Date();
-  const date =
-    typeof pickedDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(pickedDate)
-      ? pickedDate
-      : now.toISOString().slice(0, 10);
-  const time = now.toTimeString().slice(0, 8);
-  const items = readJSONOrDefault(ATTENDANCE_DEBUG_PATH, []);
-  items.push({
-    student_code: result.student_code,
-    full_name: result.full_name,
-    class_name: result.class_name,
-    date,
-    time,
-    confidence: result.confidence
-  });
-  writeJSON(ATTENDANCE_DEBUG_PATH, items);
+process.on("uncaughtException", err => console.error(err));
+process.on("unhandledRejection", err => console.error(err));
+
+async function appendAttendance(result, pickedDate) {
+  return attendanceService.recordFaceAttendance(result, pickedDate);
 }
 
 app.get("/api/subjects", (req, res) => {
   res.json({ subjects: SUBJECTS });
 });
 
-app.get("/api/teachers", (req, res) => {
-  return res.json(teacherService.loadTeachers());
+app.get("/api/teachers", async (req, res) => {
+  const teachers = await teacherService.loadTeachers();
+  return res.json(teachers);
 });
 
-app.post("/api/teachers", (req, res) => {
+app.post("/api/teachers", async (req, res) => {
   try {
-    const result = teacherService.createTeacher(req.body || {});
+    const result = await teacherService.createTeacher(req.body || {});
     return res.status(201).json(result);
   } catch (error) {
     return res.status(400).json({ error: error.message });
   }
 });
 
-app.put("/api/teachers/:id", (req, res) => {
+app.put("/api/teachers/:id", async (req, res) => {
   try {
-    const teacher = teacherService.updateTeacher(req.params.id, req.body || {});
+    const teacher = await teacherService.updateTeacher(req.params.id, req.body || {});
     return res.json(teacher);
   } catch (error) {
     return res.status(400).json({ error: error.message });
   }
 });
 
-app.delete("/api/teachers/:id", (req, res) => {
+app.delete("/api/teachers/:id", async (req, res) => {
   try {
-    teacherService.deleteTeacher(req.params.id, {
-      classes: classService.loadClasses()
-    });
+    await teacherService.deleteTeacher(req.params.id);
     return res.json({ success: true });
   } catch (error) {
     return res.status(400).json({ error: error.message });
   }
 });
 
-app.get("/api/teachers/export", (req, res) => {
-  const teachers = teacherService.loadTeachers();
+app.get("/api/teachers/export", async (req, res) => {
+  const teachers = await teacherService.loadTeachers();
   const header = [
     "name",
     "email",
@@ -266,40 +212,41 @@ app.get("/api/teachers/export", (req, res) => {
   res.send(csv);
 });
 
-app.get("/api/classes", (req, res) => {
-  return res.json(classService.loadClasses());
+app.get("/api/classes", async (req, res) => {
+  const classes = await classService.loadClasses();
+  return res.json(classes);
 });
 
-app.post("/api/classes", (req, res) => {
+app.post("/api/classes", async (req, res) => {
   try {
-    const cls = classService.createClass(req.body || {});
+    const cls = await classService.createClass(req.body || {});
     return res.status(201).json(cls);
   } catch (error) {
     return res.status(400).json({ error: error.message });
   }
 });
 
-app.put("/api/classes/:id", (req, res) => {
+app.put("/api/classes/:id", async (req, res) => {
   try {
-    const cls = classService.updateClass(req.params.id, req.body || {});
+    const cls = await classService.updateClass(req.params.id, req.body || {});
     return res.json(cls);
   } catch (error) {
     return res.status(400).json({ error: error.message });
   }
 });
 
-app.delete("/api/classes/:id", (req, res) => {
+app.delete("/api/classes/:id", async (req, res) => {
   try {
-    classService.deleteClass(req.params.id);
+    await classService.deleteClass(req.params.id);
     return res.json({ success: true });
   } catch (error) {
     return res.status(400).json({ error: error.message });
   }
 });
 
-app.get("/api/classes/export", (req, res) => {
-  const classes = classService.loadClasses();
-  const teachers = teacherService.loadTeachers();
+app.get("/api/classes/export", async (req, res) => {
+  const classes = await classService.loadClasses();
+  const teachers = await teacherService.loadTeachers();
   const teacherName = id => {
     const t = teachers.find(x => String(x.id) === String(id));
     return t ? t.full_name : "";
@@ -330,10 +277,10 @@ app.get("/api/classes/export", (req, res) => {
   res.send(csv);
 });
 
-app.get("/api/students", (req, res) => {
+app.get("/api/students", async (req, res) => {
   const { class_id } = req.query;
   try {
-    const students = studentService.listStudents({ class_id });
+    const students = await studentService.listStudents({ class_id });
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     return res.json(students);
   } catch (error) {
@@ -341,9 +288,9 @@ app.get("/api/students", (req, res) => {
   }
 });
 
-app.post("/api/students", (req, res) => {
+app.post("/api/students", async (req, res) => {
   try {
-    const student = studentService.createStudent(req.body || {});
+    const student = await studentService.createStudent(req.body || {});
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     return res.status(201).json(student);
   } catch (error) {
@@ -351,9 +298,9 @@ app.post("/api/students", (req, res) => {
   }
 });
 
-app.put("/api/students/:id", (req, res) => {
+app.put("/api/students/:id", async (req, res) => {
   try {
-    const student = studentService.updateStudent(req.params.id, req.body || {});
+    const student = await studentService.updateStudent(req.params.id, req.body || {});
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     return res.json(student);
   } catch (error) {
@@ -361,9 +308,9 @@ app.put("/api/students/:id", (req, res) => {
   }
 });
 
-app.delete("/api/students/:id", (req, res) => {
+app.delete("/api/students/:id", async (req, res) => {
   try {
-    studentService.deleteStudent(req.params.id);
+    await studentService.deleteStudent(req.params.id);
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     return res.json({ success: true });
   } catch (error) {
@@ -371,7 +318,7 @@ app.delete("/api/students/:id", (req, res) => {
   }
 });
 
-app.post("/api/students/import", (req, res) => {
+app.post("/api/students/import", async (req, res) => {
   const rows = req.body && req.body.rows;
   const mode = req.body && req.body.mode;
   const class_id = req.body && req.body.class_id;
@@ -379,7 +326,7 @@ app.post("/api/students/import", (req, res) => {
     return res.status(400).json({ error: "Dữ liệu CSV không hợp lệ" });
   }
   try {
-    const result = studentService.importStudents(rows, mode || "merge", class_id);
+    const result = await studentService.importStudents(rows, mode || "merge", class_id);
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     return res.json(result);
   } catch (error) {
@@ -387,10 +334,33 @@ app.post("/api/students/import", (req, res) => {
   }
 });
 
-app.get("/api/summary", (req, res) => {
-  const classes = classService.loadClasses();
-  const teachers = teacherService.loadTeachers();
-  const students = studentService.listStudents();
+app.get("/api/students/export", async (req, res) => {
+  try {
+    const students = await studentService.exportStudents(req.query.class_id);
+    const header = ["student_code", "full_name", "dob", "gender", "class_id", "avatar_url"];
+    const rows = students.map(s =>
+      buildCsvRow([
+        s.student_code,
+        s.full_name,
+        s.dob,
+        s.gender || "",
+        s.class_id,
+        s.avatar_url || ""
+      ])
+    );
+    const csv = [buildCsvRow(header), ...rows].join("\n");
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader("Content-Disposition", "attachment; filename=students.csv");
+    return res.send(csv);
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+});
+
+app.get("/api/summary", async (req, res) => {
+  const classes = await classService.loadClasses();
+  const teachers = await teacherService.loadTeachers();
+  const students = await studentService.listStudents();
   res.json({
     classes: classes.length,
     teachers: teachers.length,
@@ -398,113 +368,54 @@ app.get("/api/summary", (req, res) => {
   });
 });
 
-app.get("/api/attendance", (req, res) => {
+app.get("/api/attendance", async (req, res) => {
   const { date, class_id } = req.query;
-  const entries = readManualAttendance().filter(
-    e =>
-      (!date || e.date === date) &&
-      (!class_id || String(e.class_id) === String(class_id))
-  );
-  res.json(entries);
+  try {
+    const entries = await attendanceService.listAttendance({ date, class_id });
+    res.json(entries);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 });
 
-app.get("/api/attendance/face", (req, res) => {
+app.get("/api/attendance/face", async (req, res) => {
   const { date, class_name } = req.query;
-  const rows = readJSONOrDefault(ATTENDANCE_DEBUG_PATH, []);
-  const filtered = rows.filter(
-    r =>
-      (!date || r.date === date) &&
-      (!class_name || r.class_name === class_name)
-  );
-  const latestMap = new Map();
-  filtered.forEach(item => {
-    const key = `${item.student_code}-${item.date}`;
-    const existing = latestMap.get(key);
-    if (!existing || item.time > existing.time) {
-      latestMap.set(key, item);
-    }
-  });
-  res.json(Array.from(latestMap.values()));
+  try {
+    const rows = await attendanceService.listFaceAttendance({ date, class_name });
+    res.json(rows);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 });
 
-app.post("/api/attendance", (req, res) => {
+app.post("/api/attendance", async (req, res) => {
   const { date, class_id, records } = req.body || {};
   if (!date || !class_id || !Array.isArray(records)) {
     return res.status(400).json({ error: "Thiếu thông tin điểm danh" });
   }
 
-  const classes = classService.loadClasses();
-  const classExists = classes.find(c => String(c.id) === String(class_id));
-  if (!classExists) {
-    return res.status(400).json({ error: "Lớp không tồn tại" });
+  try {
+    const result = await attendanceService.saveManualAttendance({ date, class_id, records });
+    res.json(result);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
   }
-
-  const allowedStatus = ["present", "absent", "late", "excused"];
-  const entries = readManualAttendance();
-  let saved = 0;
-  const students = studentService.listStudents({ class_id });
-
-  records.forEach(rec => {
-    if (!rec.student_id) return;
-    const studentFound = students.find(
-      s => String(s.id) === String(rec.student_id)
-    );
-    if (!studentFound) return;
-    const status = allowedStatus.includes(rec.status) ? rec.status : "present";
-    entries.push({
-      id: generateId(),
-      student_id: rec.student_id,
-      class_id,
-      date,
-      status,
-      note: rec.note || ""
-    });
-    saved += 1;
-  });
-
-  writeManualAttendance(entries);
-  res.json({ saved });
 });
 
-app.post("/api/auth/login", (req, res) => {
+app.post("/api/auth/login", async (req, res) => {
   const { email, password, role } = req.body || {};
-  if (!email || !password || !role) {
-    return res.status(400).json({ error: "Thiếu thông tin đăng nhập" });
+  try {
+    const user = await authService.login({ email, password, role });
+    return res.json(user);
+  } catch (error) {
+    const status = error.message === "Thiếu thông tin đăng nhập" ? 400 : 401;
+    return res.status(status).json({ error: error.message });
   }
-
-  const users = readUsers();
-  const user = users.find(
-    u => u.email === email && u.role === role
-  );
-
-  if (!user) {
-    return res.status(401).json({ error: "Sai tài khoản hoặc mật khẩu" });
-  }
-
-  if (isBcryptHash(user.password)) {
-    const ok = bcrypt.compareSync(password, user.password);
-    if (!ok) {
-      return res.status(401).json({ error: "Sai tài khoản hoặc mật khẩu" });
-    }
-  } else {
-    if (user.password !== password) {
-      return res.status(401).json({ error: "Sai tài khoản hoặc mật khẩu" });
-    }
-    user.password = bcrypt.hashSync(password, 10);
-    writeUsers(users);
-  }
-
-  return res.json({
-    id: user.id,
-    name: user.name,
-    role: user.role
-  });
 });
 
 app.post("/api/face/train", async (req, res) => {
   try {
     ensureDir(FACE_DIR);
-    ensureDir(DATA_DIR);
     const { stdout } = await runPython(TRAIN_SCRIPT_PATH);
     const payload = safeParseEngineJson(stdout);
     return res.json(payload);
@@ -564,7 +475,6 @@ app.post("/api/face/debug", (req, res) => {
 app.post("/api/face/verify", async (req, res) => {
   try {
     ensureDir(FACE_DIR);
-    ensureDir(DATA_DIR);
 
     const imageBuffer = parseDataUrlImage(req.body && req.body.image);
     if (!imageBuffer) {
@@ -579,20 +489,26 @@ app.post("/api/face/verify", async (req, res) => {
     const result = safeParseEngineJson(stdout);
 
     if (result.status === "success") {
+      const saved = await appendAttendance(result, req.body && req.body.date);
       sendToArduino({
         status: "Y",
         name: result.full_name,
         class: result.class_name
       });
-      appendAttendance(result, req.body && req.body.date);
       console.log("Y", result.full_name, result.class_name);
-    } else {
-      sendToArduino({
-        status: "N"
+      return res.json({
+        status: "success",
+        student_code: result.student_code,
+        full_name: result.full_name,
+        class_name: result.class_name,
+        confidence: result.confidence,
+        student: saved ? saved.student : null,
+        attendance: saved ? saved.attendance : null
       });
-      console.log("N");
     }
 
+    sendToArduino({ status: "N" });
+    console.log("N");
     return res.json(result);
   } catch (error) {
     sendToArduino({
@@ -607,7 +523,16 @@ app.post("/api/face/verify", async (req, res) => {
 });
 
 const PORT = 3000;
-app.listen(PORT, () => {
+
+const server = app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
   warmupPython();
 });
+
+// Giữ server reference
+server.on("error", err => {
+  console.error("Server error:", err);
+});
+
+setInterval(() => {}, 1000);
+
