@@ -1,173 +1,279 @@
-# 🎓 School Manager Pro
+🎓 School Manager Pro – Database Specification
 
-A production-oriented web-based school management system.
+Production-grade PostgreSQL schema specification.
 
-## 📌 Overview
+1️⃣ Overview
 
-School Manager Pro is a full-stack application designed for managing:
+This document defines the final relational database architecture for School Manager Pro.
 
-- Classes
-- Teachers
-- Students
-- Attendance (Face-ID based)
+The system is designed for:
 
-The system is built for a **single-school deployment** and follows clean backend architecture principles.
+Single-school deployment
 
----
+Strict relational integrity
 
-## 🏗 Tech Stack
+Backend-enforced business rules
 
-### Backend
-- Node.js
-- Express.js
-- JSON storage (development phase)
-- PostgreSQL (production phase)
-- bcrypt (password hashing)
+Migration from JSON → PostgreSQL
 
-### Frontend
-- HTML / CSS / JS
-- Bootstrap
+Production readiness
 
-### Database Design
-- PostgreSQL
-- Normalized relational schema
-- ERD designed using drawSQL
+2️⃣ Design Principles
 
----
+Authentication separated from domain data
 
-## 🧩 Core Modules
+Fully normalized relational schema
 
-### 1️⃣ Users
-Roles:
-- admin
-- teacher
+ENUM-based constraints
 
-Passwords are hashed using bcrypt.
+Strict foreign key enforcement
 
----
+No duplicated profile data
 
-### 2️⃣ Teachers
+Business rules enforced in service layer
 
-Rules:
-- Each teacher can teach **maximum 4 classes**
-- Each teacher can be **homeroom teacher of only 1 class**
-- Subjects are fixed:
-  - Toán
-  - Văn
-  - Anh
-  - KHTN
+Cloud-ready image storage (image_url)
 
----
+3️⃣ ENUM Types
+CREATE TYPE user_role AS ENUM ('admin', 'teacher', 'parent');
+CREATE TYPE gender_type AS ENUM ('male', 'female');
+CREATE TYPE subject_type AS ENUM ('Toán', 'Văn', 'Anh', 'KHTN');
+CREATE TYPE attendance_status AS ENUM ('present', 'absent', 'late');
 
-### 3️⃣ Classes
+4️⃣ Tables
+4.1 USERS (Authentication + Base Profile)
 
-Each class must have:
-- 1 Homeroom Teacher
-- 4 Subject Teachers (one per subject)
+Stores all login accounts.
 
-Validation enforced at backend level.
+CREATE TABLE users (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    role user_role NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
----
+Notes
 
-### 4️⃣ Students
+name is stored here (single source of truth)
 
-Two modes only:
-- Manual Add
-- CSV Import
+Password must be bcrypt-hashed
 
-Manual Add:
-- student_code auto-generated
-- Format: `HS{year}-{increment}`
-- Example: `HS2026-001`
+One-to-one relation with:
 
-CSV Import:
-- student_code must be present
-- No auto-generation
-- Validation:
-  - Unique student_code
-  - Valid class_id
-  - Correct selected class
+teachers
 
----
+parents
 
-### 5️⃣ Attendance
+4.2 TEACHERS
+CREATE TABLE teachers (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT UNIQUE NOT NULL
+        REFERENCES users(id) ON DELETE CASCADE,
+    gender gender_type NOT NULL,
+    subject subject_type NOT NULL
+);
 
-Unified Face-ID attendance system.
+Notes
 
-- No manual attendance UI
-- Face recognition integration
-- Daily attendance tracking
-- Filter by class and date
+user_id is UNIQUE (1 user → 1 teacher)
 
----
+No duplicated name column
 
-## 🗄 Database Schema (PostgreSQL)
+Subject is ENUM
 
-Main Tables:
+4.3 CLASSES
+CREATE TABLE classes (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(20) UNIQUE NOT NULL,
+    grade_level INT NOT NULL,
+    homeroom_teacher_id BIGINT UNIQUE
+        REFERENCES teachers(id) ON DELETE SET NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-- users
-- teachers
-- classes
-- class_subject_teachers
-- students
-- attendance
+Notes
 
-The database is normalized and ready for production migration.
+Each class has:
 
----
+1 homeroom teacher
 
-## 🔐 Validation Rules
+4 subject teachers (stored separately)
 
-Enforced strictly at backend:
+homeroom_teacher_id is UNIQUE (1 teacher → max 1 homeroom)
 
-- Teacher max 4 classes
-- Teacher only 1 homeroom role
-- Class must have 4 subject teachers
-- student_code must be unique
-- class_id must be valid
+4.4 CLASS SUBJECT TEACHERS
+CREATE TABLE class_subject_teachers (
+    id BIGSERIAL PRIMARY KEY,
+    class_id BIGINT NOT NULL
+        REFERENCES classes(id) ON DELETE CASCADE,
+    subject subject_type NOT NULL,
+    teacher_id BIGINT NOT NULL
+        REFERENCES teachers(id) ON DELETE CASCADE,
+    UNIQUE(class_id, subject)
+);
 
----
+Notes
 
-## 🚀 Development Roadmap
+Exactly one teacher per subject per class
 
-Phase 1:
-- JSON storage
-- Full business logic implementation
+Constraint:
 
-Phase 2:
-- PostgreSQL migration
-- Seed script
-- Production deployment
+UNIQUE(class_id, subject)
 
-Phase 3:
-- Performance optimization
-- Analytics dashboard
-- AI-based attendance insights
+4.5 STUDENTS
+CREATE TABLE students (
+    id BIGSERIAL PRIMARY KEY,
+    full_name VARCHAR(255) NOT NULL,
+    student_code VARCHAR(50) UNIQUE NOT NULL,
+    dob DATE NOT NULL,
+    gender gender_type NOT NULL,
+    class_id BIGINT NOT NULL
+        REFERENCES classes(id) ON DELETE CASCADE,
+    image_url TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
----
+Notes
 
-## 📦 Migration Strategy
+student_code must be UNIQUE
 
-1. Create PostgreSQL schema
-2. Run migration scripts
-3. Import seed data
-4. Switch storage layer from JSON to DB
+image_url stores Cloud image link
 
----
+Student belongs to exactly one class
 
-## 🎯 Design Principles
+4.6 PARENTS
+CREATE TABLE parents (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT UNIQUE NOT NULL
+        REFERENCES users(id) ON DELETE CASCADE,
+    phone VARCHAR(20)
+);
 
-- Backend-first validation
-- Clean service layer
-- No business rule logic in frontend
-- Production-ready schema
-- Stable system over feature overload
+Notes
 
----
+Linked 1-1 with users
 
-## 👨‍💻 Author
+Parent name stored in users table
 
-School Manager Pro – Full-stack architecture project.
+4.7 PARENT – STUDENT RELATIONSHIP
+CREATE TABLE parent_students (
+    parent_id BIGINT NOT NULL
+        REFERENCES parents(id) ON DELETE CASCADE,
+    student_id BIGINT NOT NULL
+        REFERENCES students(id) ON DELETE CASCADE,
+    PRIMARY KEY (parent_id, student_id)
+);
 
----
+Relationship
 
+One parent → multiple students
+
+One student → multiple parents
+
+Many-to-many mapping table
+
+4.8 ATTENDANCE
+CREATE TABLE attendance (
+    id BIGSERIAL PRIMARY KEY,
+    student_id BIGINT NOT NULL
+        REFERENCES students(id) ON DELETE CASCADE,
+    date DATE NOT NULL,
+    status attendance_status NOT NULL,
+    confidence NUMERIC(4,3),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(student_id, date)
+);
+
+Notes
+
+One attendance record per student per day
+
+confidence stores Face-ID score
+
+5️⃣ Business Rules (Service Layer Enforced)
+
+The database ensures structural integrity.
+
+Business rules must be enforced in backend services:
+
+Teacher
+
+Max 4 teaching classes
+
+Max 1 homeroom assignment
+
+Class
+
+Exactly 4 subject teachers
+
+Exactly 1 homeroom teacher
+
+Student
+
+Unique student_code
+
+Valid class_id
+
+Attendance
+
+One record per student per day
+
+6️⃣ Insertion Order (Seed / Migration)
+
+Correct insertion order:
+
+users
+teachers
+classes
+class_subject_teachers
+students
+parents
+parent_students
+attendance
+
+
+Foreign keys must be respected.
+
+7️⃣ Migration Strategy (JSON → PostgreSQL)
+
+Create schema
+
+Run seed script
+
+Migrate JSON data into relational format
+
+Replace JSON service layer with SQL services
+
+Remove JSON storage
+
+Verify integrity
+
+8️⃣ Architecture Guarantees
+
+No duplicated identity fields
+
+Strong relational consistency
+
+ENUM-enforced domain constraints
+
+Cloud image support
+
+Production-ready normalization
+
+Scalable structure
+
+9️⃣ Current Status
+
+Database design finalized.
+
+Ready for:
+
+Seed script implementation
+
+Service refactor
+
+JSON → PostgreSQL migration
+
+Production deployment
