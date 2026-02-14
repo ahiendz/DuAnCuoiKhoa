@@ -1,0 +1,10 @@
+﻿ALTER TABLE attendance
+  ADD COLUMN IF NOT EXISTS class_id BIGINT REFERENCES classes(id);
+ALTER TABLE attendance
+  ADD COLUMN IF NOT EXISTS confidence NUMERIC(5,2);
+ALTER TABLE attendance
+  ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW();
+ALTER TABLE attendance
+  DROP COLUMN IF EXISTS recorded_by;
+ALTER TABLE students
+  ADD COLUMN IF NOT EXISTS image_url TEXT;

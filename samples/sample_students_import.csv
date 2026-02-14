@@ -1,8 +1,7 @@
-﻿student_code,full_name,dob,gender,class_id
-HS2026-301,Nguyễn Văn Bình,2011-03-15,male,9A3
-HS2026-302,Trần Thị Mai,2011-07-22,female,9A3
-HS2026-303,Lê Minh Khang,2011-11-05,male,9A3
-HS2026-304,Phạm Thu Hà,2011-01-30,female,9A3
+﻿HS2026-301,Nguyễn Văn Bình,2011-03-15,male,9A3,https://res.cloudinary.com/dplbtt2ki/image/upload/v1771058115/samples/smile.jpg
+HS2026-302,Trần Thị Mai,2011-07-22,female,9A3,https://res.cloudinary.com/dplbtt2ki/image/upload/v1771058107/samples/people/boy-snow-hoodie.jpg
+HS2026-303,Lê Minh Khang,2011-11-05,male,9A3,https://res.cloudinary.com/dplbtt2ki/image/upload/v1771058106/samples/people/smiling-man.jpg
+HS2026-304,Phạm Thu Hà,2011-01-30,female,9A3,https://res.cloudinary.com/dplbtt2ki/image/upload/v1771058105/samples/people/kitchen-bar.jpg
 HS2026-305,Hoàng Gia Huy,2011-09-18,male,9A3
 HS2026-306,Đặng Ngọc Anh,2011-05-12,female,9A3
 HS2026-307,Vũ Quang Huy,2011-12-03,male,9A3

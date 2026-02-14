@@ -270,5 +270,29 @@
     "date": "2026-02-13",
     "time": "23:51:55",
     "confidence": 0.59
+  },
+  {
+    "student_code": "HS2025-01",
+    "full_name": "Lý Anh Hiển",
+    "class_name": "9A1",
+    "date": "2026-02-14",
+    "time": "10:31:03",
+    "confidence": 0.69
+  },
+  {
+    "student_code": "HS2025-01",
+    "full_name": "Lý Anh Hiển",
+    "class_name": "9A1",
+    "date": "2026-02-14",
+    "time": "10:31:45",
+    "confidence": 0.62
+  },
+  {
+    "student_code": "HS2025-01",
+    "full_name": "Lý Anh Hiển",
+    "class_name": "9A1",
+    "date": "2026-02-14",
+    "time": "11:39:06",
+    "confidence": 0.67
   }
 ]

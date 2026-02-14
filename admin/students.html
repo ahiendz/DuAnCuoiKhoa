@@ -49,6 +49,7 @@
         <select id="sClass">
           <option value="">Chọn lớp</option>
         </select>
+        <input id="sAvatar" placeholder="Avatar URL (tùy chọn)">
       </div>
       <p id="studentError" class="error" style="margin-top:10px;"></p>
       <p id="studentNotice" class="muted" style="margin-top:6px;"></p>
@@ -81,7 +82,7 @@
         <input id="csvInput" type="file" accept=".csv">
         <button id="csvImportBtn" class="btn btn-outline" disabled>Nhập CSV</button>
       </div>
-      <p class="muted" style="margin-top:8px;">Định dạng: <code>student_code,full_name,dob,gender,class_id</code>. class_id phải trùng lớp đã chọn.</p>
+      <p class="muted" style="margin-top:8px;">Định dạng: <code>student_code,full_name,dob,gender,class_id,avatar_url</code>. <code>avatar_url</code> tùy chọn.</p>
       <div class="divider"></div>
       <div id="csvPreviewWrap" style="display:none;">
         <h4 style="margin:0 0 12px 0;">Xem trước dữ liệu</h4>
@@ -101,10 +102,12 @@
           <option value="">Tất cả lớp</option>
         </select>
         <button id="filterBtn" class="btn btn-outline">Lọc</button>
+        <button id="exportBtn" class="btn btn-primary" style="margin-left:auto;">Export CSV</button>
       </div>
       <table class="table">
         <thead>
           <tr>
+            <th>Avatar</th>
             <th>Mã</th>
             <th>Họ tên</th>
             <th>Ngày sinh</th>
