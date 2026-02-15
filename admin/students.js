@@ -1,4 +1,4 @@
-const STUDENT_API = "/api/students";
+﻿const STUDENT_API = "/api/students";
 const CLASS_API = "/api/classes";
 
 let classes = [];
@@ -6,22 +6,20 @@ let existingStudents = [];
 let previewRows = [];
 let csvValid = false;
 
-function logDebug(message, data) {
-  console.log(`[students] ${message}`, data ?? "");
-}
-
 function setStudentNotice(message, isError = false) {
   const el = document.getElementById("studentNotice");
-  el.style.color = isError ? "red" : "#6b7280";
+  if (!el) return;
+  el.style.color = isError ? "#ff879f" : "#9fb4dc";
   el.innerText = message || "";
 }
 
 function setCsvSummary(message, isError = false) {
   const el = document.getElementById("csvImportSummary");
-  el.style.color = isError ? "red" : "#16a34a";
+  if (!el) return;
+  el.style.color = isError ? "#ff879f" : "#78e0b2";
   el.innerText = message || "";
   if (!message) {
-    el.style.color = "#6b7280";
+    el.style.color = "#9fb4dc";
   }
 }
 
@@ -30,15 +28,16 @@ function isValidUrl(value) {
   try {
     const url = new URL(value);
     return url.protocol === "http:" || url.protocol === "https:";
-  } catch (e) {
+  } catch (error) {
     return false;
   }
 }
 
 async function loadClasses() {
-  const res = await fetch(CLASS_API);
-  const data = await res.json();
+  const response = await fetch(CLASS_API);
+  const data = await response.json();
   classes = Array.isArray(data) ? data : (data.classes || []);
+
   const classSelect = document.getElementById("sClass");
   const csvSelect = document.getElementById("csvClass");
   const filterSelect = document.getElementById("filterClass");
@@ -47,8 +46,8 @@ async function loadClasses() {
   csvSelect.innerHTML = '<option value="">Chọn lớp</option>';
   filterSelect.innerHTML = '<option value="">Tất cả lớp</option>';
 
-  classes.forEach(c => {
-    const option = `<option value="${c.name}">${c.name}</option>`;
+  classes.forEach(item => {
+    const option = `<option value="${item.name}">${item.name}</option>`;
     classSelect.innerHTML += option;
     csvSelect.innerHTML += option;
     filterSelect.innerHTML += option;
@@ -57,19 +56,11 @@ async function loadClasses() {
 
 async function loadExistingStudents() {
   try {
-    const res = await fetch(STUDENT_API);
-    const data = await res.json();
+    const response = await fetch(STUDENT_API);
+    const data = await response.json();
     existingStudents = Array.isArray(data) ? data : (data.students || []);
-    logDebug("Loaded existing students", {
-      count: existingStudents.length,
-      sample: existingStudents.slice(0, 3).map(s => ({
-        class_id: s.class_id,
-        type: typeof s.class_id
-      }))
-    });
-  } catch (err) {
+  } catch (error) {
     existingStudents = [];
-    logDebug("Failed to load students", err.message);
   }
 }
 
@@ -107,19 +98,22 @@ async function submitStudent() {
   }
 
   try {
-    const res = await fetch(STUDENT_API, {
+    const response = await fetch(STUDENT_API, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
-    const data = await res.json();
-    if (!res.ok || data.error) throw new Error(data.error || "Không lưu được học sinh");
+    const data = await response.json();
+    if (!response.ok || data.error) {
+      throw new Error(data.error || "Không lưu được học sinh");
+    }
+
     resetStudentForm();
     setStudentNotice(`Đã tạo học sinh với mã: ${data.student_code}`);
     await loadExistingStudents();
     await loadStudentList();
-  } catch (err) {
-    errorEl.innerText = err.message;
+  } catch (error) {
+    errorEl.innerText = error.message;
   }
 }
 
@@ -130,44 +124,77 @@ function getCsvMode() {
 
 function toggleReplaceWarning() {
   const warning = document.getElementById("replaceWarning");
+  if (!warning) return;
   warning.style.display = getCsvMode() === "replace" ? "block" : "none";
 }
 
-function parseCsv(text) {
-  const lines = text
-    .split(/\r?\n/)
-    .map(l => l.trim())
-    .filter(Boolean);
+function parseCsvMatrix(content) {
+  const rows = [];
+  let row = [];
+  let cell = "";
+  let inQuotes = false;
 
-  if (!lines.length) return { header: [], rows: [] };
+  for (let i = 0; i < content.length; i += 1) {
+    const ch = content[i];
+    if (ch === '"') {
+      if (inQuotes && content[i + 1] === '"') {
+        cell += '"';
+        i += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+      continue;
+    }
 
-  const first = lines[0].split(",");
-  if (first.length) {
-    first[0] = first[0].replace(/^\uFEFF/, "");
+    if (ch === "," && !inQuotes) {
+      row.push(cell);
+      cell = "";
+      continue;
+    }
+
+    if ((ch === "\n" || ch === "\r") && !inQuotes) {
+      if (ch === "\r" && content[i + 1] === "\n") {
+        i += 1;
+      }
+      row.push(cell);
+      rows.push(row);
+      row = [];
+      cell = "";
+      continue;
+    }
+
+    cell += ch;
   }
-  const headerMatch =
-    first.length >= 6 &&
-    first.map(h => h.trim().toLowerCase()).join(",") ===
-      "student_code,full_name,dob,gender,class_id,avatar_url";
 
-  const header = headerMatch
-    ? first.map(h => h.trim())
-    : ["student_code", "full_name", "dob", "gender", "class_id", "avatar_url"];
-  const start = headerMatch ? 1 : 0;
+  if (cell.length || row.length) {
+    row.push(cell);
+    rows.push(row);
+  }
 
-  const rows = lines.slice(start).map(line => {
-    const cells = line.split(",");
-    return {
-      student_code: (cells[0] || "").trim(),
-      full_name: (cells[1] || "").trim(),
-      dob: (cells[2] || "").trim(),
-      gender: (cells[3] || "").trim(),
-      class_id: (cells[4] || "").trim(),
-      avatar_url: (cells[5] || "").trim()
-    };
-  });
+  return rows
+    .map(cols => cols.map(item => String(item || "").trim()))
+    .filter(cols => cols.some(item => item !== ""));
+}
 
-  return { header, rows };
+function parseCsv(text) {
+  const matrix = parseCsvMatrix(String(text || "").replace(/^\uFEFF/, ""));
+  if (!matrix.length) {
+    return { rows: [] };
+  }
+
+  const firstRow = matrix[0].map(h => h.toLowerCase());
+  const hasHeader = firstRow.join(",") === "student_code,full_name,dob,gender,class_id,avatar_url";
+
+  const rows = matrix.slice(hasHeader ? 1 : 0).map(cells => ({
+    student_code: (cells[0] || "").trim(),
+    full_name: (cells[1] || "").trim(),
+    dob: (cells[2] || "").trim(),
+    gender: (cells[3] || "").trim(),
+    class_id: (cells[4] || "").trim(),
+    avatar_url: (cells[5] || "").trim()
+  }));
+
+  return { rows };
 }
 
 function isValidIsoDate(value) {
@@ -176,20 +203,27 @@ function isValidIsoDate(value) {
   return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
 }
 
+function resolveSelectedClassMeta(selectedClass) {
+  const raw = String(selectedClass || "").trim();
+  if (!raw) return null;
+  return classes.find(item => String(item.name) === raw || String(item.id) === raw) || null;
+}
+
 function validateRows(rows, selectedClass, mode) {
   const errors = [];
   const codeCounts = {};
-  const existingByCode = new Map(
-    existingStudents.map(s => [s.student_code, s])
-  );
+  const selectedClassMeta = resolveSelectedClassMeta(selectedClass);
+  const selectedClassName = selectedClassMeta ? String(selectedClassMeta.name) : String(selectedClass || "");
+  const selectedClassId = selectedClassMeta ? String(selectedClassMeta.id) : String(selectedClass || "");
+  const existingByCode = new Map(existingStudents.map(student => [student.student_code, student]));
 
-  rows.forEach(r => {
-    if (r.student_code) {
-      codeCounts[r.student_code] = (codeCounts[r.student_code] || 0) + 1;
+  rows.forEach(row => {
+    if (row.student_code) {
+      codeCounts[row.student_code] = (codeCounts[row.student_code] || 0) + 1;
     }
   });
 
-  rows.forEach((row, idx) => {
+  rows.forEach((row, index) => {
     const rowErrors = {};
 
     if (!row.student_code) {
@@ -212,8 +246,12 @@ function validateRows(rows, selectedClass, mode) {
 
     if (!row.class_id) {
       rowErrors.class_id = "Thiếu class_id";
-    } else if (String(row.class_id) !== String(selectedClass)) {
-      rowErrors.class_id = "class_id không đúng lớp đã chọn";
+    } else {
+      const rowClass = String(row.class_id).trim();
+      const classMatched = rowClass === selectedClassName || rowClass === selectedClassId;
+      if (!classMatched) {
+        rowErrors.class_id = `class_id không đúng lớp đã chọn (${selectedClassName} hoặc ${selectedClassId})`;
+      }
     }
 
     if (row.avatar_url && !isValidUrl(row.avatar_url)) {
@@ -222,14 +260,14 @@ function validateRows(rows, selectedClass, mode) {
 
     const existing = existingByCode.get(row.student_code);
     if (existing) {
-      if (String(existing.class_id) !== String(selectedClass)) {
+      if (String(existing.class_id) !== String(selectedClassName)) {
         rowErrors.student_code = "Mã học sinh đã tồn tại ở lớp khác";
       } else if (mode === "replace") {
-        // replace mode allows overwrite, no error
+        // replace mode cho phép ghi đè dữ liệu trong cùng lớp
       }
     }
 
-    errors[idx] = rowErrors;
+    errors[index] = rowErrors;
   });
 
   return errors;
@@ -243,13 +281,13 @@ function renderPreview(rows, rowErrors) {
   const importBtn = document.getElementById("csvImportBtn");
 
   if (!rows.length) {
-    wrap.style.display = "none";
+    wrap.classList.add("hidden");
     importBtn.disabled = true;
     csvValid = false;
     return;
   }
 
-  wrap.style.display = "block";
+  wrap.classList.remove("hidden");
   head.innerHTML = `
     <tr>
       <th>student_code</th>
@@ -267,6 +305,7 @@ function renderPreview(rows, rowErrors) {
       const errs = rowErrors[idx] || {};
       const hasError = Object.keys(errs).length > 0;
       if (hasError) invalidRows += 1;
+
       return `
         <tr class="${hasError ? "row-error" : ""}">
           ${["student_code", "full_name", "dob", "gender", "class_id", "avatar_url"].map(field => {
@@ -275,12 +314,7 @@ function renderPreview(rows, rowErrors) {
             const title = cellError ? `title="${cellError}"` : "";
             return `
               <td class="${className}" ${title}>
-                <input
-                  class="csv-cell-input"
-                  data-row="${idx}"
-                  data-field="${field}"
-                  value="${row[field] || ""}"
-                />
+                <input class="csv-cell-input" data-row="${idx}" data-field="${field}" value="${row[field] || ""}" />
               </td>
             `;
           }).join("")}
@@ -300,10 +334,10 @@ function renderPreview(rows, rowErrors) {
 
 function bindCellInputs() {
   document.querySelectorAll(".csv-cell-input").forEach(input => {
-    input.addEventListener("input", e => {
-      const rowIndex = Number(e.target.dataset.row);
-      const field = e.target.dataset.field;
-      previewRows[rowIndex][field] = e.target.value.trim();
+    input.addEventListener("input", event => {
+      const rowIndex = Number(event.target.dataset.row);
+      const field = event.target.dataset.field;
+      previewRows[rowIndex][field] = event.target.value.trim();
       runValidationAndRender();
     });
   });
@@ -312,7 +346,6 @@ function bindCellInputs() {
 function runValidationAndRender() {
   const selectedClass = document.getElementById("csvClass").value;
   const mode = getCsvMode();
-  logDebug("Validate CSV", { selectedClass, mode, rows: previewRows.length });
   const rowErrors = validateRows(previewRows, selectedClass, mode);
   renderPreview(previewRows, rowErrors);
 }
@@ -320,35 +353,31 @@ function runValidationAndRender() {
 async function handleCsvFile() {
   const fileInput = document.getElementById("csvInput");
   if (!fileInput.files.length) return;
+
   setCsvSummary("");
   const file = fileInput.files[0];
   const text = await file.text();
   const parsed = parseCsv(text);
+
   previewRows = parsed.rows;
   await loadExistingStudents();
   runValidationAndRender();
 }
 
 async function importCsv() {
-  logDebug("Import CSV clicked", {
-    csvValid,
-    selectedClass: document.getElementById("csvClass").value,
-    rows: previewRows.length
-  });
   if (!csvValid) {
-    setCsvSummary("CSV chưa hợp lệ. Vui lòng kiểm tra lỗi.", true);
-    alert("CSV chưa hợp lệ. Vui lòng kiểm tra lỗi.");
+    setCsvSummary("CSV chưa hợp lệ. Vui lòng kiểm tra lại dữ liệu.", true);
     return;
   }
+
   const classId = document.getElementById("csvClass").value;
   if (!classId) {
     setCsvSummary("Chọn lớp trước khi nhập CSV.", true);
-    alert("Chọn lớp trước khi nhập CSV.");
     return;
   }
 
   try {
-    const res = await fetch(`${STUDENT_API}/import`, {
+    const response = await fetch(`${STUDENT_API}/import`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -357,26 +386,29 @@ async function importCsv() {
         class_id: classId
       })
     });
-    const data = await res.json();
-    if (!res.ok || data.error) throw new Error(data.error || "Không nhập được CSV");
+    const data = await response.json();
+    if (!response.ok || data.error) {
+      throw new Error(data.error || "Không nhập được CSV");
+    }
+
     const summary = [
       `Đã nhập ${data.inserted || 0} học sinh.`,
       data.updated ? `Cập nhật ${data.updated} học sinh.` : "",
-      data.deleted ? `Đã xoá ${data.deleted} học sinh cũ.` : "",
+      data.deleted ? `Đã xóa ${data.deleted} học sinh cũ.` : "",
       data.skipped ? `Bỏ qua ${data.skipped} dòng lỗi.` : ""
     ].filter(Boolean).join(" ");
     setCsvSummary(summary);
 
     document.getElementById("csvInput").value = "";
     document.getElementById("csvImportBtn").disabled = true;
-    document.getElementById("csvPreviewWrap").style.display = "none";
+    document.getElementById("csvPreviewWrap").classList.add("hidden");
     previewRows = [];
     csvValid = false;
+
     await loadExistingStudents();
     await loadStudentList();
-  } catch (err) {
-    setCsvSummary(err.message, true);
-    alert(err.message);
+  } catch (error) {
+    setCsvSummary(error.message, true);
   }
 }
 
@@ -385,14 +417,14 @@ async function loadStudentList() {
   const url = selectedClass
     ? `${STUDENT_API}?class_id=${encodeURIComponent(selectedClass)}`
     : STUDENT_API;
-  logDebug("Load student list", { selectedClass, url });
+
   let students = [];
   try {
-    const res = await fetch(url);
-    const data = await res.json();
+    const response = await fetch(url);
+    const data = await response.json();
     students = Array.isArray(data) ? data : (data.students || []);
-  } catch (err) {
-    logDebug("Failed to load list", err.message);
+  } catch (error) {
+    students = [];
   }
 
   const tbody = document.getElementById("studentTable");
@@ -405,19 +437,25 @@ async function loadStudentList() {
   }
 
   note.innerText = `Tổng ${students.length} học sinh.`;
-  students.forEach(s => {
-    const avatar = s.avatar_url || "https://placehold.co/40x40";
+  students.forEach(student => {
+    const avatar = student.avatar_url || "https://placehold.co/40x40";
     tbody.innerHTML += `
       <tr>
         <td><img src="${avatar}" alt="avatar" style="width:40px;height:40px;border-radius:50%;object-fit:cover;"></td>
-        <td>${s.student_code}</td>
-        <td>${s.full_name}</td>
-        <td>${s.dob || ""}</td>
-        <td>${s.gender || ""}</td>
-        <td>${s.class_id || ""}</td>
+        <td>${student.student_code}</td>
+        <td>${student.full_name}</td>
+        <td>${student.dob || ""}</td>
+        <td>${student.gender || ""}</td>
+        <td>${student.class_id || ""}</td>
       </tr>
     `;
   });
+}
+
+function exportStudents() {
+  const selectedClass = document.getElementById("filterClass").value;
+  const params = selectedClass ? `?class_id=${encodeURIComponent(selectedClass)}` : "";
+  window.location.href = `${STUDENT_API}/export${params}`;
 }
 
 function initStudentPage() {
@@ -434,13 +472,15 @@ function initStudentPage() {
       runValidationAndRender();
     });
   }
-  document.querySelectorAll('input[name="csvMode"]').forEach(el => {
-    el.addEventListener("change", () => {
+
+  document.querySelectorAll('input[name="csvMode"]').forEach(input => {
+    input.addEventListener("change", () => {
       toggleReplaceWarning();
       setCsvSummary("");
       runValidationAndRender();
     });
   });
+
   if (importBtn) importBtn.addEventListener("click", importCsv);
   if (filterBtn) filterBtn.addEventListener("click", loadStudentList);
   if (exportBtn) exportBtn.addEventListener("click", exportStudents);
@@ -453,9 +493,3 @@ function initStudentPage() {
 }
 
 window.addEventListener("DOMContentLoaded", initStudentPage);
-
-async function exportStudents() {
-  const selectedClass = document.getElementById("filterClass").value;
-  const params = selectedClass ? `?class_id=${encodeURIComponent(selectedClass)}` : "";
-  window.location.href = `${STUDENT_API}/export${params}`;
-}

@@ -1,53 +1,50 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Quản lý giáo viên | Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản Lý Giáo Viên | Admin</title>
   <link rel="stylesheet" href="../css/style.css">
 </head>
-<body>
-
+<body class="admin-page">
 <script>
   const u = JSON.parse(sessionStorage.getItem("currentUser"));
-  if (!u || u.role !== "admin") {
-    location.href = "../login.html";
-  }
+  if (!u || u.role !== "admin") location.href = "../login.html";
 </script>
 
-<header class="header">
-  <div class="container header-inner">
-    <div class="logo">School Manager Pro</div>
-    <a href="../login.html" class="btn btn-outline">Đăng xuất</a>
-  </div>
-</header>
-
-<div class="dashboard container">
-  <aside class="sidebar">
-    <h3>Admin</h3>
-    <nav class="sidebar-nav">
-      <a href="dashboard.html">📊 Tổng quan</a>
-      <a href="classes.html">🏫 Lớp học</a>
-      <a href="teachers.html" class="active">👩‍🏫 Giáo viên</a>
-      <a href="students.html">👨‍🎓 Học sinh</a>
-      <a href="attendance.html">🗓️ Điểm danh</a>
-    </nav>
-  </aside>
-
-  <main class="main">
-    <h2>Quản lý giáo viên</h2>
-    <p class="subtext">Tạo mới, chỉnh sửa và kiểm soát hạn mức phân lớp</p>
-
-    <div class="card">
-      <div class="form-row" style="justify-content: space-between; align-items:center;">
-        <div>
-          <p class="muted" style="margin:0;">Xuất danh sách giáo viên theo CSV.</p>
-        </div>
-        <button class="btn btn-outline" onclick="window.location.href='/api/teachers/export'">Export CSV</button>
-      </div>
+<div class="admin-shell container">
+  <header class="admin-topbar">
+    <div class="brand-wrap">
+      <p class="brand-eyebrow">School Manager Pro</p>
+      <h1 class="brand-title">Quản Lý Giáo Viên</h1>
+      <p class="brand-sub">Tạo mới và kiểm soát tải giảng dạy theo môn học.</p>
     </div>
+    <nav class="main-nav">
+      <a class="nav-link" href="dashboard.html">Trang chủ</a>
+      <a class="nav-link active" href="teachers.html">Tính năng</a>
+      <a class="nav-link" href="dashboard.html#noteZone">Ghi chú</a>
+      <a class="nav-link nav-danger" href="../login.html">Đăng xuất</a>
+    </nav>
+  </header>
 
-    <div class="card">
-      <h3>➕ Thêm / Cập nhật giáo viên</h3>
+  <nav class="admin-subnav">
+    <a class="subnav-link" href="dashboard.html">Dashboard</a>
+    <a class="subnav-link" href="classes.html">Lớp học</a>
+    <a class="subnav-link active" href="teachers.html">Giáo viên</a>
+    <a class="subnav-link" href="students.html">Học sinh</a>
+    <a class="subnav-link" href="attendance.html">Điểm danh</a>
+  </nav>
+
+  <main class="admin-main">
+    <section class="card">
+      <div class="form-row space-between align-center">
+        <p class="muted">Xuất danh sách giáo viên theo định dạng CSV.</p>
+        <button class="btn btn-secondary" onclick="window.location.href='/api/teachers/export'">Xuất CSV</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3>Thêm / Cập Nhật Giáo Viên</h3>
       <div class="form-row wrap">
         <input id="tName" placeholder="Họ và tên">
         <select id="tGender">
@@ -64,36 +61,38 @@
           <option value="KHTN">KHTN</option>
         </select>
         <input id="tEmail" type="email" placeholder="Email (bắt buộc)">
-        <div style="display:flex; gap:6px; flex:1 1 220px; align-items:center;">
-          <input id="tPassword" type="password" placeholder="Mật khẩu (để trống sẽ tự tạo)" style="flex:1;">
-          <button type="button" class="btn btn-outline" onclick="togglePassword(event)">Hiện</button>
+        <div class="password-wrap">
+          <input id="tPassword" type="password" placeholder="Mật khẩu (để trống sẽ tự tạo)">
+          <button type="button" class="btn btn-secondary" onclick="togglePassword(event)">Hiện</button>
         </div>
       </div>
-      <p id="teacherError" class="error" style="margin-top:10px;"></p>
-      <p id="teacherNotice" class="muted" style="margin-top:6px;"></p>
-      <div style="margin-top:12px;">
-        <button class="btn btn-primary" onclick="addTeacher()">Lưu giáo viên</button>
-        <button class="btn btn-outline" onclick="resetTeacherForm()">Hủy</button>
+      <p id="teacherError" class="error"></p>
+      <p id="teacherNotice" class="muted"></p>
+      <div class="form-actions">
+        <button class="btn btn-primary" id="teacherSubmitBtn" onclick="addTeacher()">Lưu giáo viên</button>
+        <button class="btn btn-secondary" onclick="resetTeacherForm()">Hủy</button>
       </div>
-      <p class="muted" style="margin-top:10px;">Hệ thống tự chặn giáo viên dạy quá 4 lớp hoặc trùng GVCN.</p>
-    </div>
+      <p class="muted">Hệ thống tự chặn giáo viên dạy quá 4 lớp hoặc trùng GVCN.</p>
+    </section>
 
-    <div class="card">
-      <h3>📋 Danh sách giáo viên</h3>
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Tên</th>
-            <th>Môn</th>
-            <th>GVCN</th>
-            <th>Số lớp</th>
-            <th>Email</th>
-            <th>Hành động</th>
-          </tr>
-        </thead>
-        <tbody id="teacherTable"></tbody>
-      </table>
-    </div>
+    <section class="card">
+      <h3>Danh Sách Giáo Viên</h3>
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Tên</th>
+              <th>Môn</th>
+              <th>GVCN</th>
+              <th>Số lớp</th>
+              <th>Email</th>
+              <th>Hành động</th>
+            </tr>
+          </thead>
+          <tbody id="teacherTable"></tbody>
+        </table>
+      </div>
+    </section>
   </main>
 </div>
 

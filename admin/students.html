@@ -1,42 +1,43 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Quản lý học sinh</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản Lý Học Sinh | Admin</title>
   <link rel="stylesheet" href="../css/style.css">
 </head>
-<body>
-
+<body class="admin-page">
 <script>
   const u = JSON.parse(sessionStorage.getItem("currentUser"));
   if (!u || u.role !== "admin") location.href = "../login.html";
 </script>
 
-<header class="header">
-  <div class="container header-inner">
-    <div class="logo">School Manager Pro</div>
-    <a href="../login.html" class="btn btn-outline">Đăng xuất</a>
-  </div>
-</header>
-
-<div class="dashboard container">
-  <aside class="sidebar">
-    <h3>Admin</h3>
-    <nav class="sidebar-nav">
-      <a href="dashboard.html">📊 Tổng quan</a>
-      <a href="classes.html">🏫 Lớp học</a>
-      <a href="teachers.html">👩‍🏫 Giáo viên</a>
-      <a href="students.html" class="active">👨‍🎓 Học sinh</a>
-      <a href="attendance.html">🗓️ Điểm danh</a>
+<div class="admin-shell container">
+  <header class="admin-topbar">
+    <div class="brand-wrap">
+      <p class="brand-eyebrow">School Manager Pro</p>
+      <h1 class="brand-title">Quản Lý Học Sinh</h1>
+      <p class="brand-sub">Thêm thủ công hoặc nhập CSV theo từng lớp học.</p>
+    </div>
+    <nav class="main-nav">
+      <a class="nav-link" href="dashboard.html">Trang chủ</a>
+      <a class="nav-link active" href="students.html">Tính năng</a>
+      <a class="nav-link" href="dashboard.html#noteZone">Ghi chú</a>
+      <a class="nav-link nav-danger" href="../login.html">Đăng xuất</a>
     </nav>
-  </aside>
+  </header>
 
-  <main class="main">
-    <h2>Quản lý học sinh</h2>
-    <p class="subtext">Thêm thủ công hoặc nhập CSV theo lớp</p>
+  <nav class="admin-subnav">
+    <a class="subnav-link" href="dashboard.html">Dashboard</a>
+    <a class="subnav-link" href="classes.html">Lớp học</a>
+    <a class="subnav-link" href="teachers.html">Giáo viên</a>
+    <a class="subnav-link active" href="students.html">Học sinh</a>
+    <a class="subnav-link" href="attendance.html">Điểm danh</a>
+  </nav>
 
-    <div class="card">
-      <h3>➕ Thêm học sinh (tự tạo mã)</h3>
+  <main class="admin-main">
+    <section class="card">
+      <h3>Thêm Học Sinh (Tự Tạo Mã)</h3>
       <div class="form-row wrap">
         <input id="sFullName" placeholder="Họ và tên">
         <input id="sDob" type="date" placeholder="Ngày sinh">
@@ -51,74 +52,84 @@
         </select>
         <input id="sAvatar" placeholder="Avatar URL (tùy chọn)">
       </div>
-      <p id="studentError" class="error" style="margin-top:10px;"></p>
-      <p id="studentNotice" class="muted" style="margin-top:6px;"></p>
-      <div style="margin-top:12px;">
+      <p id="studentError" class="error"></p>
+      <p id="studentNotice" class="muted"></p>
+      <div class="form-actions">
         <button class="btn btn-primary" onclick="submitStudent()">Lưu học sinh</button>
-        <button class="btn btn-outline" onclick="resetStudentForm()">Hủy</button>
+        <button class="btn btn-secondary" onclick="resetStudentForm()">Hủy</button>
       </div>
-      <p class="muted" style="margin-top:8px;">Mã học sinh tự động dạng <code>HSYYYY-XXX</code>.</p>
-    </div>
+      <p class="muted">Mã học sinh tự động theo định dạng <code>HSYYYY-XXX</code>.</p>
+    </section>
 
-    <div class="card">
-      <h3>📥 Nhập CSV</h3>
-      <div class="form-row wrap" style="margin-top:6px; align-items:center;">
-        <label style="display:flex; align-items:center; gap:6px;">
+    <section class="card">
+      <h3>Nhập CSV</h3>
+      <div class="form-row wrap align-center">
+        <label class="radio-inline">
           <input type="radio" name="csvMode" value="merge" checked>
           Gộp (Merge)
         </label>
-        <label style="display:flex; align-items:center; gap:6px;">
+        <label class="radio-inline">
           <input type="radio" name="csvMode" value="replace">
           Thay thế toàn bộ lớp (Replace)
         </label>
       </div>
-      <p id="replaceWarning" class="error" style="margin-top:6px; display:none;">
-        Tất cả học sinh của lớp này sẽ bị xoá trước khi nhập mới.
+
+      <p id="replaceWarning" class="error hidden-inline">
+        Toàn bộ học sinh của lớp này sẽ bị xóa trước khi nhập mới.
       </p>
+
       <div class="form-row wrap">
         <select id="csvClass">
           <option value="">Chọn lớp</option>
         </select>
         <input id="csvInput" type="file" accept=".csv">
-        <button id="csvImportBtn" class="btn btn-outline" disabled>Nhập CSV</button>
+        <button id="csvImportBtn" class="btn btn-secondary" disabled>Nhập CSV</button>
       </div>
-      <p class="muted" style="margin-top:8px;">Định dạng: <code>student_code,full_name,dob,gender,class_id,avatar_url</code>. <code>avatar_url</code> tùy chọn.</p>
-      <div class="divider"></div>
-      <div id="csvPreviewWrap" style="display:none;">
-        <h4 style="margin:0 0 12px 0;">Xem trước dữ liệu</h4>
-        <table class="table">
-          <thead id="csvPreviewHead"></thead>
-          <tbody id="csvPreviewBody"></tbody>
-        </table>
-        <p id="csvPreviewNote" class="muted" style="margin-top:8px;"></p>
-      </div>
-      <p id="csvImportSummary" class="muted" style="margin-top:10px;"></p>
-    </div>
 
-    <div class="card">
-      <h3>📋 Danh sách học sinh</h3>
-      <div class="form-row" style="margin-bottom:12px;">
+      <p class="muted">Định dạng: <code>student_code,full_name,dob,gender,class_id,avatar_url</code>. <code>avatar_url</code> là tùy chọn.</p>
+      <div class="divider"></div>
+
+      <div id="csvPreviewWrap" class="hidden">
+        <h4 class="subheading">Xem trước dữ liệu</h4>
+        <div class="table-wrap">
+          <table class="table">
+            <thead id="csvPreviewHead"></thead>
+            <tbody id="csvPreviewBody"></tbody>
+          </table>
+        </div>
+        <p id="csvPreviewNote" class="muted"></p>
+      </div>
+
+      <p id="csvImportSummary" class="muted"></p>
+    </section>
+
+    <section class="card">
+      <h3>Danh Sách Học Sinh</h3>
+      <div class="form-row align-center">
         <select id="filterClass">
           <option value="">Tất cả lớp</option>
         </select>
-        <button id="filterBtn" class="btn btn-outline">Lọc</button>
-        <button id="exportBtn" class="btn btn-primary" style="margin-left:auto;">Export CSV</button>
+        <button id="filterBtn" class="btn btn-secondary">Lọc</button>
+        <button id="exportBtn" class="btn btn-primary push-right">Xuất CSV</button>
       </div>
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Avatar</th>
-            <th>Mã</th>
-            <th>Họ tên</th>
-            <th>Ngày sinh</th>
-            <th>Giới tính</th>
-            <th>Lớp</th>
-          </tr>
-        </thead>
-        <tbody id="studentTable"></tbody>
-      </table>
-      <p id="studentListNote" class="muted" style="margin-top:8px;"></p>
-    </div>
+
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Avatar</th>
+              <th>Mã</th>
+              <th>Họ tên</th>
+              <th>Ngày sinh</th>
+              <th>Giới tính</th>
+              <th>Lớp</th>
+            </tr>
+          </thead>
+          <tbody id="studentTable"></tbody>
+        </table>
+      </div>
+      <p id="studentListNote" class="muted"></p>
+    </section>
   </main>
 </div>
 

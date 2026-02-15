@@ -1,13 +1,13 @@
-const FACE_ATT_API = "/api/attendance/face";
+﻿const FACE_ATT_API = "/api/attendance/face";
 const CLASS_API = "/api/classes";
 
 async function loadClasses() {
-  const res = await fetch(CLASS_API);
-  const classes = await res.json();
+  const response = await fetch(CLASS_API);
+  const classes = await response.json();
   const select = document.getElementById("attClassFilter");
   select.innerHTML = '<option value="">Tất cả lớp</option>';
-  classes.forEach(c => {
-    select.innerHTML += `<option value="${c.name}">${c.name}</option>`;
+  classes.forEach(item => {
+    select.innerHTML += `<option value="${item.name}">${item.name}</option>`;
   });
 }
 
@@ -21,12 +21,14 @@ function setToday() {
 async function loadAttendance() {
   const date = document.getElementById("attDateFilter").value;
   const className = document.getElementById("attClassFilter").value;
+
   const params = new URLSearchParams();
   if (date) params.append("date", date);
   if (className) params.append("class_name", className);
 
-  const res = await fetch(`${FACE_ATT_API}?${params.toString()}`);
-  const data = await res.json();
+  const response = await fetch(`${FACE_ATT_API}?${params.toString()}`);
+  const data = await response.json();
+
   const tbody = document.getElementById("attendanceTable");
   const notice = document.getElementById("attendanceNotice");
   tbody.innerHTML = "";

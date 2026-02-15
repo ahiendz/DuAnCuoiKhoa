@@ -39,7 +39,7 @@ async function resolveClass(classIdOrName, client = pool) {
   return rows[0] || null;
 }
 
-function validateRow(row, selectedClassName) {
+function validateRow(row, selectedClassInfo) {
   const errors = {};
   if (!row.student_code) errors.student_code = "Thiếu mã học sinh";
   if (!row.full_name) errors.full_name = "Thiếu họ tên";
@@ -51,8 +51,13 @@ function validateRow(row, selectedClassName) {
   }
   if (!row.class_id) {
     errors.class_id = "Thiếu class_id";
-  } else if (String(row.class_id) !== String(selectedClassName)) {
-    errors.class_id = "class_id không đúng lớp đã chọn";
+  } else {
+    const rowClass = String(row.class_id).trim();
+    const className = String(selectedClassInfo && selectedClassInfo.name ? selectedClassInfo.name : "").trim();
+    const classId = String(selectedClassInfo && selectedClassInfo.id ? selectedClassInfo.id : "").trim();
+    if (rowClass !== className && rowClass !== classId) {
+      errors.class_id = `class_id không đúng lớp đã chọn (${className} hoặc ${classId})`;
+    }
   }
   if (row.avatar_url && !isValidUrl(row.avatar_url)) {
     errors.avatar_url = "avatar_url không hợp lệ";
@@ -289,7 +294,6 @@ async function importStudents(rows, mode, selectedClass) {
     const classInfo = await resolveClass(selectedClass, client);
     if (!classInfo) throw new Error("Lớp học không tồn tại");
 
-    const className = classInfo.name;
     const classId = classInfo.id;
 
     const codeCounts = {};
@@ -311,7 +315,7 @@ async function importStudents(rows, mode, selectedClass) {
 
     const validRows = [];
     rows.forEach(row => {
-      const errors = validateRow(row, className);
+      const errors = validateRow(row, classInfo);
       if (codeCounts[row.student_code] > 1) errors.student_code = "Trùng mã học sinh trong CSV";
       const existing = existingByCode.get(row.student_code);
       if (existing && String(existing.class_id) !== String(classId)) {

@@ -1,19 +1,19 @@
-const CLASS_API = "/api/classes";
+﻿const CLASS_API = "/api/classes";
 const TEACHER_API = "/api/teachers";
 
 let teachers = [];
 let classes = [];
 let editingId = null;
 
-function optionLabel(t) {
-  const count = t.teaching_classes ? t.teaching_classes.length : 0;
-  return `${t.full_name} • ${t.subject} • ${count}/4 lớp${t.is_homeroom ? " • GVCN" : ""}`;
+function optionLabel(teacher) {
+  const classCount = teacher.teaching_classes ? teacher.teaching_classes.length : 0;
+  return `${teacher.full_name} • ${teacher.subject} • ${classCount}/4 lớp${teacher.is_homeroom ? " • GVCN" : ""}`;
 }
 
-function isRestrictedTeacher(t) {
-  const fullLoad = (t.teaching_classes || []).length >= 4;
+function isRestrictedTeacher(teacher) {
+  const fullLoad = (teacher.teaching_classes || []).length >= 4;
   const homeroomElsewhere =
-    t.is_homeroom && t.homeroom_class_id && String(t.homeroom_class_id) !== String(editingId);
+    teacher.is_homeroom && teacher.homeroom_class_id && String(teacher.homeroom_class_id) !== String(editingId);
   return fullLoad || homeroomElsewhere;
 }
 
@@ -22,31 +22,33 @@ function sortTeachers(list) {
     const aRestricted = isRestrictedTeacher(a);
     const bRestricted = isRestrictedTeacher(b);
     if (aRestricted !== bRestricted) return aRestricted ? 1 : -1;
-    return a.full_name.localeCompare(b.full_name);
+    return a.full_name.localeCompare(b.full_name, "vi");
   });
 }
 
 function renderSelect(selectId, list, placeholder) {
-  const el = document.getElementById(selectId);
-  el.innerHTML = "";
-  const first = document.createElement("option");
-  first.value = "";
-  first.textContent = placeholder;
-  el.appendChild(first);
+  const element = document.getElementById(selectId);
+  if (!element) return;
 
-  sortTeachers(list).forEach(t => {
-    const opt = document.createElement("option");
-    opt.value = t.id;
-    opt.textContent = optionLabel(t);
-    if (isRestrictedTeacher(t)) {
-      opt.classList.add("option-restricted");
+  element.innerHTML = "";
+  const defaultOption = document.createElement("option");
+  defaultOption.value = "";
+  defaultOption.textContent = placeholder;
+  element.appendChild(defaultOption);
+
+  sortTeachers(list).forEach(teacher => {
+    const option = document.createElement("option");
+    option.value = teacher.id;
+    option.textContent = optionLabel(teacher);
+    if (isRestrictedTeacher(teacher)) {
+      option.classList.add("option-restricted");
     }
-    el.appendChild(opt);
+    element.appendChild(option);
   });
 }
 
 function renderTeacherOptions() {
-  renderSelect("homeroomSelect", teachers, "Chọn GVCN");
+  renderSelect("homeroomSelect", teachers, "Chọn giáo viên chủ nhiệm");
   renderSelect("teacherToan", teachers.filter(t => t.subject === "Toán"), "Giáo viên Toán");
   renderSelect("teacherVan", teachers.filter(t => t.subject === "Văn"), "Giáo viên Văn");
   renderSelect("teacherAnh", teachers.filter(t => t.subject === "Anh"), "Giáo viên Anh");
@@ -54,25 +56,27 @@ function renderTeacherOptions() {
 }
 
 async function loadTeachers() {
-  const res = await fetch(TEACHER_API);
-  teachers = await res.json();
+  const response = await fetch(TEACHER_API);
+  teachers = await response.json();
   renderTeacherOptions();
 }
 
 async function loadClasses() {
-  const res = await fetch(CLASS_API);
-  classes = await res.json();
+  const response = await fetch(CLASS_API);
+  classes = await response.json();
   renderClasses();
 }
 
 function teacherName(id) {
   if (!id) return "—";
-  const t = teachers.find(x => String(x.id) === String(id));
-  return t ? t.full_name : "Không rõ";
+  const teacher = teachers.find(item => String(item.id) === String(id));
+  return teacher ? teacher.full_name : "Không rõ";
 }
 
 function renderClasses() {
   const tbody = document.getElementById("classTable");
+  if (!tbody) return;
+
   tbody.innerHTML = "";
   classes.forEach(cls => {
     tbody.innerHTML += `
@@ -87,7 +91,7 @@ function renderClasses() {
         <td>
           <div class="table-actions">
             <button class="btn btn-ghost btn-action" onclick="editClass(${cls.id})">Sửa</button>
-            <button class="btn btn-outline btn-action" onclick="deleteClass(${cls.id})">Xoá</button>
+            <button class="btn btn-secondary btn-action" onclick="deleteClass(${cls.id})">Xóa</button>
           </div>
         </td>
       </tr>
@@ -97,28 +101,29 @@ function renderClasses() {
 
 function getFormPayload() {
   const name = document.getElementById("className").value.trim();
-  const grade_level = Number(document.getElementById("classGrade").value);
-  const homeroom_teacher_id = document.getElementById("homeroomSelect").value;
-  const subject_teachers = {
-    "Toán": document.getElementById("teacherToan").value,
-    "Văn": document.getElementById("teacherVan").value,
-    "Anh": document.getElementById("teacherAnh").value,
-    "KHTN": document.getElementById("teacherKHTN").value
+  const gradeLevel = Number(document.getElementById("classGrade").value);
+  const homeroomTeacherId = document.getElementById("homeroomSelect").value;
+  const subjectTeachers = {
+    Toán: document.getElementById("teacherToan").value,
+    Văn: document.getElementById("teacherVan").value,
+    Anh: document.getElementById("teacherAnh").value,
+    KHTN: document.getElementById("teacherKHTN").value
   };
 
   return {
     name,
-    grade_level,
-    homeroom_teacher_id: homeroom_teacher_id ? Number(homeroom_teacher_id) : null,
+    grade_level: gradeLevel,
+    homeroom_teacher_id: homeroomTeacherId ? Number(homeroomTeacherId) : null,
     subject_teachers: Object.fromEntries(
-      Object.entries(subject_teachers).map(([k, v]) => [k, Number(v)])
+      Object.entries(subjectTeachers).map(([subject, teacherId]) => [subject, Number(teacherId)])
     )
   };
 }
 
 async function submitClass() {
   const errorEl = document.getElementById("classError");
-  errorEl.innerText = "";
+  if (errorEl) errorEl.innerText = "";
+
   try {
     const payload = getFormPayload();
     if (!payload.name || !payload.grade_level) {
@@ -128,22 +133,22 @@ async function submitClass() {
     const method = editingId ? "PUT" : "POST";
     const url = editingId ? `${CLASS_API}/${editingId}` : CLASS_API;
 
-    const res = await fetch(url, {
+    const response = await fetch(url, {
       method,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
 
-    const data = await res.json();
-    if (!res.ok || data.error) {
+    const data = await response.json();
+    if (!response.ok || data.error) {
       throw new Error(data.error || "Không thể lưu lớp");
     }
 
     await loadClasses();
     await loadTeachers();
     resetForm();
-  } catch (err) {
-    errorEl.innerText = err.message;
+  } catch (error) {
+    if (errorEl) errorEl.innerText = error.message;
   }
 }
 
@@ -160,10 +165,12 @@ function resetForm() {
 }
 
 function editClass(id) {
-  const cls = classes.find(c => String(c.id) === String(id));
+  const cls = classes.find(item => String(item.id) === String(id));
   if (!cls) return;
+
   editingId = id;
   renderTeacherOptions();
+
   document.getElementById("className").value = cls.name;
   document.getElementById("classGrade").value = cls.grade_level;
   document.getElementById("homeroomSelect").value = cls.homeroom_teacher_id || "";
@@ -172,17 +179,22 @@ function editClass(id) {
   document.getElementById("teacherAnh").value = cls.subject_teachers["Anh"] || "";
   document.getElementById("teacherKHTN").value = cls.subject_teachers["KHTN"] || "";
   document.getElementById("classSubmitBtn").innerText = "Cập nhật lớp";
+
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 async function deleteClass(id) {
-  if (!confirm("Xoá lớp này? Học sinh sẽ được bỏ phân lớp.")) return;
-  const res = await fetch(`${CLASS_API}/${id}`, { method: "DELETE" });
-  const data = await res.json();
-  if (!res.ok || data.error) {
-    alert(data.error || "Không thể xoá lớp");
+  if (!window.confirm("Xóa lớp này? Các dữ liệu liên quan sẽ được xử lý theo cấu hình hệ thống.")) {
     return;
   }
+
+  const response = await fetch(`${CLASS_API}/${id}`, { method: "DELETE" });
+  const data = await response.json();
+  if (!response.ok || data.error) {
+    alert(data.error || "Không thể xóa lớp");
+    return;
+  }
+
   await loadClasses();
   await loadTeachers();
 }

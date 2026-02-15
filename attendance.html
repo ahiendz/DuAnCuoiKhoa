@@ -55,6 +55,23 @@
             Sẵn sàng nhận diện.
           </div>
 
+          <div id="trainModal" class="train-modal hidden" aria-hidden="true">
+            <div class="train-modal-backdrop" data-train-close="1"></div>
+            <div class="train-modal-card" role="dialog" aria-modal="true" aria-labelledby="trainModalTitle">
+              <div class="train-modal-header">
+                <h3 id="trainModalTitle">Xác Nhận Huấn Luyện Dữ Liệu Khuôn Mặt</h3>
+                <button id="closeTrainModalBtn" type="button" class="train-close-btn">Đóng</button>
+              </div>
+              <p id="trainModalSummary" class="muted">Đang tải danh sách học sinh...</p>
+              <div id="trainPreviewState" class="train-preview-state">Đang tải...</div>
+              <div id="trainPreviewGrid" class="train-preview-grid" aria-live="polite"></div>
+              <div class="train-modal-actions">
+                <button id="cancelTrainBtn" type="button" class="btn btn-outline">Hủy</button>
+                <button id="confirmTrainBtn" type="button" class="btn btn-primary">Xác Nhận Và Huấn Luyện</button>
+              </div>
+            </div>
+          </div>
+
           <div class="divider"></div>
           <h4 style="margin:0 0 12px 0;">Kết quả nhận diện gần nhất</h4>
           <table class="table">

@@ -1,74 +1,91 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Admin Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bảng Điều Khiển Admin | School Manager Pro</title>
   <link rel="stylesheet" href="../css/style.css">
 </head>
-<body>
-
+<body class="admin-page">
 <script>
   const u = JSON.parse(sessionStorage.getItem("currentUser"));
   if (!u || u.role !== "admin") location.href = "../login.html";
 </script>
 
-<header class="header">
-  <div class="container header-inner">
-    <div class="logo">School Manager Pro</div>
-    <a href="../login.html" class="btn btn-outline">Đăng xuất</a>
-  </div>
-</header>
-
-<div class="dashboard container">
-  <aside class="sidebar">
-    <h3>Admin</h3>
-    <nav class="sidebar-nav">
-      <a href="dashboard.html" class="active">📊 Tổng quan</a>
-      <a href="classes.html">🏫 Lớp học</a>
-      <a href="teachers.html">👩‍🏫 Giáo viên</a>
-      <a href="students.html">👨‍🎓 Học sinh</a>
-      <a href="attendance.html">🗓️ Điểm danh</a>
+<div class="admin-shell container">
+  <header class="admin-topbar">
+    <div class="brand-wrap">
+      <p class="brand-eyebrow">School Manager Pro</p>
+      <h1 class="brand-title">Bảng Điều Khiển Quản Trị</h1>
+      <p class="brand-sub">Quản lý toàn bộ hệ thống lớp học, giáo viên, học sinh và điểm danh.</p>
+    </div>
+    <nav class="main-nav">
+      <a class="nav-link active" href="dashboard.html">Trang chủ</a>
+      <a class="nav-link" href="#featureZone">Tính năng</a>
+      <a class="nav-link" href="#noteZone">Ghi chú</a>
+      <a class="nav-link nav-danger" href="../login.html">Đăng xuất</a>
     </nav>
-  </aside>
+  </header>
 
-  <main class="main">
-    <h2>Xin chào Admin 👋</h2>
-    <p class="subtext">Quản lý toàn bộ hệ thống trường học</p>
+  <nav class="admin-subnav" id="featureZone">
+    <a class="subnav-link active" href="dashboard.html">Dashboard</a>
+    <a class="subnav-link" href="classes.html">Lớp học</a>
+    <a class="subnav-link" href="teachers.html">Giáo viên</a>
+    <a class="subnav-link" href="students.html">Học sinh</a>
+    <a class="subnav-link" href="attendance.html">Điểm danh</a>
+  </nav>
 
-    <div class="stats">
-      <div class="stat-card">
+  <main class="admin-main">
+    <section class="stats-grid">
+      <article class="stat-card">
         <p class="status-badge">Lớp học</p>
         <h3 id="countClasses">--</h3>
-        <p>Đủ 4 môn Toán, Văn, Anh, KHTN</p>
-        <a href="classes.html" class="btn btn-ghost">Xem</a>
-      </div>
-      <div class="stat-card">
+        <p>Tổng số lớp đang vận hành.</p>
+      </article>
+      <article class="stat-card">
         <p class="status-badge">Giáo viên</p>
         <h3 id="countTeachers">--</h3>
-        <p>Tối đa 4 lớp/giáo viên, 1 GVCN duy nhất</p>
-        <a href="teachers.html" class="btn btn-ghost">Quản lý</a>
-      </div>
-      <div class="stat-card">
+        <p>Đã phân công theo môn học.</p>
+      </article>
+      <article class="stat-card">
         <p class="status-badge">Học sinh</p>
         <h3 id="countStudents">--</h3>
-        <p>Mã học sinh duy nhất, hỗ trợ nhập CSV</p>
-        <a href="students.html" class="btn btn-ghost">Xem danh sách</a>
-      </div>
-    </div>
+        <p>Tổng số hồ sơ học sinh hiện có.</p>
+      </article>
+      <article class="stat-card">
+        <p class="status-badge">Điểm danh hôm nay</p>
+        <h3 id="todayAttendance">--</h3>
+        <p>Số lượt điểm danh nhận diện khuôn mặt.</p>
+      </article>
+    </section>
 
-    <div class="card">
-      <h3>Quy tắc nghiệp vụ</h3>
-      <div class="divider"></div>
-      <ul>
-        <li>• Mỗi lớp cần 1 GVCN và 4 giáo viên bộ môn cố định (Toán, Văn, Anh, KHTN).</li>
-        <li>• GVCN chỉ được quản lý 1 lớp; giáo viên bộ môn tối đa 4 lớp.</li>
-        <li>• Mã học sinh (student_code) phải duy nhất trên toàn hệ thống.</li>
-        <li>• Có thể nhập học sinh bằng CSV: <code>student_code,full_name,dob,gender,class_id</code>.</li>
-      </ul>
-    </div>
+    <section class="chart-grid">
+      <article class="card chart-card">
+        <h3>Phân bổ học sinh theo khối</h3>
+        <canvas id="studentsByGradeChart" height="240"></canvas>
+      </article>
+      <article class="card chart-card">
+        <h3>Phân bổ giáo viên theo môn</h3>
+        <canvas id="teacherSubjectChart" height="240"></canvas>
+      </article>
+      <article class="card chart-card">
+        <h3>Sĩ số theo lớp (Top 8)</h3>
+        <canvas id="classCapacityChart" height="240"></canvas>
+      </article>
+      <article class="card" id="noteZone">
+        <h3>Ghi chú hệ thống</h3>
+        <ul class="note-list">
+          <li id="noteLine1">Đang tải dữ liệu tổng quan.</li>
+          <li id="noteLine2">Đang phân tích phân bổ học sinh theo khối.</li>
+          <li id="noteLine3">Đang phân tích phân công giáo viên theo môn.</li>
+          <li id="noteLine4">Đang tổng hợp tình hình điểm danh hôm nay.</li>
+        </ul>
+      </article>
+    </section>
   </main>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="dashboard.js"></script>
 </body>
 </html>

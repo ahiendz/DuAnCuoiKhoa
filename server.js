@@ -9,12 +9,14 @@ const teacherService = require("./backend/services/teacherService");
 const studentService = require("./backend/services/studentService");
 const attendanceService = require("./backend/services/attendanceService");
 const authService = require("./backend/services/authService");
+const teacherRoutes = require("./backend/routes/teacherRoutes");
 const { SUBJECTS } = classService;
 
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.static(__dirname));
+app.use("/api/teacher", teacherRoutes);
 
 const BACKEND_DIR = path.join(__dirname, "backend");
 const FACE_DIR = path.join(BACKEND_DIR, "face");
@@ -134,6 +136,40 @@ function saveBase64Image(dataUrl, filePath) {
   return filePath;
 }
 
+function isValidHttpUrl(value) {
+  if (!value || typeof value !== "string") return false;
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch (error) {
+    return false;
+  }
+}
+
+function normalizeTrainCandidates(students = []) {
+  return students
+    .filter(item => item && item.student_code && isValidHttpUrl(item.avatar_url))
+    .map(item => ({
+      id: item.id ?? null,
+      student_code: item.student_code,
+      full_name: item.full_name || "",
+      class_name: item.class_name || item.class_id || "",
+      class_id: item.class_id || "",
+      avatar_url: item.avatar_url
+    }));
+}
+
+function normalizeClassDeleteError(error) {
+  const message = (error && error.message) ? String(error.message) : "Không thể xóa lớp.";
+  if (message.includes("attendance_class_id_fkey")) {
+    return "Không thể xóa lớp vì còn bản ghi điểm danh liên quan.";
+  }
+  if (message.includes("violates foreign key constraint")) {
+    return "Không thể xóa lớp vì còn dữ liệu liên quan trong hệ thống.";
+  }
+  return message;
+}
+
 function warmupPython() {
   try {
     const child = spawn(PYTHON_BIN, [FACE_ENGINE_PATH], { cwd: __dirname });
@@ -240,7 +276,7 @@ app.delete("/api/classes/:id", async (req, res) => {
     await classService.deleteClass(req.params.id);
     return res.json({ success: true });
   } catch (error) {
-    return res.status(400).json({ error: error.message });
+    return res.status(400).json({ error: normalizeClassDeleteError(error) });
   }
 });
 
@@ -413,17 +449,67 @@ app.post("/api/auth/login", async (req, res) => {
   }
 });
 
-app.post("/api/face/train", async (req, res) => {
+app.get("/api/face/train/candidates", async (req, res) => {
   try {
-    ensureDir(FACE_DIR);
-    const { stdout } = await runPython(TRAIN_SCRIPT_PATH);
-    const payload = safeParseEngineJson(stdout);
-    return res.json(payload);
+    const students = await studentService.listStudents();
+    const candidates = normalizeTrainCandidates(students);
+    return res.json({
+      status: "success",
+      total_students: students.length,
+      eligible_students: candidates.length,
+      students: candidates
+    });
   } catch (error) {
     return res.status(500).json({
       status: "error",
       message: error.message
     });
+  }
+});
+
+app.post("/api/face/train", async (req, res) => {
+  let trainInputPath = null;
+  try {
+    ensureDir(FACE_DIR);
+    const students = await studentService.listStudents();
+    const candidates = normalizeTrainCandidates(students);
+
+    if (!candidates.length) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Không có học sinh nào có avatar URL hợp lệ để huấn luyện.",
+        total_students: students.length,
+        eligible_students: 0
+      });
+    }
+
+    trainInputPath = path.join(FACE_DIR, `train_input_${Date.now()}.json`);
+    fs.writeFileSync(
+      trainInputPath,
+      JSON.stringify({ students: candidates }, null, 2),
+      { encoding: "utf-8" }
+    );
+
+    const { stdout } = await runPython(TRAIN_SCRIPT_PATH, [trainInputPath]);
+    const payload = safeParseEngineJson(stdout);
+    return res.json({
+      ...payload,
+      total_students: students.length,
+      eligible_students: candidates.length
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: "error",
+      message: error.message
+    });
+  } finally {
+    if (trainInputPath && fs.existsSync(trainInputPath)) {
+      try {
+        fs.unlinkSync(trainInputPath);
+      } catch (cleanupError) {
+        console.error("Failed to remove train input:", cleanupError.message);
+      }
+    }
   }
 });
 
@@ -535,4 +621,3 @@ server.on("error", err => {
 });
 
 setInterval(() => {}, 1000);
-

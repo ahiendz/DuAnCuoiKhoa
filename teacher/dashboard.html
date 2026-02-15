@@ -1,0 +1,104 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bảng Điều Khiển Giáo Viên | School Manager Pro</title>
+  <link rel="stylesheet" href="teacher.css">
+</head>
+<body>
+  <div class="portal-shell">
+    <header class="topbar">
+      <div class="brand-wrap">
+        <p class="brand-eyebrow">School Manager Pro</p>
+        <h1 class="brand-title">Bảng Điều Khiển Giáo Viên</h1>
+        <p id="teacherWelcome" class="brand-sub">Đang tải thông tin giáo viên...</p>
+      </div>
+      <nav class="main-nav">
+        <a class="nav-link active" href="dashboard.html">Trang chủ</a>
+        <a class="nav-link" href="#features">Tính năng</a>
+        <a class="nav-link" href="#notes">Ghi chú</a>
+        <a class="nav-link" href="grades.html">Nhập điểm</a>
+        <a class="nav-link nav-danger" href="../login.html">Đăng xuất</a>
+      </nav>
+    </header>
+
+    <section class="panel" id="features">
+      <div class="form-grid">
+        <label class="field">
+          <span>Lớp - Môn phụ trách</span>
+          <select id="assignmentSelect"></select>
+        </label>
+        <label class="field">
+          <span>Học kỳ phân tích</span>
+          <select id="semesterSelect">
+            <option value="HK1">HK1</option>
+            <option value="HK2">HK2</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Năm học</span>
+          <input id="academicYearInput" value="2025-2026" placeholder="2025-2026">
+        </label>
+        <div class="field action-field">
+          <span>&nbsp;</span>
+          <button id="reloadBtn" type="button" class="btn btn-primary">Tải Dashboard</button>
+        </div>
+      </div>
+      <p id="dashboardStatus" class="status"></p>
+      <div class="metric-grid">
+        <article class="metric-card">
+          <p class="metric-label">Trung bình lớp</p>
+          <h3 id="avgClass" class="metric-value">0.00</h3>
+        </article>
+        <article class="metric-card">
+          <p class="metric-label">Sĩ số lớp</p>
+          <h3 id="totalStudents" class="metric-value">0</h3>
+        </article>
+        <article class="metric-card">
+          <p class="metric-label">Bản ghi điểm</p>
+          <h3 id="gradedCount" class="metric-value">0</h3>
+        </article>
+        <article class="metric-card">
+          <p class="metric-label">Môn học</p>
+          <h3 id="subjectName" class="metric-value">--</h3>
+        </article>
+      </div>
+    </section>
+
+    <section class="chart-grid">
+      <article class="panel chart-panel">
+        <div class="panel-heading">
+          <h3>Phân bố điểm cuối kỳ</h3>
+          <p>Tổng quan theo 4 nhóm điểm chuẩn.</p>
+        </div>
+        <canvas id="distributionChart" height="220"></canvas>
+      </article>
+      <article class="panel chart-panel">
+        <div class="panel-heading">
+          <h3>So sánh TBHK1 và TBHK2</h3>
+          <p>Biểu đồ cột trung bình theo học kỳ.</p>
+        </div>
+        <canvas id="compareChart" height="220"></canvas>
+      </article>
+    </section>
+
+    <section class="panel" id="notes">
+      <h3 class="panel-title">Ghi chú vận hành</h3>
+      <ul class="note-list">
+        <li id="line1">Đang chuẩn bị dữ liệu tổng quan.</li>
+        <li id="line2">Đang chuẩn bị phân tích phân bố điểm.</li>
+        <li id="line3">Đang chuẩn bị so sánh học kỳ.</li>
+        <li id="line4">Đang chuẩn bị trạng thái nhập điểm.</li>
+      </ul>
+    </section>
+  </div>
+
+  <div id="loadingOverlay" class="loading-overlay" aria-hidden="true">
+    <div class="loading-box">Đang xử lý dữ liệu...</div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>

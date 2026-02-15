@@ -1,22 +1,116 @@
-<table class="table table-dark table-bordered">
-  <thead>
-    <tr>
-      <th>Họ tên</th>
-      <th>Miệng</th>
-      <th>15 phút</th>
-      <th>1 tiết</th>
-      <th>Giữa kỳ</th>
-      <th>Cuối kỳ</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Lý Anh Hiền</td>
-      <td><input class="form-control"></td>
-      <td><input class="form-control"></td>
-      <td><input class="form-control"></td>
-      <td><input class="form-control"></td>
-      <td><input class="form-control"></td>
-    </tr>
-  </tbody>
-</table>
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nhập Điểm | School Manager Pro</title>
+  <link rel="stylesheet" href="teacher.css">
+</head>
+<body>
+  <div class="portal-shell">
+    <header class="topbar">
+      <div class="brand-wrap">
+        <p class="brand-eyebrow">School Manager Pro</p>
+        <h1 class="brand-title">Nhập Điểm Học Sinh</h1>
+        <p id="teacherWelcome" class="brand-sub">Đang tải thông tin giáo viên...</p>
+      </div>
+      <nav class="main-nav">
+        <a class="nav-link" href="dashboard.html">Trang chủ</a>
+        <a class="nav-link" href="dashboard.html#features">Tính năng</a>
+        <a class="nav-link" href="dashboard.html#notes">Ghi chú</a>
+        <a class="nav-link active" href="grades.html">Nhập điểm</a>
+        <a class="nav-link nav-danger" href="../login.html">Đăng xuất</a>
+      </nav>
+    </header>
+
+    <section class="panel">
+      <div class="form-grid">
+        <label class="field">
+          <span>Lớp - Môn phụ trách</span>
+          <select id="assignmentSelect"></select>
+        </label>
+        <label class="field">
+          <span>Học kỳ</span>
+          <select id="semesterSelect">
+            <option value="HK1">HK1</option>
+            <option value="HK2">HK2</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Năm học</span>
+          <input id="academicYearInput" value="2025-2026" placeholder="2025-2026">
+        </label>
+        <div class="field action-field">
+          <span>&nbsp;</span>
+          <button id="loadBtn" type="button" class="btn btn-primary">Tải Danh Sách</button>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <button id="saveBtn" type="button" class="btn btn-success">Lưu Toàn Bộ</button>
+        <button id="importBtn" type="button" class="btn btn-secondary">Nhập CSV</button>
+        <button id="exportBtn" type="button" class="btn btn-secondary">Xuất CSV</button>
+        <input id="importFileInput" type="file" accept=".csv,text/csv" hidden>
+      </div>
+
+      <div class="toolbar">
+        <label class="field compact-field">
+          <span>Quick tag áp dụng nhanh</span>
+          <select id="defaultTagSelect">
+            <option value="">-- Không áp dụng --</option>
+            <option value="Tốt">Tốt</option>
+            <option value="Tiến bộ">Tiến bộ</option>
+            <option value="Cần cố gắng">Cần cố gắng</option>
+            <option value="Chưa tập trung">Chưa tập trung</option>
+            <option value="Nổi bật">Nổi bật</option>
+          </select>
+        </label>
+        <button id="applyTagBtn" type="button" class="btn btn-secondary">Áp Dụng Tag Cho Tất Cả</button>
+      </div>
+
+      <p id="gradeStatus" class="status"></p>
+    </section>
+
+    <section class="panel">
+      <div class="table-wrap">
+        <table class="grade-table">
+          <thead>
+            <tr>
+              <th rowspan="2">STT</th>
+              <th rowspan="2">Mã HS</th>
+              <th rowspan="2">Họ tên</th>
+              <th colspan="2">Miệng</th>
+              <th colspan="2">15 phút</th>
+              <th colspan="2">1 tiết</th>
+              <th rowspan="2">Giữa kỳ</th>
+              <th rowspan="2">Cuối kỳ</th>
+              <th rowspan="2">TBHK</th>
+              <th rowspan="2">Quick tag</th>
+              <th rowspan="2">Nhận xét</th>
+            </tr>
+            <tr>
+              <th>C1</th>
+              <th>C2</th>
+              <th>C1</th>
+              <th>C2</th>
+              <th>C1</th>
+              <th>C2</th>
+            </tr>
+          </thead>
+          <tbody id="gradeTableBody">
+            <tr>
+              <td colspan="14" class="empty-cell">Chưa có dữ liệu.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <div id="loadingOverlay" class="loading-overlay" aria-hidden="true">
+    <div class="loading-box">Đang xử lý dữ liệu...</div>
+  </div>
+
+  <script src="grades.js"></script>
+</body>
+</html>

@@ -1,5 +1,9 @@
-﻿const { pool } = require("../config/db");
+const fs = require("fs");
+const path = require("path");
+const { pool } = require("../config/db");
 const { SUBJECTS } = require("./teacherService");
+
+const FACE_ENCODINGS_PATH = path.join(__dirname, "..", "face", "face_encodings.json");
 
 function assertSubjectTeachersMap(subject_teachers = {}) {
   const missing = SUBJECTS.filter(sub => !subject_teachers[sub]);
@@ -299,15 +303,61 @@ async function deleteClass(id) {
     await client.query("BEGIN");
 
     const classRes = await client.query(
-      "SELECT id FROM classes WHERE id = $1",
+      "SELECT id, name FROM classes WHERE id = $1",
       [id]
     );
     if (!classRes.rows.length) {
       throw new Error("Không tìm thấy lớp");
     }
 
+    const classInfo = classRes.rows[0];
+    const studentRes = await client.query(
+      "SELECT id, student_code FROM students WHERE class_id = $1",
+      [id]
+    );
+    const studentIds = studentRes.rows
+      .map(row => Number(row.id))
+      .filter(Number.isFinite);
+    const studentCodes = studentRes.rows
+      .map(row => String(row.student_code || "").trim())
+      .filter(Boolean);
+
+    // Xóa điểm danh trước để tránh lỗi FK attendance_class_id_fkey
+    if (studentIds.length) {
+      await client.query(
+        "DELETE FROM attendance WHERE class_id = $1 OR student_id = ANY($2::bigint[])",
+        [id, studentIds]
+      );
+    } else {
+      await client.query("DELETE FROM attendance WHERE class_id = $1", [id]);
+    }
+    await client.query("DELETE FROM students WHERE class_id = $1", [id]);
     await client.query("DELETE FROM class_subject_teachers WHERE class_id = $1", [id]);
     await client.query("DELETE FROM classes WHERE id = $1", [id]);
+
+    if (fs.existsSync(FACE_ENCODINGS_PATH)) {
+      const raw = fs.readFileSync(FACE_ENCODINGS_PATH, "utf-8");
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) {
+        throw new Error("face_encodings.json không đúng định dạng mảng");
+      }
+
+      const studentCodeSet = new Set(studentCodes);
+      const classIdStr = String(classInfo.id);
+      const className = String(classInfo.name || "");
+
+      const next = parsed.filter(item => {
+        const code = String((item && item.student_code) || "").trim();
+        const itemClassId = String((item && item.class_id) || "").trim();
+        const itemClassName = String((item && item.class_name) || "").trim();
+        if (code && studentCodeSet.has(code)) return false;
+        if (itemClassId && itemClassId === classIdStr) return false;
+        if (className && itemClassName && itemClassName === className) return false;
+        return true;
+      });
+
+      fs.writeFileSync(FACE_ENCODINGS_PATH, JSON.stringify(next, null, 2), "utf-8");
+    }
 
     await client.query("COMMIT");
     return true;

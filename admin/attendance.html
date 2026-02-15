@@ -1,41 +1,42 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Điểm danh | Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Điểm Danh | Admin</title>
   <link rel="stylesheet" href="../css/style.css">
 </head>
-<body>
-
+<body class="admin-page">
 <script>
   const u = JSON.parse(sessionStorage.getItem("currentUser"));
   if (!u || u.role !== "admin") location.href = "../login.html";
 </script>
 
-<header class="header">
-  <div class="container header-inner">
-    <div class="logo">School Manager Pro</div>
-    <a href="../login.html" class="btn btn-outline">Đăng xuất</a>
-  </div>
-</header>
-
-<div class="dashboard container">
-  <aside class="sidebar">
-    <h3>Admin</h3>
-    <nav class="sidebar-nav">
-      <a href="dashboard.html">📊 Tổng quan</a>
-      <a href="classes.html">🏫 Lớp học</a>
-      <a href="teachers.html">👩‍🏫 Giáo viên</a>
-      <a href="students.html">👨‍🎓 Học sinh</a>
-      <a href="attendance.html" class="active">🗓️ Điểm danh</a>
+<div class="admin-shell container">
+  <header class="admin-topbar">
+    <div class="brand-wrap">
+      <p class="brand-eyebrow">School Manager Pro</p>
+      <h1 class="brand-title">Theo Dõi Điểm Danh</h1>
+      <p class="brand-sub">Xem dữ liệu điểm danh nhận diện khuôn mặt theo ngày và lớp.</p>
+    </div>
+    <nav class="main-nav">
+      <a class="nav-link" href="dashboard.html">Trang chủ</a>
+      <a class="nav-link active" href="attendance.html">Tính năng</a>
+      <a class="nav-link" href="dashboard.html#noteZone">Ghi chú</a>
+      <a class="nav-link nav-danger" href="../login.html">Đăng xuất</a>
     </nav>
-  </aside>
+  </header>
 
-  <main class="main">
-    <h2>Điểm danh hôm nay</h2>
-    <p class="subtext">Danh sách học sinh đã được nhận diện theo ngày và lớp</p>
+  <nav class="admin-subnav">
+    <a class="subnav-link" href="dashboard.html">Dashboard</a>
+    <a class="subnav-link" href="classes.html">Lớp học</a>
+    <a class="subnav-link" href="teachers.html">Giáo viên</a>
+    <a class="subnav-link" href="students.html">Học sinh</a>
+    <a class="subnav-link active" href="attendance.html">Điểm danh</a>
+  </nav>
 
-    <div class="card">
+  <main class="admin-main">
+    <section class="card">
       <div class="form-row wrap">
         <input id="attDateFilter" type="date">
         <select id="attClassFilter">
@@ -44,21 +45,24 @@
         <button class="btn btn-primary" onclick="loadAttendance()">Lọc dữ liệu</button>
       </div>
       <div class="divider"></div>
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Mã học sinh</th>
-            <th>Họ tên</th>
-            <th>Lớp</th>
-            <th>Ngày</th>
-            <th>Giờ</th>
-            <th>Độ tin cậy</th>
-          </tr>
-        </thead>
-        <tbody id="attendanceTable"></tbody>
-      </table>
-      <p id="attendanceNotice" class="muted" style="margin-top:8px;"></p>
-    </div>
+
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Mã học sinh</th>
+              <th>Họ tên</th>
+              <th>Lớp</th>
+              <th>Ngày</th>
+              <th>Giờ</th>
+              <th>Độ tin cậy</th>
+            </tr>
+          </thead>
+          <tbody id="attendanceTable"></tbody>
+        </table>
+      </div>
+      <p id="attendanceNotice" class="muted"></p>
+    </section>
   </main>
 </div>
 
