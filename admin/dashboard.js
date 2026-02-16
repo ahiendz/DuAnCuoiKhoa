@@ -7,6 +7,7 @@ const FACE_ATTENDANCE_API = "/api/attendance/face";
 let studentsByGradeChart = null;
 let teacherSubjectChart = null;
 let classCapacityChart = null;
+let dashboardLoadPromise = null;
 
 function setText(id, value) {
   const element = document.getElementById(id);
@@ -31,12 +32,35 @@ function buildGradient(canvas, start, end) {
   return gradient;
 }
 
-function commonChartOptions({ maxY } = {}) {
+function arraysEqual(a, b) {
+  if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) {
+    return false;
+  }
+  for (let i = 0; i < a.length; i += 1) {
+    if (a[i] !== b[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function getScaleConfig(values) {
+  const maxValue = Math.max(0, ...values);
+  if (maxValue <= 0) {
+    return { suggestedMax: 1, stepSize: 1 };
+  }
+  const suggestedMax = Math.ceil(maxValue * 1.2);
+  const stepSize = Math.max(1, Math.ceil(suggestedMax / 6));
+  return { suggestedMax, stepSize };
+}
+
+function commonChartOptions(values = []) {
+  const scale = getScaleConfig(values);
   return {
     responsive: true,
     maintainAspectRatio: false,
     animation: {
-      duration: 900,
+      duration: 450,
       easing: "easeOutQuart"
     },
     plugins: {
@@ -60,12 +84,31 @@ function commonChartOptions({ maxY } = {}) {
       },
       y: {
         min: 0,
-        ...(Number.isFinite(maxY) ? { max: maxY } : {}),
-        ticks: { color: "#a9c0ec" },
+        suggestedMax: scale.suggestedMax,
+        ticks: {
+          color: "#a9c0ec",
+          stepSize: scale.stepSize,
+          precision: 0
+        },
         grid: { color: "rgba(126, 154, 214, 0.22)" }
       }
     }
   };
+}
+
+function updateChartDataIfChanged(chart, labels, data) {
+  const existingLabels = chart.data.labels || [];
+  const existingData = chart.data.datasets?.[0]?.data || [];
+  if (arraysEqual(existingLabels, labels) && arraysEqual(existingData, data)) {
+    return;
+  }
+
+  const scale = getScaleConfig(data);
+  chart.data.labels = labels;
+  chart.data.datasets[0].data = data;
+  chart.options.scales.y.suggestedMax = scale.suggestedMax;
+  chart.options.scales.y.ticks.stepSize = scale.stepSize;
+  chart.update();
 }
 
 function renderStudentsByGradeChart(gradeMap) {
@@ -93,14 +136,12 @@ function renderStudentsByGradeChart(gradeMap) {
           }
         ]
       },
-      options: commonChartOptions()
+      options: commonChartOptions(data)
     });
     return;
   }
 
-  studentsByGradeChart.data.labels = labels;
-  studentsByGradeChart.data.datasets[0].data = data;
-  studentsByGradeChart.update();
+  updateChartDataIfChanged(studentsByGradeChart, labels, data);
 }
 
 function renderTeacherSubjectChart(subjectMap) {
@@ -128,14 +169,12 @@ function renderTeacherSubjectChart(subjectMap) {
           }
         ]
       },
-      options: commonChartOptions()
+      options: commonChartOptions(data)
     });
     return;
   }
 
-  teacherSubjectChart.data.labels = labels;
-  teacherSubjectChart.data.datasets[0].data = data;
-  teacherSubjectChart.update();
+  updateChartDataIfChanged(teacherSubjectChart, labels, data);
 }
 
 function renderClassCapacityChart(capacityMap) {
@@ -163,14 +202,12 @@ function renderClassCapacityChart(capacityMap) {
           }
         ]
       },
-      options: commonChartOptions()
+      options: commonChartOptions(data)
     });
     return;
   }
 
-  classCapacityChart.data.labels = labels;
-  classCapacityChart.data.datasets[0].data = data;
-  classCapacityChart.update();
+  updateChartDataIfChanged(classCapacityChart, labels, data);
 }
 
 function updateNotes(lines = []) {
@@ -257,4 +294,11 @@ async function loadDashboard() {
   }
 }
 
-document.addEventListener("DOMContentLoaded", loadDashboard);
+function loadDashboardOnce() {
+  if (!dashboardLoadPromise) {
+    dashboardLoadPromise = loadDashboard();
+  }
+  return dashboardLoadPromise;
+}
+
+document.addEventListener("DOMContentLoaded", loadDashboardOnce, { once: true });

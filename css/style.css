@@ -472,7 +472,20 @@ body.admin-page {
 }
 
 .chart-card {
-  min-height: 350px;
+  min-height: 0;
+}
+
+.chart-canvas-wrap {
+  position: relative;
+  width: 100%;
+  height: clamp(220px, 32vh, 320px);
+  max-height: 320px;
+}
+
+.chart-canvas-wrap canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
 }
 
 .note-list {
