@@ -1,0 +1,10 @@
+--- START DEBUG FACE BACKEND ---
+1. Checking Server...
+   [OK] Server is running. Summary: {"classes":2,"teachers":7,"students":11}
+
+2. Checking Train Candidates...
+   [OK] Found 7 eligible students.
+   Sample: {"id":"55","student_code":"HS2026-303","full_name":"Lê Minh Khang","class_name":"9A3","class_id":"9A3","avatar_url":"https://res.cloudinary.com/dplbtt2ki/image/upload/school_manager_pro/students/weqtjsvbqsdwjzhtf4fn.jpg"}
+
+3. Testing Detect API (Mock)...
+   [OK] Detect Response: {"hasFace":false}

@@ -1,5 +1,8 @@
 ﻿const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const { pool } = require("../config/db");
+
+const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret_key_123";
 
 function isBcryptHash(value) {
   return typeof value === "string" && value.startsWith("$2");
@@ -37,10 +40,17 @@ async function login({ email, password, role }) {
     );
   }
 
+  const token = jwt.sign(
+    { id: user.id, name: user.name, role: user.role },
+    JWT_SECRET,
+    { expiresIn: "24h" }
+  );
+
   return {
     id: user.id,
     name: user.name,
-    role: user.role
+    role: user.role,
+    token
   };
 }
 

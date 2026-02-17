@@ -47,6 +47,7 @@ function assertSemester(semester) {
 
 function assertAcademicYear(academicYear) {
   if (!/^\d{4}-\d{4}$/.test(academicYear)) {
+    console.log("Invalid Academic Year:", JSON.stringify(academicYear));
     throw new Error("Năm học không hợp lệ. Định dạng: YYYY-YYYY");
   }
 }

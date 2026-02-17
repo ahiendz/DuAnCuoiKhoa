@@ -1,8 +1,11 @@
 const express = require("express");
 const multer = require("multer");
 const teacherController = require("../controllers/teacherController");
+const authenticateToken = require("../middleware/authMiddleware");
 
 const router = express.Router();
+
+router.use(authenticateToken);
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {

@@ -1,3 +1,4 @@
+console.log("!!! SERVER SCRIPT STARTING !!!");
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
@@ -10,13 +11,16 @@ const studentService = require("./backend/services/studentService");
 const attendanceService = require("./backend/services/attendanceService");
 const authService = require("./backend/services/authService");
 const teacherRoutes = require("./backend/routes/teacherRoutes");
+const noteRoutes = require("./backend/routes/noteRoutes");
 const { SUBJECTS } = classService;
+
 
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.static(__dirname));
 app.use("/api/teacher", teacherRoutes);
+app.use("/api/notes", noteRoutes);
 
 const BACKEND_DIR = path.join(__dirname, "backend");
 const FACE_DIR = path.join(BACKEND_DIR, "face");
@@ -173,7 +177,7 @@ function normalizeClassDeleteError(error) {
 function warmupPython() {
   try {
     const child = spawn(PYTHON_BIN, [FACE_ENGINE_PATH], { cwd: __dirname });
-    child.on("error", () => {});
+    child.on("error", () => { });
   } catch (e) {
     console.error("Python warmup failed:", e.message);
   }
@@ -608,7 +612,7 @@ app.post("/api/face/verify", async (req, res) => {
   }
 });
 
-const PORT = 3000;
+const PORT = 5000;
 
 const server = app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
@@ -620,4 +624,4 @@ server.on("error", err => {
   console.error("Server error:", err);
 });
 
-setInterval(() => {}, 1000);
+setInterval(() => { }, 1000);

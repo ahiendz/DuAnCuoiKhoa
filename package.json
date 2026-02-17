@@ -4,7 +4,10 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js",
+    "start": "concurrently \"npm run server\" \"npm run dev\"",
+    "server": "node server.js",
+    "dev": "vite",
+    "build": "vite build",
     "seed": "node scripts/seed.js",
     "migrate-json": "node scripts/migrate-json.js"
   },
@@ -12,14 +15,31 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@tailwindcss/postcss": "^4.1.18",
+    "@vitejs/plugin-react": "^5.1.4",
+    "autoprefixer": "^10.4.24",
+    "axios": "^1.13.5",
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.9.0",
+    "clsx": "^2.1.1",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
+    "form-data": "^4.0.5",
+    "framer-motion": "^12.34.0",
+    "jsonwebtoken": "^9.0.3",
+    "lucide-react": "^0.564.0",
     "multer": "^2.0.2",
     "pg": "^8.18.0",
+    "postcss": "^8.5.6",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-router-dom": "^7.13.0",
+    "recharts": "^3.7.0",
     "serialport": "^13.0.0",
+    "tailwind-merge": "^3.4.1",
+    "tailwindcss": "^4.1.18",
+    "vite": "^7.3.1",
     "xlsx": "^0.18.5"
   },
   "repository": {
@@ -30,5 +50,8 @@
     "url": "https://github.com/ahiendz/DuAnCuoiKhoa/issues"
   },
   "homepage": "https://github.com/ahiendz/DuAnCuoiKhoa#readme",
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
 }
