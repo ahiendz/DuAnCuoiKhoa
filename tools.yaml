@@ -1,0 +1,130 @@
+# Phần 1: Định nghĩa nguồn dữ liệu
+kind: sources
+name: school-db
+type: postgres
+host: 127.0.0.1
+port: 5432
+database: school_manager_pro
+user: postgres
+password: huhu18072011
+
+---
+# Phần 2: Định nghĩa các hành động (Tools)
+
+kind: tools
+name: get_linked_students_by_parent
+type: postgres-sql
+source: school-db
+description: "Lấy danh sách các học sinh liên kết với tài khoản phụ huynh."
+parameters:
+  - name: parent_user_id
+    type: integer
+    description: "User ID của tài khoản phụ huynh (từ bảng users)"
+statement: |
+  SELECT s.id as student_id, s.full_name as student_name, s.student_code, c.name as class_name, sp.relationship
+  FROM students s
+  JOIN student_parents sp ON sp.student_id = s.id
+  JOIN parents p ON p.id = sp.parent_id
+  LEFT JOIN classes c ON c.id = s.class_id
+  WHERE p.user_id = $1
+  ORDER BY s.full_name;
+
+---
+kind: tools
+name: get_student_grades_detail
+type: postgres-sql
+source: school-db
+description: "Lấy chi tiết điểm số của học sinh theo từng môn học."
+parameters:
+  - name: student_id
+    type: integer
+    description: "ID của học sinh cần xem điểm"
+statement: |
+  SELECT g.term, s.name as subject_name, g.score, g.weight, g.type, g.created_at
+  FROM grades g
+  JOIN subjects s ON s.id = g.subject_id
+  WHERE g.student_id = $1
+  ORDER BY g.term, s.name, g.created_at;
+
+---
+kind: tools
+name: get_student_grade_analytics
+type: postgres-sql
+source: school-db
+description: "Tính toán điểm trung bình môn học cho học sinh."
+parameters:
+  - name: student_id
+    type: integer
+    description: "ID của học sinh"
+statement: |
+  SELECT g.term, s.name as subject_name, ROUND(CAST(SUM(g.score * COALESCE(g.weight, 1)) / NULLIF(SUM(COALESCE(g.weight, 1)), 0) AS NUMERIC), 2) as weighted_average
+  FROM grades g
+  JOIN subjects s ON s.id = g.subject_id
+  WHERE g.student_id = $1
+  GROUP BY g.term, s.name
+  ORDER BY g.term, s.name;
+
+---
+kind: tools
+name: get_student_attendance_history
+type: postgres-sql
+source: school-db
+description: "Lấy lịch sử điểm danh của học sinh."
+parameters:
+  - name: student_id
+    type: integer
+    description: "ID của học sinh"
+  - name: limit
+    type: integer
+    description: "Số lượng bản ghi tối đa"
+statement: |
+  SELECT date, status, note, created_at
+  FROM attendance
+  WHERE student_id = $1
+  ORDER BY date DESC
+  LIMIT $2;
+
+---
+kind: tools
+name: get_student_fees_status
+type: postgres-sql
+source: school-db
+description: "Kiểm tra trạng thái đóng học phí (Yêu cầu bảng fees)."
+parameters:
+  - name: student_id
+    type: integer
+    description: "ID của học sinh"
+statement: |
+  SELECT id, title, amount, due_date, status, payment_date
+  FROM fees
+  WHERE student_id = $1
+  ORDER BY due_date DESC;
+
+---
+kind: tools
+name: get_school_announcements
+type: postgres-sql
+source: school-db
+description: "Lấy thông báo nhà trường (Yêu cầu bảng announcements)."
+parameters:
+  - name: limit
+    type: integer
+    description: "Số lượng thông báo"
+statement: |
+  SELECT id, title, content, created_at, author_id
+  FROM announcements
+  WHERE target_role IN ('parent', 'all')
+  ORDER BY created_at DESC
+  LIMIT $1;
+
+---
+# Phần 3: Nhóm các tool (Toolsets)
+kind: toolsets
+name: parent_module_set
+tools:
+  - get_linked_students_by_parent
+  - get_student_grades_detail
+  - get_student_grade_analytics
+  - get_student_attendance_history
+  - get_student_fees_status
+  - get_school_announcements
