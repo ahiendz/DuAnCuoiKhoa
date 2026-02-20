@@ -1,351 +1,320 @@
+School Manager Pro – Parent Module Refactor & Enhancement (Production)
+1. Project Context
+
 You are working on a production-ready system called School Manager Pro.
 
-This is NOT a demo project.
+Tech stack:
 
-The system stack:
+Frontend: React (Vite)
 
-Frontend: React (Vite), Bootstrap 5, Framer Motion
 Backend: Node.js + Express
+
 Database: PostgreSQL
+
 Auth: JWT
 
-Database schema already exists (DO NOT add new tables).
+Password hashing: bcrypt
 
-Existing tables:
+A full database backup has already been created.
+
+You are allowed to:
+
+Add columns if necessary
+
+Add constraints
+
+Add indexes
+
+Add migration SQL
+
+You are NOT allowed to:
+
+Drop existing tables
+
+Remove existing columns
+
+Break existing foreign key relationships
+
+Modify unrelated modules
+
+All changes must be backward compatible.
+
+2. Current Relevant Database Structure
+users
+id (PK)
+email (UNIQUE)
+password_hash
+role ('admin','teacher','parent')
+created_at
+
+
+Login is email-based.
+
+parents
+id (PK)
+user_id (FK -> users.id)
+phone
+
+
+Stores parent contact info.
+
+student_parents
+parent_id (FK)
+student_id (FK)
+
+
+Many-to-many relationship.
+
+students
+id
+full_name
+student_code (UNIQUE)
+dob
+gender
+class_id
+
+grades
+attendance
+teacher_notes
+classes
+subjects
+
+These must NOT be modified unless absolutely required for Parent logic.
+
+3. Goal
+
+Refactor and enhance the Parent module to meet production standards.
+
+You may add:
+
+must_change_password column to users
+
+relationship column to student_parents
+
+full_name column to parents (if missing)
+
+necessary indexes
+
+Do not redesign authentication architecture.
+
+4. Parent Account Creation Logic
+
+When creating a student (manual or Excel import):
+
+Input must include:
+
+parent_name
+
+parent_email
+
+parent_phone
+
+relationship
+
+Backend Flow (Transaction per student)
+BEGIN
+
+1. Insert student
+
+2. Check if parent_email exists in users WHERE role='parent'
+
+IF exists:
+    → get user_id
+    → get parent_id
+
+ELSE:
+    → default_password = student_code
+    → hash password
+    → INSERT users (email, password_hash, role='parent', must_change_password=TRUE)
+    → INSERT parents (user_id, phone, full_name)
+
+3. Insert student_parents (student_id, parent_id, relationship)
+
+COMMIT
+
+
+Rollback on failure.
+
+5. Required Enhancements (If Not Present)
+
+You are allowed to generate migration SQL for:
 
 users
 
-students
+Add:
 
-classes
+must_change_password BOOLEAN DEFAULT TRUE
+is_active BOOLEAN DEFAULT TRUE
+updated_at TIMESTAMP
 
-grades
+parents
 
-attendance
+Ensure:
 
-subjects
+full_name VARCHAR(200)
+phone VARCHAR(20)
 
-🎨 UI REQUIREMENTS
-
-⚠️ IMPORTANT:
-
-Keep the EXACT dark theme style from the existing app.
-
-Keep table structure similar to the old Parent Window UI.
-
-Use tab-based layout (Bootstrap Tabs).
-
-Do NOT redesign theme.
-
-Do NOT change color system.
-
-Keep card borders, table look, spacing consistent.
-
-🧭 PARENT SIDEBAR NAVIGATION
-
-Create sidebar navigation:
-
-Dashboard
-
-Bảng điểm
-
-Điểm danh
-
-Nhận xét
-
-So sánh lớp
-
-Cảnh báo học tập
-
-Báo cáo PDF
-
-Đổi mật khẩu
-
-🏠 1️⃣ DASHBOARD TAB
-Layout
-
-Top card:
-
-Avatar
-
-Họ tên
-
-Lớp
-
-Trung bình hiện tại
-
-Xếp loại
-
-Tab sections inside Dashboard
-
-Use nested tabs:
-
-Tổng quan
-
-Biểu đồ điểm
-
-Điểm danh
-
-Cảnh báo
-
-🔹 Biểu đồ điểm
-Line Chart:
-
-Trend điểm trung bình theo:
-
-HK1
-
-HK2
-
-Cả năm
-
-Calculation:
-
-Weighted average:
-SUM(score * weight) / SUM(weight)
-
-Bar Chart:
-
-Trung bình từng môn
-
-🔹 Biểu đồ điểm danh
-
-Pie Chart:
-
-Present
-
-Absent
-
-Late
-
-🚨 2️⃣ SMART ALERT SYSTEM TAB
-
-⚠️ DO NOT create new DB table.
-
-Generate alerts dynamically from:
-
-grades
-attendance
-
-Alert Conditions:
-
-1️⃣ Nếu trung bình HK2 < HK1
-→ Alert: “Học lực đang giảm so với học kỳ trước”
-
-2️⃣ Nếu điểm môn bất kỳ < 5
-→ Alert: “Môn X đang dưới trung bình”
-
-3️⃣ Nếu nghỉ > 10% số buổi
-→ Alert: “Tỷ lệ chuyên cần thấp”
-
-Return format:
-
-[
-{
-type: "academic_decline",
-severity: "warning",
-message: "Học lực đang giảm 1.2 điểm so với HK1"
-}
-]
-
-📊 3️⃣ BẢNG ĐIỂM TAB
-
-Tabs:
-
-Học kỳ 1
-
-Học kỳ 2
-
-Cả năm
-
-Table structure must remain identical to old UI:
-
-| Môn | Miệng | 15p | 1 tiết | GK | CK | Trung bình |
-
-Enhancements:
-
-Hover show calculation tooltip
-
-Color coding:
-
-= 8: green
-
-6–7.9: yellow
-
-< 6: red
-
-📅 4️⃣ ĐIỂM DANH TAB
-
-Tabs:
-
-Theo tháng
-
-Theo học kỳ
-
-Table:
-
-| Ngày | Trạng thái | Ghi chú |
+student_parents
 
 Add:
 
-Mini monthly summary
+relationship VARCHAR(20)
+created_at TIMESTAMP DEFAULT NOW()
+UNIQUE(student_id, parent_id)
 
-% attendance rate
+6. Parent Login Logic
 
-📝 5️⃣ NHẬN XÉT TAB
+POST /api/auth/login
 
-Since no remarks table exists:
+Authenticate by email
 
-Use workaround:
+Verify password_hash
 
-Use grades.recorded_by
-If needed, create API to return mock teacher remarks based on subject.
+Check role = 'parent'
 
-Grouped by subject:
+If:
 
-Card style:
-Subject name
-Latest comment
-Date
+must_change_password = TRUE
 
-📊 6️⃣ SO SÁNH LỚP (ẨN DANH)
-
-⚠️ No new table.
-
-Use aggregate query:
-
-SELECT subject_id,
-AVG(score * weight) / SUM(weight) AS class_avg
-FROM grades
-JOIN students ON students.id = grades.student_id
-WHERE students.class_id = ?
-GROUP BY subject_id
 
 Return:
 
 {
-subject: "Toán",
-student_avg: 7.2,
-class_avg: 6.5
+  force_change_password: true
 }
 
-Display as:
 
-| Môn | Con bạn | Trung bình lớp |
+Frontend must redirect to password change page.
 
-No other student names exposed.
-
-📄 7️⃣ BÁO CÁO PDF
+7. Force Change Password
 
 Endpoint:
 
-GET /api/reports/student/:id?term=HK1
+POST /api/auth/change-password-first-time
 
-Include:
+Rules:
 
-Student info
+New password >= 8 characters
 
-Grade table
+Must contain letters and numbers
 
-Attendance %
+Cannot match default password (student_code)
 
-Alerts summary
+After success:
 
-🔐 8️⃣ ĐỔI MẬT KHẨU
+UPDATE users
+SET password_hash = new_hash,
+    must_change_password = FALSE
 
-Form fields:
+8. Parent Dashboard Requirements
 
-Current password
+Parent can only access their own children.
 
-New password
+Ownership query:
 
-Confirm new password
+SELECT s.*
+FROM students s
+JOIN student_parents sp ON sp.student_id = s.id
+JOIN parents p ON p.id = sp.parent_id
+WHERE p.user_id = current_user_id
 
-Validation:
+Dashboard Sections
+1. Summary
 
-= 8 characters
+Current term average
 
-Must include number
+Attendance rate
 
-Must include uppercase
+Risk level
 
-Confirm must match
+2. Grade Analytics
 
-Backend:
+Weighted average:
 
-POST /api/auth/change-password
+SUM(score * weight) / SUM(weight)
 
-Steps:
 
-Verify current password
+Grouped by:
 
-Hash new password
+Term
 
-Save
+Subject
 
-Invalidate refresh token
+3. Attendance Analytics
 
-🧠 BACKEND ROUTES REQUIRED
+Attendance rate:
 
-Create:
+present / total_days
 
-GET /api/parent/dashboard
-GET /api/parent/grades
-GET /api/parent/attendance
-GET /api/parent/alerts
-GET /api/parent/class-comparison
 
-POST /api/auth/change-password
+Alert if < 90%
 
-All routes must verify:
+4. Smart Alert System (Dynamic, no new table)
 
-req.user.role === "parent"
+Trigger:
 
-🏗 FRONTEND STRUCTURE
+Term average drops ≥ 1.0
 
-Create folder:
+Any subject average < 5
 
-src/modules/parent/
+Attendance rate < 90%
 
-Components:
+Return JSON alerts only.
 
-ParentDashboard.jsx
-ParentGrades.jsx
-ParentAttendance.jsx
-ParentAlerts.jsx
-ParentComparison.jsx
-ParentChangePassword.jsx
+Do NOT store alerts in DB.
 
-Use:
+5. Class Comparison (Anonymous)
 
-Recharts for charts
+Compare:
 
-Bootstrap tabs
+Student average vs class average
 
-Framer Motion for fade animation
+Without exposing other student identities.
 
-🚫 DO NOT
+9. Excel Import Rules
 
-Do NOT create new DB tables
+Template must include:
 
-Do NOT modify schema
+parent_email
 
-Do NOT redesign UI theme
+parent_phone
 
-Do NOT break existing style
+relationship
 
-🎯 GOAL
+Transaction per row.
 
-Parent module must feel:
+Return import summary.
 
-Professional
+10. Security Rules
 
-Insight-driven
+Never expose password_hash
 
-Data analytical
+Never log plain passwords
 
-Clean and structured
+Always filter data by parent ownership
 
-Not overloaded
+Use transactions
 
-Production ready
+Validate foreign keys
+
+11. Output Requirements
+
+You must provide:
+
+Migration SQL (if needed)
+
+Updated ERD description
+
+Backend service logic
+
+API contract definitions
+
+Edge case handling
+
+Security validation logic
+
+All code must be production-ready.
+
+No demo shortcuts.
+
+End of Specification

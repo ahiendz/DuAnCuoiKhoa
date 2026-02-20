@@ -1,38 +1,64 @@
 @import "tailwindcss";
 
-@layer theme {
+@layer base {
   :root {
-    --color-slate-50: #f8fafc;
-    --color-slate-100: #f1f5f9;
-    --color-slate-200: #e2e8f0;
-    --color-slate-300: #cbd5e1;
-    --color-slate-400: #94a3b8;
-    --color-slate-500: #64748b;
-    --color-slate-600: #475569;
-    --color-slate-700: #334155;
-    --color-slate-800: #1e293b;
-    --color-slate-900: #0f172a;
-    --color-slate-950: #020617;
+    /* Light mode variables */
+    --bg-page: #F3F4F6;
+    --bg-card: #FFFFFF;
+    --bg-sidebar: #FFFFFF;
+    --text-primary: #111827;
+    --text-placeholder: #9CA3AF;
+    --border-color: #E5E7EB;
 
-    --color-indigo-400: #818cf8;
-    --color-indigo-500: #6366f1;
+    --chart-grid: #F1F5F9;
+    --chart-text: #64748B;
+    --chart-tooltip-bg: rgba(255, 255, 255, 0.95);
+    --chart-tooltip-text: #1E293B;
+  }
 
-    --color-sky-400: #38bdf8;
+  .dark {
+    /* Dark mode variables */
+    --bg-page: #0B1120;
+    --bg-card: #111827;
+    --bg-sidebar: #111827;
+    --text-primary: #F3F4F6;
+    --text-placeholder: #6B7280;
+    --border-color: #374151;
 
-    --color-cyan-400: #22d3ee;
+    --chart-grid: #334155;
+    --chart-text: #94A3B8;
+    --chart-tooltip-bg: #1E293B;
+    --chart-tooltip-text: #F8FAFC;
+  }
 
-    --color-red-500: #ef4444;
-    --color-pink-500: #ec4899;
+  body {
+    @apply transition-colors duration-300;
+    background-color: var(--bg-page);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
   }
 }
 
-@layer base {
-  body {
-    @apply bg-slate-50 text-slate-900 antialiased transition-colors duration-300;
+@layer components {
+
+  /* Theme-aware card utility */
+  .card-panel {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 1rem;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.04);
   }
 
-  .dark body {
-    @apply bg-slate-950 text-slate-100;
+  /* Standardizing input fields */
+  .input-field {
+    @apply w-full px-4 py-2.5 rounded-xl border focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all text-sm;
+    background-color: var(--bg-card);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+  }
+
+  .input-field::placeholder {
+    color: var(--text-placeholder);
   }
 
   /* Gradient Scrollbar */
@@ -42,42 +68,27 @@
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-transparent;
+    background: transparent;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-slate-300 dark:bg-slate-700 rounded-full hover:bg-slate-400 dark:hover:bg-slate-600;
+    background: #cbd5e1;
+    border-radius: 9999px;
   }
 
-  /* Placeholder text visibility */
-  ::placeholder {
-    @apply text-slate-400 dark:text-slate-500 opacity-100;
+  .dark ::-webkit-scrollbar-thumb {
+    background: #334155;
   }
 
-  input[type="date"]::-webkit-calendar-picker-indicator {
-    @apply cursor-pointer opacity-60 hover:opacity-100;
-    filter: invert(1);
+  ::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
   }
 }
 
-@layer components {
-  .btn-primary {
-    @apply bg-gradient-to-r from-indigo-500 to-sky-400 text-white font-medium px-4 py-2 rounded-lg hover:brightness-110 active:scale-95 transition-all shadow-md hover:shadow-lg dark:from-indigo-400 dark:to-cyan-400;
-  }
-
-  .btn-ghost {
-    @apply px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors;
-  }
-
-  .btn-danger {
-    @apply bg-gradient-to-r from-red-500 to-pink-500 text-white font-medium px-4 py-2 rounded-lg hover:brightness-110 active:scale-95 transition-all shadow-md;
-  }
-
-  .card {
-    @apply bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-6;
-  }
-
-  .input-field {
-    @apply w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all;
-  }
-}
+/* DEBUG: To check theme variables in browser, run in console:
+   getComputedStyle(document.body).getPropertyValue('--bg-primary')
+*/

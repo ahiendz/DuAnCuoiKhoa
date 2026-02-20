@@ -6,16 +6,16 @@ import {
 
 export const StudentDistributionChart = ({ data }) => {
     return (
-        <div className="card h-80">
-            <h3 className="text-lg font-semibold mb-4 text-slate-800 dark:text-white">Phân bố học sinh theo Khối</h3>
+        <div className="card-panel h-80 p-4">
+            <h3 className="text-lg font-semibold mb-4 text-[var(--text-primary)]">Phân bố học sinh theo Khối</h3>
             <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={data}>
-                    <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-                    <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} />
-                    <YAxis fontSize={12} tickLine={false} axisLine={false} />
+                    <CartesianGrid stroke="var(--border-color)" strokeDasharray="3 3" opacity={0.5} />
+                    <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} stroke="var(--text-placeholder)" />
+                    <YAxis fontSize={12} tickLine={false} axisLine={false} stroke="var(--text-placeholder)" />
                     <Tooltip
-                        contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.9)', borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
-                        itemStyle={{ color: '#374151' }}
+                        contentStyle={{ backgroundColor: 'var(--bg-card)', borderRadius: '8px', borderColor: 'var(--border-color)', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
+                        itemStyle={{ color: 'var(--text-primary)' }}
                     />
                     <Bar dataKey="students" fill="#6366f1" radius={[4, 4, 0, 0]} />
                 </BarChart>

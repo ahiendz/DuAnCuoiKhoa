@@ -15,7 +15,7 @@ export default function Students() {
     const [importModal, setImportModal] = useState(false);
     const [deleteDialog, setDeleteDialog] = useState({ open: false, id: null });
     const [editing, setEditing] = useState(null);
-    const [form, setForm] = useState({ full_name: '', dob: '', gender: '', class_id: '', avatar_url: '' });
+    const [form, setForm] = useState({ full_name: '', dob: '', gender: '', class_id: '', avatar_url: '', parent_email: '', parent_name: '', parent_phone: '', relationship: '' });
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
     const [importMode, setImportMode] = useState('merge');
@@ -36,14 +36,14 @@ export default function Students() {
 
     const openAdd = () => {
         setEditing(null);
-        setForm({ full_name: '', dob: '', gender: '', class_id: classFilter || '', avatar_url: '' });
+        setForm({ full_name: '', dob: '', gender: '', class_id: classFilter || '', avatar_url: '', parent_email: '', parent_name: '', parent_phone: '', relationship: '' });
         setError('');
         setModalOpen(true);
     };
 
     const openEdit = (s) => {
         setEditing(s);
-        setForm({ full_name: s.full_name || '', dob: s.dob || '', gender: s.gender || '', class_id: s.class_id || '', avatar_url: s.avatar_url || '' });
+        setForm({ full_name: s.full_name || '', dob: s.dob || '', gender: s.gender || '', class_id: s.class_id || '', avatar_url: s.avatar_url || '', parent_email: '', parent_name: '', parent_phone: '', relationship: '' });
         setError('');
         setModalOpen(true);
     };
@@ -199,8 +199,8 @@ export default function Students() {
                             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Giới tính</label>
                             <select className="input-field" value={form.gender} onChange={e => setForm({ ...form, gender: e.target.value })}>
                                 <option value="">Chọn</option>
-                                <option value="Nam">Nam</option>
-                                <option value="Nữ">Nữ</option>
+                                <option value="male">Nam</option>
+                                <option value="female">Nữ</option>
                             </select>
                         </div>
                     </div>
@@ -215,6 +215,45 @@ export default function Students() {
                         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Avatar URL</label>
                         <input className="input-field" value={form.avatar_url} onChange={e => setForm({ ...form, avatar_url: e.target.value })} placeholder="https://..." />
                     </div>
+
+                    {/* Parent Information Section */}
+                    {!editing && (
+                        <>
+                            <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
+                                <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Thông tin Phụ huynh (Tùy chọn)</h4>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email PH</label>
+                                    <input type="email" className="input-field" value={form.parent_email} onChange={e => setForm({ ...form, parent_email: e.target.value })} placeholder="parent@email.com" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Họ tên PH</label>
+                                    <input className="input-field" value={form.parent_name} onChange={e => setForm({ ...form, parent_name: e.target.value })} placeholder="Nguyễn Văn A" />
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">SĐT PH</label>
+                                    <input type="tel" className="input-field" value={form.parent_phone} onChange={e => setForm({ ...form, parent_phone: e.target.value })} placeholder="0909123456" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Quan hệ</label>
+                                    <select className="input-field" value={form.relationship} onChange={e => setForm({ ...form, relationship: e.target.value })}>
+                                        <option value="">Chọn</option>
+                                        <option value="father">Cha</option>
+                                        <option value="mother">Mẹ</option>
+                                        <option value="guardian">Người giám hộ</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+                                <p className="text-xs text-blue-700 dark:text-blue-300">
+                                    <strong>Lưu ý:</strong> Nếu nhập email PH, hệ thống sẽ tự tạo tài khoản parent. Mật khẩu mặc định = Mã học sinh.
+                                </p>
+                            </div>
+                        </>
+                    )}
                     <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
                         <button onClick={() => setModalOpen(false)} className="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm">Hủy</button>
                         <button onClick={handleSave} disabled={saving} className="btn-primary text-sm">{saving ? 'Đang lưu...' : 'Lưu'}</button>

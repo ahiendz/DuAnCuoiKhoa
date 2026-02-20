@@ -161,8 +161,8 @@ export default function Teachers() {
                             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Giới tính</label>
                             <select className="input-field" value={form.gender} onChange={e => setForm({ ...form, gender: e.target.value })}>
                                 <option value="">Chọn</option>
-                                <option value="Nam">Nam</option>
-                                <option value="Nữ">Nữ</option>
+                                <option value="male">Nam</option>
+                                <option value="female">Nữ</option>
                             </select>
                         </div>
                         <div>

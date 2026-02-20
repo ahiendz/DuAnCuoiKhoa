@@ -10,6 +10,7 @@ const teacherService = require("./backend/services/teacherService");
 const studentService = require("./backend/services/studentService");
 const attendanceService = require("./backend/services/attendanceService");
 const authService = require("./backend/services/authService");
+const parentRoutes = require("./backend/routes/parentRoutes");
 const teacherRoutes = require("./backend/routes/teacherRoutes");
 const noteRoutes = require("./backend/routes/noteRoutes");
 const { SUBJECTS } = classService;
@@ -19,6 +20,7 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.static(__dirname));
+app.use("/api/parent", parentRoutes);
 app.use("/api/teacher", teacherRoutes);
 app.use("/api/notes", noteRoutes);
 
@@ -450,6 +452,16 @@ app.post("/api/auth/login", async (req, res) => {
   } catch (error) {
     const status = error.message === "Thiếu thông tin đăng nhập" ? 400 : 401;
     return res.status(status).json({ error: error.message });
+  }
+});
+
+app.post("/api/auth/change-password-first-time", async (req, res) => {
+  const { user_id, new_password, default_password } = req.body || {};
+  try {
+    await authService.changePasswordFirstTime({ user_id, new_password, default_password });
+    return res.json({ ok: true, message: "Đổi mật khẩu thành công" });
+  } catch (error) {
+    return res.status(400).json({ ok: false, error: error.message });
   }
 });
 
