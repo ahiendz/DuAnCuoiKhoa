@@ -18,6 +18,13 @@ export default function Login() {
         setLoading(true);
         try {
             const userData = await login(email, password, role);
+
+            // Check if forced password change is required
+            if (userData.force_change_password) {
+                navigate('/parent/change-password');
+                return;
+            }
+
             const dest = { admin: '/admin', teacher: '/teacher', parent: '/parent' };
             navigate(dest[userData.role] || '/');
         } catch (err) {

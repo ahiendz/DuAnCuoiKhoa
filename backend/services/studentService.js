@@ -148,7 +148,7 @@ async function listStudents(filter = {}) {
 }
 
 async function createStudent(payload) {
-  const { full_name, dob, gender, class_id, avatar_url } = payload;
+  const { full_name, dob, gender, class_id, avatar_url, parent_email, parent_name, parent_phone, relationship } = payload;
   if (!full_name || !dob || !gender || !class_id) {
     throw new Error("Thiếu họ tên, ngày sinh, giới tính hoặc lớp học");
   }
@@ -176,10 +176,32 @@ async function createStudent(payload) {
       ]
     );
 
+    const student_id = insertRes.rows[0].id;
+
+    // Create parent account if parent details provided
+    if (parent_email && parent_name) {
+      const parentService = require("./parentService");
+      const { parent_id } = await parentService.createOrGetParent({
+        email: parent_email,
+        full_name: parent_name,
+        phone: parent_phone || null,
+        default_password: student_code, // Use student_code as default password
+        client // Pass transaction client
+      });
+
+      // Link parent to student
+      await parentService.linkParentToStudent({
+        parent_id,
+        student_id,
+        relationship: relationship || null,
+        client // Pass transaction client
+      });
+    }
+
     await client.query("COMMIT");
 
     return {
-      id: insertRes.rows[0].id,
+      id: student_id,
       full_name,
       student_code,
       dob,
@@ -306,9 +328,9 @@ async function importStudents(rows, mode, selectedClass) {
     const codes = rows.map(r => r.student_code).filter(Boolean);
     const existingRows = codes.length
       ? await client.query(
-          "SELECT id, student_code, class_id FROM students WHERE student_code = ANY($1::text[])",
-          [codes]
-        )
+        "SELECT id, student_code, class_id FROM students WHERE student_code = ANY($1::text[])",
+        [codes]
+      )
       : { rows: [] };
 
     const existingByCode = new Map(existingRows.rows.map(r => [r.student_code, r]));
@@ -340,40 +362,57 @@ async function importStudents(rows, mode, selectedClass) {
       deleted = deleteRes.rowCount || 0;
     }
 
-    if (validRows.length) {
-      const values = [];
-      const params = [];
-      let idx = 1;
-      validRows.forEach(row => {
-        values.push(`($${idx}, $${idx + 1}, $${idx + 2}, $${idx + 3}, $${idx + 4}, $${idx + 5})`);
-        params.push(
-          row.full_name,
-          row.student_code,
-          row.dob,
-          row.gender,
-          classId,
-          row.avatar_url && isValidUrl(row.avatar_url) ? row.avatar_url : null
-        );
-        idx += 6;
-      });
-
+    // Process each valid row individually to support per-row parent linking
+    for (const row of validRows) {
       const upsertSql = `
         INSERT INTO students (full_name, student_code, dob, gender, class_id, image_url)
-        VALUES ${values.join(", ")}
+        VALUES ($1, $2, $3, $4, $5, $6)
         ON CONFLICT (student_code) DO UPDATE SET
           full_name = EXCLUDED.full_name,
           dob = EXCLUDED.dob,
           gender = EXCLUDED.gender,
           class_id = EXCLUDED.class_id,
           image_url = EXCLUDED.image_url
+        RETURNING id
       `;
-      const res = await client.query(upsertSql, params);
-      if (mode === "replace") {
-        inserted = validRows.length;
+      const upsertRes = await client.query(upsertSql, [
+        row.full_name,
+        row.student_code,
+        row.dob,
+        row.gender,
+        classId,
+        row.avatar_url && isValidUrl(row.avatar_url) ? row.avatar_url : null
+      ]);
+
+      const student_id = upsertRes.rows[0].id;
+
+      if (existingByCode.has(row.student_code)) {
+        updated += 1;
       } else {
-        validRows.forEach(row => {
-          if (existingByCode.has(row.student_code)) updated += 1; else inserted += 1;
-        });
+        inserted += 1;
+      }
+
+      // Per-row parent creation (optional columns: parent_email, parent_name, parent_phone, relationship)
+      if (row.parent_email && row.parent_name) {
+        try {
+          const parentService = require("./parentService");
+          const { parent_id } = await parentService.createOrGetParent({
+            email: row.parent_email,
+            full_name: row.parent_name,
+            phone: row.parent_phone || null,
+            default_password: row.student_code,
+            client // reuse same transaction client
+          });
+          await parentService.linkParentToStudent({
+            parent_id,
+            student_id,
+            relationship: row.relationship || null,
+            client
+          });
+        } catch (parentErr) {
+          // Non-fatal: log and continue so the student import is not blocked
+          console.warn(`[import] parent link failed for ${row.student_code}:`, parentErr.message);
+        }
       }
     }
 
