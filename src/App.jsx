@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { NotificationProvider } from '@/context/NotificationContext';
+import { ThemeProvider } from '@/context/ThemeContext';
 
 // Layouts
 import PublicLayout from '@/layouts/PublicLayout';
@@ -31,6 +32,7 @@ import Notes from '@/pages/teacher/Notes';
 import ParentDashboard from '@/pages/parent/Dashboard';
 import ParentGrades from '@/pages/parent/Grades';
 import ParentAttendance from '@/pages/parent/Attendance';
+import ParentChangePassword from '@/modules/parent/ParentChangePassword';
 
 import {
     LayoutDashboard, Users, GraduationCap, BookOpen,
@@ -61,6 +63,10 @@ function ProtectedRoute({ children, allowedRoles }) {
     const { user } = useAuth();
     if (!user) return <Navigate to="/login" replace />;
     if (allowedRoles && !allowedRoles.includes(user.role)) return <Navigate to="/" replace />;
+    // Block parent dashboard until they change their default password
+    if (user.role === 'parent' && user.force_change_password) {
+        return <Navigate to="/parent/change-password" replace />;
+    }
     return children;
 }
 
@@ -106,6 +112,10 @@ function AppRoutes() {
             </Route>
 
             {/* Parent */}
+            {/* Parent - Password Change (no layout, before login redirect) */}
+            <Route path="/parent/change-password" element={<ParentChangePassword />} />
+
+            {/* Parent */}
             <Route path="/parent" element={
                 <ProtectedRoute allowedRoles={['parent']}>
                     <MainLayout navItems={parentNav} roleTitle="Phụ huynh" />
@@ -124,12 +134,15 @@ function AppRoutes() {
 
 export default function App() {
     return (
-        <BrowserRouter>
-            <AuthProvider>
-                <NotificationProvider>
-                    <AppRoutes />
-                </NotificationProvider>
-            </AuthProvider>
-        </BrowserRouter>
+        <ThemeProvider>
+            <BrowserRouter>
+                <AuthProvider>
+                    <NotificationProvider>
+                        <AppRoutes />
+                    </NotificationProvider>
+                </AuthProvider>
+            </BrowserRouter>
+        </ThemeProvider>
     );
 }
+

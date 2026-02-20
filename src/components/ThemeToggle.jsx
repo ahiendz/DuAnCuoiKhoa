@@ -1,35 +1,32 @@
-import React, { useEffect, useState } from 'react';
-import { Moon, Sun } from 'lucide-react';
+import React from 'react';
+import { Moon, Sun, Monitor } from 'lucide-react';
+import { useTheme } from '@/context/ThemeContext';
 
 export default function ThemeToggle() {
-    const [isDark, setIsDark] = useState(false);
+    const { theme, toggleTheme } = useTheme();
 
-    useEffect(() => {
-        // Check initial state
-        if (document.documentElement.classList.contains('dark')) {
-            setIsDark(true);
-        }
-    }, []);
+    const icons = {
+        light: <Sun size={20} className="text-slate-500 dark:text-slate-400" />,
+        dark: <Moon size={20} className="text-slate-500 dark:text-slate-400" />,
+        system: <Monitor size={20} className="text-slate-500 dark:text-slate-400" />
+    };
 
-    const toggleTheme = () => {
-        if (isDark) {
-            document.documentElement.classList.remove('dark');
-            localStorage.theme = 'light';
-            setIsDark(false);
-        } else {
-            document.documentElement.classList.add('dark');
-            localStorage.theme = 'dark';
-            setIsDark(true);
-        }
+    const labels = {
+        light: 'Sáng',
+        dark: 'Tối',
+        system: 'Hệ thống'
     };
 
     return (
         <button
             onClick={toggleTheme}
-            className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-            aria-label="Toggle Dark Mode"
+            className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-300 flex items-center justify-center border border-transparent dark:border-slate-700/50"
+            aria-label={`Chuyển sang chế độ tiếp theo. Hiện tại: ${labels[theme]}`}
+            title={`Chế độ: ${labels[theme]}`}
         >
-            {isDark ? <Sun size={20} /> : <Moon size={20} />}
+            <span className="block transition-transform duration-300">
+                {icons[theme]}
+            </span>
         </button>
     );
 }

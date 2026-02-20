@@ -10,7 +10,7 @@ export default function MainLayout({ navItems, roleTitle }) {
     const { user } = useAuth();
 
     return (
-        <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors">
+        <div className="flex min-h-screen">
             {/* Mobile overlay */}
             {sidebarOpen && (
                 <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />

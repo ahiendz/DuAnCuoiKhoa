@@ -149,14 +149,14 @@ export default function PublicHome() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white pb-20">
+        <div className="min-h-screen pb-20 bg-[var(--bg-page)] text-[var(--text-primary)] transition-colors duration-300">
             {/* Hero */}
             <section className="relative pt-32 pb-20 px-6 text-center overflow-hidden">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-indigo-500/20 rounded-full blur-3xl -z-10 animate-pulse" />
                 <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-indigo-500 via-purple-500 to-sky-400 bg-clip-text text-transparent leading-tight">
                     Điểm danh thông minh
                 </h1>
-                <p className="text-xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto mb-10">
+                <p className="text-xl text-[var(--text-placeholder)] max-w-2xl mx-auto mb-10">
                     Hệ thống quản lý giáo dục toàn diện tích hợp công nghệ nhận diện khuôn mặt AI.
                 </p>
             </section>
@@ -164,13 +164,13 @@ export default function PublicHome() {
             {/* Mode toggle */}
             <section className="container mx-auto px-4 mb-6">
                 <div className="flex justify-center">
-                    <div className="flex bg-slate-200 dark:bg-slate-800 rounded-xl p-1 gap-1">
+                    <div className="flex rounded-xl p-1 gap-1" style={{ backgroundColor: 'var(--border-color)' }}>
                         <button onClick={() => { setMode('face'); stopCamera(); }}
-                            className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${mode === 'face' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+                            className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${mode === 'face' ? 'text-indigo-600 shadow-sm' : 'text-[var(--text-placeholder)] hover:text-[var(--text-primary)]'}`} style={mode === 'face' ? { backgroundColor: 'var(--bg-card)' } : {}}>
                             <Camera size={18} /> Nhận diện khuôn mặt
                         </button>
                         <button onClick={() => { setMode('manual'); stopCamera(); }}
-                            className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${mode === 'manual' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+                            className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${mode === 'manual' ? 'text-indigo-600 shadow-sm' : 'text-[var(--text-placeholder)] hover:text-[var(--text-primary)]'}`} style={mode === 'manual' ? { backgroundColor: 'var(--bg-card)' } : {}}>
                             <ClipboardList size={18} /> Điểm danh thủ công
                         </button>
                     </div>
@@ -180,14 +180,14 @@ export default function PublicHome() {
             {/* FACE RECOGNITION MODE */}
             {mode === 'face' && (
                 <section className="container mx-auto px-4 mb-20">
-                    <div className="max-w-4xl mx-auto bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-800">
+                    <div className="max-w-4xl mx-auto rounded-3xl overflow-hidden card-panel">
                         <div className="p-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-sky-400" />
                         <div className="p-8 md:p-12">
                             <div className="flex items-center justify-between mb-6">
                                 <h2 className="text-2xl font-bold flex items-center gap-2">
                                     <Camera className="text-indigo-500" /> Điểm danh khuôn mặt
                                 </h2>
-                                <div className={`px-3 py-1 text-xs font-bold rounded-full uppercase tracking-wider ${cameraOn ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'}`}>
+                                <div className={`px-3 py-1 text-xs font-bold rounded-full uppercase tracking-wider ${cameraOn ? 'bg-green-100 text-green-600' : 'text-[var(--text-placeholder)]'}`} style={!cameraOn ? { backgroundColor: 'var(--border-color)' } : {}}>
                                     {cameraOn ? 'Camera Active' : 'Camera Off'}
                                 </div>
                             </div>
@@ -199,13 +199,13 @@ export default function PublicHome() {
                             )}
 
                             {/* Camera area */}
-                            <div className="aspect-video bg-slate-100 dark:bg-slate-950 rounded-2xl overflow-hidden border-2 border-dashed border-slate-300 dark:border-slate-700 relative">
+                            <div className="aspect-video rounded-2xl overflow-hidden border-2 border-dashed relative" style={{ backgroundColor: 'var(--bg-page)', borderColor: 'var(--border-color)' }}>
                                 <video ref={videoRef} className="w-full h-full object-cover" autoPlay muted playsInline style={{ display: cameraOn ? 'block' : 'none' }} />
                                 <canvas ref={canvasRef} className="hidden" />
                                 {!cameraOn && (
                                     <div className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer" onClick={startCamera}>
-                                        <UserCheck size={64} className="text-slate-300 dark:text-slate-700 mb-4" />
-                                        <p className="text-slate-400 font-medium">Nhấn để bật camera</p>
+                                        <UserCheck size={64} className="mb-4" style={{ color: 'var(--border-color)' }} />
+                                        <p className="font-medium text-[var(--text-placeholder)]">Nhấn để bật camera</p>
                                     </div>
                                 )}
                                 {detecting && (
@@ -259,20 +259,20 @@ export default function PublicHome() {
 
                             {/* Feature cards */}
                             <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+                                <div className="p-4 rounded-xl border" style={{ backgroundColor: 'var(--bg-page)', borderColor: 'var(--border-color)' }}>
                                     <Zap className="text-yellow-500 mb-2" />
                                     <h3 className="font-bold text-sm">Tốc độ cao</h3>
-                                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Nhận diện dưới 200ms</p>
+                                    <p className="text-xs text-[var(--text-placeholder)] mt-1">Nhận diện dưới 200ms</p>
                                 </div>
-                                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+                                <div className="p-4 rounded-xl border" style={{ backgroundColor: 'var(--bg-page)', borderColor: 'var(--border-color)' }}>
                                     <ShieldCheck className="text-green-500 mb-2" />
                                     <h3 className="font-bold text-sm">Chính xác 99%</h3>
-                                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Công nghệ AI mới nhất</p>
+                                    <p className="text-xs text-[var(--text-placeholder)] mt-1">Công nghệ AI mới nhất</p>
                                 </div>
-                                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+                                <div className="p-4 rounded-xl border" style={{ backgroundColor: 'var(--bg-page)', borderColor: 'var(--border-color)' }}>
                                     <UserCheck className="text-blue-500 mb-2" />
                                     <h3 className="font-bold text-sm">Tự động</h3>
-                                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Không cần thao tác</p>
+                                    <p className="text-xs text-[var(--text-placeholder)] mt-1">Không cần thao tác</p>
                                 </div>
                             </div>
                         </div>
@@ -283,7 +283,7 @@ export default function PublicHome() {
             {/* MANUAL ATTENDANCE MODE */}
             {mode === 'manual' && (
                 <section className="container mx-auto px-4 mb-20">
-                    <div className="max-w-4xl mx-auto bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-800">
+                    <div className="max-w-4xl mx-auto rounded-3xl overflow-hidden card-panel">
                         <div className="p-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-sky-400" />
                         <div className="p-8 md:p-12">
                             <h2 className="text-2xl font-bold flex items-center gap-2 mb-6">
@@ -292,44 +292,44 @@ export default function PublicHome() {
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Lớp</label>
+                                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Lớp</label>
                                     <select className="input-field" value={manualClass} onChange={e => setManualClass(e.target.value)}>
                                         <option value="">Chọn lớp</option>
                                         {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Ngày</label>
+                                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Ngày</label>
                                     <input type="date" className="input-field" value={manualDate} onChange={e => setManualDate(e.target.value)} />
                                 </div>
                             </div>
 
                             {students.length > 0 && (
                                 <>
-                                    <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
+                                    <div className="overflow-x-auto rounded-xl border border-[var(--border-color)]">
                                         <table className="w-full text-sm">
-                                            <thead>
-                                                <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
-                                                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">STT</th>
-                                                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Mã HS</th>
-                                                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Họ tên</th>
-                                                    <th className="text-center px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Trạng thái</th>
+                                            <thead style={{ backgroundColor: 'var(--bg-page)' }} className="border-b border-[var(--border-color)]">
+                                                <tr>
+                                                    <th className="text-left px-4 py-3 text-xs font-semibold uppercase text-[var(--text-placeholder)]">STT</th>
+                                                    <th className="text-left px-4 py-3 text-xs font-semibold uppercase text-[var(--text-placeholder)]">Mã HS</th>
+                                                    <th className="text-left px-4 py-3 text-xs font-semibold uppercase text-[var(--text-placeholder)]">Họ tên</th>
+                                                    <th className="text-center px-4 py-3 text-xs font-semibold uppercase text-[var(--text-placeholder)]">Trạng thái</th>
                                                 </tr>
                                             </thead>
-                                            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                                            <tbody className="divide-y" style={{ divideColor: 'var(--border-color)' }}>
                                                 {students.map((s, i) => (
-                                                    <tr key={s.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30">
-                                                        <td className="px-4 py-3 text-slate-500">{i + 1}</td>
-                                                        <td className="px-4 py-3 text-slate-600 dark:text-slate-400 font-mono text-xs">{s.student_code}</td>
-                                                        <td className="px-4 py-3 font-medium text-slate-800 dark:text-white">{s.full_name}</td>
+                                                    <tr key={s.id} className="hover:bg-[var(--bg-page)] transition-colors">
+                                                        <td className="px-4 py-3 text-[var(--text-placeholder)]">{i + 1}</td>
+                                                        <td className="px-4 py-3 text-[var(--text-primary)] font-mono text-xs">{s.student_code}</td>
+                                                        <td className="px-4 py-3 font-medium text-[var(--text-primary)]">{s.full_name}</td>
                                                         <td className="px-4 py-3 text-center">
                                                             <div className="flex justify-center gap-2">
                                                                 <button onClick={() => setAttendance(prev => ({ ...prev, [s.id]: 'present' }))}
-                                                                    className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${attendance[s.id] === 'present' ? 'bg-green-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-green-50'}`}>
+                                                                    className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${attendance[s.id] === 'present' ? 'bg-green-500 text-white' : 'text-[var(--text-placeholder)] hover:opacity-80'}`} style={attendance[s.id] !== 'present' ? { backgroundColor: 'var(--border-color)' } : {}}>
                                                                     Có mặt
                                                                 </button>
                                                                 <button onClick={() => setAttendance(prev => ({ ...prev, [s.id]: 'absent' }))}
-                                                                    className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${attendance[s.id] === 'absent' ? 'bg-red-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-red-50'}`}>
+                                                                    className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${attendance[s.id] === 'absent' ? 'bg-red-500 text-white' : 'text-[var(--text-placeholder)] hover:opacity-80'}`} style={attendance[s.id] !== 'absent' ? { backgroundColor: 'var(--border-color)' } : {}}>
                                                                     Vắng
                                                                 </button>
                                                             </div>

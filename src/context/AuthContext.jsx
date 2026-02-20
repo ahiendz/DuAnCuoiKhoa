@@ -15,7 +15,6 @@ export const AuthProvider = ({ children }) => {
         if (stored && token) {
             try {
                 setUser(JSON.parse(stored));
-                // We rely on api.js interceptor to read token from localStorage
             } catch { /* ignore */ }
         }
         setLoading(false);
@@ -23,21 +22,38 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (email, password, role) => {
         const res = await api.post('/auth/login', { email, password, role });
-        const { token, ...userData } = res.data;
-        setUser(userData);
-        localStorage.setItem('user', JSON.stringify(userData));
+        const { token, force_change_password, ...userData } = res.data;
+
+        const userWithFlags = { ...userData, force_change_password };
+        setUser(userWithFlags);
+        localStorage.setItem('user', JSON.stringify(userWithFlags));
         localStorage.setItem('token', token);
-        return userData;
+
+        if (force_change_password) {
+            localStorage.setItem('default_password', password);
+        }
+
+        return userWithFlags;
     };
 
     const logout = () => {
         setUser(null);
         localStorage.removeItem('user');
         localStorage.removeItem('token');
+        localStorage.removeItem('default_password');
+    };
+
+    /** Patch specific fields on the user without logging out */
+    const updateUser = (patch) => {
+        setUser((prev) => {
+            const next = { ...prev, ...patch };
+            localStorage.setItem('user', JSON.stringify(next));
+            return next;
+        });
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, loading }}>
+        <AuthContext.Provider value={{ user, login, logout, updateUser, loading }}>
             {!loading && children}
         </AuthContext.Provider>
     );

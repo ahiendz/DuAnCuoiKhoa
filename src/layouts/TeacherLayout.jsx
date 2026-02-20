@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { LayoutDashboard, BookOpen, StickyNote, FileText, LogOut, GraduationCap } from 'lucide-react';
+import ThemeToggle from '@/components/ThemeToggle';
 
 export default function TeacherLayout() {
     const { user, logout } = useAuth();
@@ -46,8 +47,8 @@ export default function TeacherLayout() {
                                     key={item.to}
                                     to={item.to}
                                     className={`px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-all ${isActive
-                                            ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
-                                            : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                                        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
+                                        : 'text-slate-400 hover:text-white hover:bg-slate-800'
                                         }`}
                                 >
                                     <item.icon size={16} />
@@ -55,6 +56,10 @@ export default function TeacherLayout() {
                                 </Link>
                             );
                         })}
+
+                        <div className="h-6 w-px bg-slate-700 mx-2"></div>
+
+                        <ThemeToggle />
 
                         <div className="h-6 w-px bg-slate-700 mx-2"></div>
 
