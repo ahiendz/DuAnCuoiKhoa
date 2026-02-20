@@ -12,8 +12,13 @@ export default defineConfig({
     server: {
         proxy: {
             '/api': {
-                target: 'http://localhost:5000',
+                target: 'http://127.0.0.1:5000',
                 changeOrigin: true,
+                secure: false,
+                ws: true,
+                configure: (proxy) => {
+                    proxy.on('error', (err) => console.log('proxy error', err));
+                }
             },
         },
     },

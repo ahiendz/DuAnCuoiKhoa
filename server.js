@@ -5,6 +5,7 @@ const path = require("path");
 const cors = require("cors");
 const { spawn } = require("child_process");
 const { sendToArduino } = require("./backend/iot/arduino.service");
+const db = require("./backend/config/db");
 const classService = require("./backend/services/classService");
 const teacherService = require("./backend/services/teacherService");
 const studentService = require("./backend/services/studentService");
@@ -408,6 +409,41 @@ app.get("/api/summary", async (req, res) => {
     teachers: teachers.length,
     students: students.length
   });
+});
+
+app.get("/api/analytics/grades", async (req, res) => {
+  try {
+    const query = `
+      SELECT
+        subject,
+        ROUND(AVG(CASE WHEN semester = 'HK1' THEN COALESCE(final_score, midterm_score*0.3 + final_exam_score*0.7) END), 2) AS hk1,
+        ROUND(AVG(CASE WHEN semester = 'HK2' THEN COALESCE(final_score, midterm_score*0.3 + final_exam_score*0.7) END), 2) AS hk2,
+        ROUND(AVG(COALESCE(final_score, midterm_score*0.3 + final_exam_score*0.7)), 2) AS trend
+      FROM grades
+      WHERE subject IN ('Toán', 'Văn', 'Anh', 'Khoa học tự nhiên', 'KHTN', 'Lý', 'Hóa', 'Sinh')
+      GROUP BY subject
+      ORDER BY subject;
+    `;
+    const result = await db.query(query);
+    const data = result.rows.map(row => ({
+      subject: String(row.subject).replace('Khoa học tự nhiên', 'KHTN'),
+      HK1: parseFloat(row.hk1) || 0,
+      HK2: parseFloat(row.hk2) || 0,
+      trend: parseFloat(row.trend) || 0
+    }));
+
+    if (data.length === 0) {
+      return res.json([
+        { subject: 'Toán', HK1: 0, HK2: 0, trend: 0 },
+        { subject: 'Văn', HK1: 0, HK2: 0, trend: 0 },
+        { subject: 'Anh', HK1: 0, HK2: 0, trend: 0 },
+        { subject: 'KHTN', HK1: 0, HK2: 0, trend: 0 }
+      ]);
+    }
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 app.get("/api/attendance", async (req, res) => {
