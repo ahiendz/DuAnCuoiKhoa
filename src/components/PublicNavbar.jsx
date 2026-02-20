@@ -1,69 +1,151 @@
-import React, { useState } from 'react';
-import { LogIn, Menu, X } from 'lucide-react';
-import { Link, NavLink } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Menu, X, ScanFace, GraduationCap, LogIn } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 
-const NAV_ITEMS = [
-    { to: '/', label: 'Trang chủ' },
-    { to: '/features', label: 'Tính năng' },
-    { to: '/attendance', label: 'Điểm danh' },
-    { to: '/support', label: 'Hỗ trợ' },
-];
+const navLinks = [
+  { name: 'Trang chủ', href: '#home' },
+  { name: 'Tính năng', href: '#features' },
+  { name: 'Phân tích', href: '#analytics' },
+  { name: 'Liên hệ', href: '#contact' }];
 
-export default function PublicNavbar() {
-    const [mobileMenu, setMobileMenu] = useState(false);
 
-    return (
-        <header className="h-20 fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 transition-colors">
-            <div className="container mx-auto px-4 h-full flex items-center justify-between">
-                <Link to="/" className="text-2xl font-bold bg-gradient-to-r from-indigo-500 to-sky-400 bg-clip-text text-transparent">
-                    School Manager Pro
-                </Link>
+export default function Navbar() {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
 
-                {/* Desktop nav */}
-                <nav className="hidden md:flex items-center gap-8">
-                    {NAV_ITEMS.map(item => (
-                        <NavLink key={item.to} to={item.to} end={item.to === '/'}
-                            className={({ isActive }) =>
-                                `text-sm font-medium transition-colors ${isActive ? 'text-indigo-500 dark:text-sky-400' : 'text-slate-600 dark:text-slate-300 hover:text-indigo-500 dark:hover:text-sky-400'}`
-                            }>
-                            {item.label}
-                        </NavLink>
-                    ))}
-                </nav>
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
-                <div className="flex items-center gap-4">
-                    <ThemeToggle />
-                    <Link to="/login"
-                        className="hidden sm:flex items-center gap-2 px-5 py-2.5 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-medium text-sm hover:opacity-90 transition-opacity">
-                        <LogIn size={18} />
-                        Đăng nhập
-                    </Link>
-                    <button onClick={() => setMobileMenu(!mobileMenu)} className="md:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
-                        {mobileMenu ? <X size={22} /> : <Menu size={22} />}
-                    </button>
-                </div>
+  const handleNavClick = (e, href) => {
+    e.preventDefault();
+    const targetId = href.replace('#', '');
+
+    if (location.pathname !== '/') {
+      navigate('/');
+      setTimeout(() => {
+        const element = document.getElementById(targetId);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    } else {
+      const element = document.getElementById(targetId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+    setIsMobileMenuOpen(false);
+  };
+
+  const handleAttendanceClick = () => {
+    navigate('/attendance');
+    setIsMobileMenuOpen(false);
+  };
+
+  return (
+    <>
+      <nav
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ?
+            'bg-navy/80 backdrop-blur-xl border-b border-white/10' :
+            'bg-transparent'}`
+        }>
+
+        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 xl:px-12">
+          <div className="flex items-center justify-between h-16 lg:h-18">
+            {/* Logo */}
+            <Link to="/" className="flex items-center gap-2 group">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet to-indigo flex items-center justify-center shadow-glow group-hover:shadow-glow-lg transition-shadow">
+                <GraduationCap className="w-5 h-5 text-white" />
+              </div>
+              <span className="font-heading font-bold text-lg text-white hidden sm:block">
+                School Manager Pro
+              </span>
+            </Link>
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center gap-8">
+              {navLinks.map((link) =>
+                <a
+                  key={link.name}
+                  href={link.href}
+                  onClick={(e) => handleNavClick(e, link.href)}
+                  className="text-sm font-medium text-slate-300 hover:text-white transition-colors relative group">
+
+                  {link.name}
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-violet transition-all duration-300 group-hover:w-full" />
+                </a>
+              )}
             </div>
 
-            {/* Mobile menu */}
-            {mobileMenu && (
-                <div className="md:hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-lg">
-                    <nav className="container mx-auto px-4 py-4 flex flex-col gap-2">
-                        {NAV_ITEMS.map(item => (
-                            <NavLink key={item.to} to={item.to} end={item.to === '/'} onClick={() => setMobileMenu(false)}
-                                className={({ isActive }) =>
-                                    `px-4 py-2 rounded-lg text-sm font-medium ${isActive ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'}`
-                                }>
-                                {item.label}
-                            </NavLink>
-                        ))}
-                        <Link to="/login" onClick={() => setMobileMenu(false)}
-                            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-medium text-sm mt-2">
-                            <LogIn size={18} /> Đăng nhập
-                        </Link>
-                    </nav>
-                </div>
+            {/* CTA Buttons */}
+            <div className="hidden md:flex items-center gap-3">
+              <ThemeToggle />
+
+              <Link to="/login" className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all text-slate-300 hover:text-white hover:bg-white/10 dark:hover:bg-slate-800">
+                <LogIn className="w-4 h-4" />
+                <span>Đăng nhập</span>
+              </Link>
+
+              <button
+                onClick={handleAttendanceClick}
+                className="btn-primary gap-2 px-5 py-2">
+                <ScanFace className="w-4 h-4" />
+                <span>Điểm danh AI</span>
+              </button>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <div className="md:hidden flex items-center gap-2">
+              <ThemeToggle />
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="p-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/5 transition-colors">
+                {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* Mobile Menu Overlay */}
+      <div
+        className={`fixed inset-0 z-40 md:hidden transition-all duration-300 ${isMobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`
+        }>
+
+        <div className="absolute inset-0 bg-navy/95 backdrop-blur-xl" onClick={() => setIsMobileMenuOpen(false)} />
+        <div className="absolute top-16 left-0 right-0 p-6">
+          <div className="flex flex-col gap-4">
+            {navLinks.map((link) =>
+              <a
+                key={link.name}
+                href={link.href}
+                onClick={(e) => handleNavClick(e, link.href)}
+                className="text-lg font-medium text-slate-300 hover:text-white transition-colors py-2">
+
+                {link.name}
+              </a>
             )}
-        </header>
-    );
+            <Link to="/login" className="flex items-center justify-center gap-2 w-full py-3 mt-4 mb-2 rounded-xl border border-white/20 text-slate-200 hover:bg-white/10 transition-colors font-medium">
+              <LogIn className="w-5 h-5" />
+              <span>Đăng nhập</span>
+            </Link>
+            <button
+              onClick={handleAttendanceClick}
+              className="btn-primary gap-2 w-full py-3">
+              <ScanFace className="w-5 h-5" />
+              <span>Điểm danh AI</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </>);
+
 }
