@@ -17,7 +17,7 @@ export default function Sidebar({ navItems = [], roleTitle, collapsed, setCollap
         <>
             {/* Desktop sidebar */}
             <aside className={cn(
-                "hidden lg:flex flex-col shrink-0 border-r h-screen sticky top-0 transition-all duration-300",
+                "hidden lg:flex flex-col shrink-0 border-r h-full transition-all duration-300",
                 "bg-[var(--bg-sidebar)] border-[var(--border-color)]",
                 collapsed ? "w-20" : "w-64"
             )}>

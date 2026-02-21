@@ -2,37 +2,38 @@ import { useEffect, useRef } from 'react';
 import { Mail, Phone, MessageCircle, ArrowUpRight, Clock, MapPin } from 'lucide-react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { Link } from 'react-router-dom';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const contactMethods = [
-{
-  icon: Mail,
-  title: 'Email',
-  value: 'support@schoolmanager.vn',
-  description: 'Phản hồi trong 24h',
-  action: 'Gửi email',
-  href: 'mailto:support@schoolmanager.vn',
-  color: 'violet'
-},
-{
-  icon: Phone,
-  title: 'Hotline',
-  value: '1900-123-456',
-  description: '7:00 - 21:00, T2-CN',
-  action: 'Gọi ngay',
-  href: 'tel:1900123456',
-  color: 'indigo'
-},
-{
-  icon: MessageCircle,
-  title: 'Live Chat',
-  value: 'Trong ứng dụng',
-  description: 'Hỗ trợ tức thì',
-  action: 'Bắt đầu chat',
-  href: '#',
-  color: 'emerald'
-}];
+  {
+    icon: Mail,
+    title: 'Email',
+    value: 'support@schoolmanager.vn',
+    description: 'Phản hồi trong 24h',
+    action: 'Gửi email',
+    href: 'mailto:support@schoolmanager.vn',
+    color: 'violet'
+  },
+  {
+    icon: Phone,
+    title: 'Hotline',
+    value: '1900-123-456',
+    description: '7:00 - 21:00, T2-CN',
+    action: 'Gọi ngay',
+    href: 'tel:1900123456',
+    color: 'indigo'
+  },
+  {
+    icon: MessageCircle,
+    title: 'Live Chat',
+    value: 'Trong ứng dụng',
+    description: 'Hỗ trợ tức thì',
+    action: 'Bắt đầu chat',
+    href: '/support',
+    color: 'emerald'
+  }];
 
 
 const colorMap = {
@@ -131,7 +132,7 @@ export default function Contact() {
       ref={sectionRef}
       className="relative w-full py-20 lg:py-32 overflow-hidden"
       style={{ background: 'linear-gradient(180deg, #0B1120 0%, #1A0F2E 100%)' }}>
-      
+
       {/* Decorative Orbs */}
       <div className="orb orb-violet w-[32vw] h-[32vw] right-[-8vw] top-[15vh] opacity-25" />
       <div className="orb orb-indigo w-[28vw] h-[28vw] left-[5vw] bottom-[10vh] opacity-20" />
@@ -158,13 +159,13 @@ export default function Contact() {
               return (
                 <div
                   key={method.title}
-                  ref={(el) => {cardsRef.current[index] = el;}}
+                  ref={(el) => { cardsRef.current[index] = el; }}
                   className="glass-card p-6 lg:p-8 group hover:scale-[1.02] transition-all duration-300">
-                  
+
                   {/* Icon */}
                   <div
                     className={`w-14 h-14 rounded-2xl ${colors.bg} border ${colors.border} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
-                    
+
                     <Icon className={`w-7 h-7 ${colors.icon}`} />
                   </div>
 
@@ -176,13 +177,21 @@ export default function Contact() {
                   <p className="text-sm text-slate-400 mb-6">{method.description}</p>
 
                   {/* Action Button */}
-                  <a
-                    href={method.href}
-                    className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl ${colors.bg} border ${colors.border} ${colors.hover} transition-colors text-sm font-medium ${colors.icon}`}>
-                    
-                    {method.action}
-                    <ArrowUpRight className="w-4 h-4" />
-                  </a>
+                  {method.href.startsWith('/') ? (
+                    <Link
+                      to={method.href}
+                      className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl ${colors.bg} border ${colors.border} ${colors.hover} transition-colors text-sm font-medium ${colors.icon}`}>
+                      {method.action}
+                      <ArrowUpRight className="w-4 h-4" />
+                    </Link>
+                  ) : (
+                    <a
+                      href={method.href}
+                      className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl ${colors.bg} border ${colors.border} ${colors.hover} transition-colors text-sm font-medium ${colors.icon}`}>
+                      {method.action}
+                      <ArrowUpRight className="w-4 h-4" />
+                    </a>
+                  )}
                 </div>);
 
             })}
@@ -192,7 +201,7 @@ export default function Contact() {
           <div
             ref={infoRef}
             className="glass-card p-6 lg:p-8 flex flex-col sm:flex-row items-center justify-between gap-6">
-            
+
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-violet/10 border border-violet/20 flex items-center justify-center">
                 <Clock className="w-6 h-6 text-violet-light" />
@@ -220,10 +229,10 @@ export default function Contact() {
             <div className="flex items-center gap-3">
               <div className="flex -space-x-2">
                 {[1, 2, 3].map((i) =>
-                <div
-                  key={i}
-                  className="w-8 h-8 rounded-full bg-gradient-to-br from-violet to-indigo border-2 border-navy flex items-center justify-center">
-                  
+                  <div
+                    key={i}
+                    className="w-8 h-8 rounded-full bg-gradient-to-br from-violet to-indigo border-2 border-navy flex items-center justify-center">
+
                     <span className="text-xs font-medium text-white">{i}</span>
                   </div>
                 )}

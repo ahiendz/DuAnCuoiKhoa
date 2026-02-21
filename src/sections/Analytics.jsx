@@ -84,18 +84,23 @@ export default function Analytics() {
         } else {
           // Fallback if no real data
           setChartData([
-            { subject: 'Toán', HK1: 7.5, HK2: 8.2, trend: 7.85 },
-            { subject: 'Văn', HK1: 8.0, HK2: 8.5, trend: 8.25 },
-            { subject: 'Anh', HK1: 7.2, HK2: 7.8, trend: 7.5 },
-            { subject: 'KHTN', HK1: 6.8, HK2: 7.5, trend: 7.15 }
+            { subject: 'Toán', HK1: 8.5, HK2: 9.0, trend: 8.75 },
+            { subject: 'Văn', HK1: 7.5, HK2: 8.2, trend: 7.85 },
+            { subject: 'Anh', HK1: 8.0, HK2: 8.5, trend: 8.25 },
+            { subject: 'Vật Lý', HK1: 7.8, HK2: 8.4, trend: 8.1 },
+            { subject: 'Hóa Học', HK1: 7.2, HK2: 8.0, trend: 7.6 },
+            { subject: 'Sinh Học', HK1: 8.8, HK2: 9.2, trend: 9.0 }
           ]);
         }
       } catch (err) {
         // Fallback on error
         setChartData([
-          { subject: 'Toán', HK1: 7.5, HK2: 8.2, trend: 7.85 },
-          { subject: 'Văn', HK1: 8.0, HK2: 8.5, trend: 8.25 },
-          { subject: 'Anh', HK1: 7.2, HK2: 7.8, trend: 7.5 }
+          { subject: 'Toán', HK1: 8.5, HK2: 9.0, trend: 8.75 },
+          { subject: 'Văn', HK1: 7.5, HK2: 8.2, trend: 7.85 },
+          { subject: 'Anh', HK1: 8.0, HK2: 8.5, trend: 8.25 },
+          { subject: 'Vật Lý', HK1: 7.8, HK2: 8.4, trend: 8.1 },
+          { subject: 'Hóa Học', HK1: 7.2, HK2: 8.0, trend: 7.6 },
+          { subject: 'Sinh Học', HK1: 8.8, HK2: 9.2, trend: 9.0 }
         ]);
       }
     };
@@ -181,7 +186,7 @@ export default function Analytics() {
 
               <h2 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">
                 Thông tin chi tiết để đưa ra{' '}
-                <span className="gradient-text">Quyết định</span>
+                <span className="gradient-text block lg:inline-block">Quyết định</span>
               </h2>
 
               <p className="text-lg text-slate-300 leading-relaxed mb-8">

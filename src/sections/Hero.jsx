@@ -115,6 +115,7 @@ export default function Hero() {
         className="orb orb-indigo w-[38vw] h-[38vw] -right-[8vw] -bottom-[12vh] opacity-30" />
 
 
+
       {/* Content Container */}
       <div className="relative z-10 w-full px-4 sm:px-6 lg:px-8 xl:px-12 py-12 lg:py-20">
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center max-w-7xl mx-auto">
@@ -130,7 +131,7 @@ export default function Hero() {
               </div>
             </div>
             <img
-              src="/hero_student.jpg"
+              src="/img/hero.png"
               alt="Giáo dục AI"
               className="w-full h-full object-cover" />
 
@@ -176,7 +177,7 @@ export default function Hero() {
               className="font-heading text-3xl sm:text-4xl lg:text-5xl xl:text-[56px] font-bold text-white leading-tight mb-6">
 
               Cách mạng hóa giáo dục bằng{' '}
-              <span className="gradient-text">Trí tuệ nhân tạo</span>
+              <span className="gradient-text block lg:inline-block">Trí tuệ nhân tạo</span>
             </h1>
 
             <p
