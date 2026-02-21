@@ -1,9 +1,11 @@
 console.log("!!! SERVER SCRIPT STARTING !!!");
+require("dotenv").config();
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
 const cors = require("cors");
 const { spawn } = require("child_process");
+const { GoogleGenAI } = require("@google/genai");
 const { sendToArduino } = require("./backend/iot/arduino.service");
 const db = require("./backend/config/db");
 const classService = require("./backend/services/classService");
@@ -14,8 +16,7 @@ const authService = require("./backend/services/authService");
 const parentRoutes = require("./backend/routes/parentRoutes");
 const teacherRoutes = require("./backend/routes/teacherRoutes");
 const noteRoutes = require("./backend/routes/noteRoutes");
-const { SUBJECTS } = classService;
-
+const aiRoutes = require("./backend/routes/ai.routes");
 
 const app = express();
 app.use(cors());
@@ -24,6 +25,7 @@ app.use(express.static(__dirname));
 app.use("/api/parent", parentRoutes);
 app.use("/api/teacher", teacherRoutes);
 app.use("/api/notes", noteRoutes);
+app.use("/api/ai", aiRoutes);
 
 const BACKEND_DIR = path.join(__dirname, "backend");
 const FACE_DIR = path.join(BACKEND_DIR, "face");
@@ -192,6 +194,12 @@ process.on("unhandledRejection", err => console.error(err));
 async function appendAttendance(result, pickedDate) {
   return attendanceService.recordFaceAttendance(result, pickedDate);
 }
+
+const SUBJECTS = [
+  "Toán", "Văn", "Anh", "Lý", "Hóa", "Sinh", "KHTN",
+  "Lịch sử", "Địa lý", "GDCD", "Công nghệ", "Tin học",
+  "Thể dục", "Âm nhạc", "Mỹ thuật"
+];
 
 app.get("/api/subjects", (req, res) => {
   res.json({ subjects: SUBJECTS });
@@ -649,14 +657,9 @@ app.post("/api/face/verify", async (req, res) => {
     console.log("N");
     return res.json(result);
   } catch (error) {
-    sendToArduino({
-      status: "N"
-    });
+    sendToArduino({ status: "N" });
     console.log("N");
-    return res.status(500).json({
-      status: "fail",
-      message: error.message
-    });
+    return res.status(500).json({ status: "fail", message: error.message });
   }
 });
 
