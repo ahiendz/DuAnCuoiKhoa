@@ -1,1 +1,26 @@
-node_modules
+# 🛡️ BẢO MẬT (Quan trọng nhất)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 📦 Thư viện (Nặng, không cần push)
+node_modules/
+jspm_packages/
+
+# 🏗️ File sau khi Build (Dùng để deploy, không cần lưu trên Git)
+dist/
+dist-ssr/
+*.local
+
+# 📜 Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ⚙️ Cài đặt IDE/OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
