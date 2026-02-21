@@ -3,6 +3,7 @@ import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { LayoutDashboard, BookOpen, StickyNote, FileText, LogOut, GraduationCap } from 'lucide-react';
 import ThemeToggle from '@/components/ThemeToggle';
+import DashboardNavLinks from '@/components/DashboardNavLinks';
 
 export default function TeacherLayout() {
     const { user, logout } = useAuth();
@@ -40,6 +41,9 @@ export default function TeacherLayout() {
 
                     {/* RIGHT: Navigation */}
                     <nav className="flex items-center gap-1">
+                        <DashboardNavLinks className="mr-2" textColorClass="text-slate-400 hover:text-white" />
+                        <div className="hidden lg:block h-6 w-px bg-slate-700 mx-2 mr-3"></div>
+
                         {navItems.map(item => {
                             const isActive = location.pathname === item.to || (item.to !== '/teacher' && location.pathname.startsWith(item.to));
                             return (

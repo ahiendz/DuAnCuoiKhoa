@@ -17,6 +17,9 @@
 
 @layer base {
   :root {
+    /* Layout */
+    --nav-height: 64px;
+
     /* Light mode variables */
     --bg-page: #F3F4F6;
     --bg-card: #FFFFFF;
@@ -29,6 +32,12 @@
     --chart-text: #64748B;
     --chart-tooltip-bg: rgba(255, 255, 255, 0.95);
     --chart-tooltip-text: #1E293B;
+  }
+
+  @media (min-width: 1024px) {
+    :root {
+      --nav-height: 72px;
+    }
   }
 
   .dark {
@@ -51,6 +60,17 @@
     background-color: var(--bg-page);
     color: var(--text-primary);
     -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #root {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    width: 100%;
+    min-height: 100vh;
   }
 }
 
