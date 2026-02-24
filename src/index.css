@@ -18,7 +18,7 @@
 @layer base {
   :root {
     /* Layout */
-    --nav-height: 64px;
+    --nav-height: 80px;
 
     /* Light mode variables */
     --bg-page: #F3F4F6;
@@ -36,7 +36,7 @@
 
   @media (min-width: 1024px) {
     :root {
-      --nav-height: 72px;
+      --nav-height: 96px;
     }
   }
 
