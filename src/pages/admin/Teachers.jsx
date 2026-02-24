@@ -1,36 +1,44 @@
-import React, { useEffect, useState } from 'react';
-import { Plus, Search, Download, Pencil, Trash2, Award } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Plus, Search, Download, Pencil, Trash2, Award, AlertTriangle } from 'lucide-react';
 import { getTeachers, createTeacher, updateTeacher, deleteTeacher, exportTeachersCsv } from '@/services/teacherService';
-import { getSubjects } from '@/services/classService';
 import Modal from '@/components/Modal';
 import ConfirmDialog from '@/components/ConfirmDialog';
 
 export default function Teachers() {
     const [teachers, setTeachers] = useState([]);
-    const [subjects, setSubjects] = useState([]);
     const [search, setSearch] = useState('');
     const [loading, setLoading] = useState(true);
     const [modalOpen, setModalOpen] = useState(false);
     const [deleteDialog, setDeleteDialog] = useState({ open: false, id: null });
     const [editing, setEditing] = useState(null);
-    const [form, setForm] = useState({ full_name: '', contact_email: '', gender: '', subject: '', is_homeroom: false, password: '' });
+    const [form, setForm] = useState({ full_name: '', email: '', gender: '', subject: '', password: '' });
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
+    const [errorModal, setErrorModal] = useState('');
+    const [passwordModal, setPasswordModal] = useState({ open: false, value: '' });
+
+    const fixedSubjects = ['Toán', 'Văn', 'Anh', 'KHTN'];
 
     const load = async () => {
         setLoading(true);
         try {
-            const [t, s] = await Promise.all([getTeachers(), getSubjects()]);
+            const t = await getTeachers();
             setTeachers(t);
-            setSubjects(s.subjects || []);
         } catch { } finally { setLoading(false); }
     };
 
     useEffect(() => { load(); }, []);
 
+    const teacherMeta = useMemo(() => teachers.map(t => {
+        const load = (t.teaching_classes || []).length + (t.is_homeroom ? 1 : 0);
+        const isFull = load >= 4;
+        const isUnassigned = (t.teaching_classes || []).length === 0 && !t.is_homeroom;
+        return { ...t, load, isFull, isUnassigned };
+    }), [teachers]);
+
     const openAdd = () => {
         setEditing(null);
-        setForm({ full_name: '', contact_email: '', gender: '', subject: '', is_homeroom: false, password: '' });
+        setForm({ full_name: '', email: '', gender: '', subject: '', password: '' });
         setError('');
         setModalOpen(true);
     };
@@ -39,10 +47,9 @@ export default function Teachers() {
         setEditing(t);
         setForm({
             full_name: t.full_name || '',
-            contact_email: t.contact_email || '',
+            email: t.contact_email || '',
             gender: t.gender || '',
             subject: t.subject || '',
-            is_homeroom: !!t.is_homeroom,
             password: '',
         });
         setError('');
@@ -53,13 +60,13 @@ export default function Teachers() {
         setSaving(true);
         setError('');
         try {
+            console.log("Teacher Payload:", form);
             const response = editing
                 ? await updateTeacher(editing.id, form)
                 : await createTeacher(form);
 
-            // Show generated password modal if backend returned one
             if (response.generatedPassword) {
-                alert(`Mật khẩu tự động: ${response.generatedPassword}\nVui lòng lưu lại!`);
+                setPasswordModal({ open: true, value: response.generatedPassword });
             }
 
             setModalOpen(false);
@@ -75,12 +82,12 @@ export default function Teachers() {
             setDeleteDialog({ open: false, id: null });
             load();
         } catch (err) {
-            alert(err.response?.data?.error || 'Xóa thất bại');
+            setErrorModal(err.response?.data?.error || 'Không thể xóa giáo viên');
             setDeleteDialog({ open: false, id: null });
         }
     };
 
-    const filtered = teachers.filter(t => t.full_name?.toLowerCase().includes(search.toLowerCase()));
+    const filtered = teacherMeta.filter(t => t.full_name?.toLowerCase().includes(search.toLowerCase()));
 
     return (
         <div className="space-y-6">
@@ -124,7 +131,14 @@ export default function Teachers() {
                                         <td className="px-4 py-3 font-medium text-slate-800 dark:text-white">{t.full_name}</td>
                                         <td className="px-4 py-3 text-slate-600 dark:text-slate-400">{t.contact_email || '—'}</td>
                                         <td className="px-4 py-3">
-                                            <span className="text-xs px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">{t.subject}</span>
+                                            <span
+                                                className={`text-xs px-2 py-0.5 rounded-full ${t.isFull
+                                                        ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 font-semibold'
+                                                        : 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
+                                                    }`}
+                                            >
+                                                {t.subject} {t.isFull && '[FULL]'}
+                                            </span>
                                         </td>
                                         <td className="px-4 py-3 text-slate-600 dark:text-slate-400">{(t.teaching_classes || []).length}/4</td>
                                         <td className="px-4 py-3">
@@ -154,7 +168,7 @@ export default function Teachers() {
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email</label>
-                        <input className="input-field" value={form.contact_email} onChange={e => setForm({ ...form, contact_email: e.target.value })} />
+                        <input className="input-field" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
@@ -169,7 +183,7 @@ export default function Teachers() {
                             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Môn giảng dạy</label>
                             <select className="input-field" value={form.subject} onChange={e => setForm({ ...form, subject: e.target.value })}>
                                 <option value="">Chọn môn</option>
-                                {subjects.map(s => <option key={s} value={s}>{s}</option>)}
+                                {fixedSubjects.map(s => <option key={s} value={s}>{s}</option>)}
                             </select>
                         </div>
                     </div>
@@ -185,10 +199,6 @@ export default function Teachers() {
                             placeholder={editing ? 'Nhập mật khẩu mới' : 'Tự động tạo nếu để trống'}
                         />
                     </div>
-                    <div className="flex items-center gap-2">
-                        <input type="checkbox" id="is_homeroom" checked={form.is_homeroom} onChange={e => setForm({ ...form, is_homeroom: e.target.checked })} className="rounded" />
-                        <label htmlFor="is_homeroom" className="text-sm text-slate-700 dark:text-slate-300">Là giáo viên chủ nhiệm</label>
-                    </div>
                     <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
                         <button onClick={() => setModalOpen(false)} className="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm">Hủy</button>
                         <button onClick={handleSave} disabled={saving} className="btn-primary text-sm">{saving ? 'Đang lưu...' : 'Lưu'}</button>
@@ -198,6 +208,26 @@ export default function Teachers() {
 
             <ConfirmDialog open={deleteDialog.open} onClose={() => setDeleteDialog({ open: false, id: null })} onConfirm={handleDelete}
                 message="Bạn có chắc muốn xóa giáo viên này?" />
-        </div>
+
+            <Modal open={!!errorModal} onClose={() => setErrorModal('')} title="Không thể xóa">
+                <div className="flex items-start gap-3 text-red-500 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-3">
+                    <AlertTriangle size={20} className="mt-0.5" />
+                    <p className="text-sm">{errorModal}</p>
+                </div>
+            </Modal>
+
+            <Modal open={passwordModal.open} onClose={() => setPasswordModal({ open: false, value: '' })} title="Mật khẩu mới">
+                <p className="text-sm text-slate-300">Hệ thống đã tạo mật khẩu:</p>
+                <p className="mt-2 text-lg font-semibold text-white font-mono">{passwordModal.value}</p>
+                <div className="flex justify-end mt-4">
+                    <button
+                        onClick={() => setPasswordModal({ open: false, value: '' })}
+                        className="btn-primary px-4 py-2 text-sm"
+                    >
+                        Đã hiểu
+                    </button>
+                </div>
+            </Modal>
+        </div >
     );
 }
