@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { Plus, Search, Download, Pencil, Trash2 } from 'lucide-react';
-import { getClasses, createClass, updateClass, deleteClass, exportClassesCsv, getSubjects } from '@/services/classService';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Plus, Search, Download, Pencil, Trash2, AlertTriangle } from 'lucide-react';
+import { getClasses, createClass, updateClass, deleteClass, exportClassesCsv } from '@/services/classService';
 import { getTeachers } from '@/services/teacherService';
 import Modal from '@/components/Modal';
 import ConfirmDialog from '@/components/ConfirmDialog';
@@ -8,11 +8,12 @@ import ConfirmDialog from '@/components/ConfirmDialog';
 export default function Classes() {
     const [classes, setClasses] = useState([]);
     const [teachers, setTeachers] = useState([]);
-    const [subjects, setSubjects] = useState([]);
+    const fixedSubjects = ['Toán', 'Văn', 'Anh', 'KHTN'];
     const [search, setSearch] = useState('');
     const [loading, setLoading] = useState(true);
     const [modalOpen, setModalOpen] = useState(false);
-    const [deleteDialog, setDeleteDialog] = useState({ open: false, id: null });
+    const [deleteDialog, setDeleteDialog] = useState({ open: false, id: null, stage: 'warn' });
+    const [errorModal, setErrorModal] = useState('');
     const [editing, setEditing] = useState(null);
     const [form, setForm] = useState({ name: '', grade_level: '', homeroom_teacher_id: '', subject_teachers: {} });
     const [saving, setSaving] = useState(false);
@@ -21,10 +22,9 @@ export default function Classes() {
     const load = async () => {
         setLoading(true);
         try {
-            const [c, t, s] = await Promise.all([getClasses(), getTeachers(), getSubjects()]);
+            const [c, t] = await Promise.all([getClasses(), getTeachers()]);
             setClasses(c);
             setTeachers(t);
-            setSubjects(s.subjects || []);
         } catch { } finally { setLoading(false); }
     };
 
@@ -49,6 +49,80 @@ export default function Classes() {
         setModalOpen(true);
     };
 
+    const teacherMeta = useMemo(() => {
+        return teachers.map(t => {
+            const load = (t.teaching_classes || []).length + (t.is_homeroom ? 1 : 0);
+            const isFull = load >= 4;
+            const isUnassigned = (t.teaching_classes || []).length === 0 && !t.is_homeroom;
+            return { ...t, load, isFull, isUnassigned };
+        });
+    }, [teachers]);
+
+    // Keep the subject dropdown in sync with the selected homeroom teacher
+    useEffect(() => {
+        if (!form.homeroom_teacher_id) return;
+        const teacher = teachers.find(x => String(x.id) === String(form.homeroom_teacher_id));
+        if (!teacher?.subject) return;
+        setForm(prev => {
+            const current = prev.subject_teachers?.[teacher.subject];
+            if (String(current) === String(teacher.id)) return prev;
+            return {
+                ...prev,
+                subject_teachers: { ...prev.subject_teachers, [teacher.subject]: teacher.id }
+            };
+        });
+    }, [form.homeroom_teacher_id, teachers]);
+
+    const isGvcnElsewhere = (t) => t.is_homeroom && (!editing || String(t.homeroom_class_id) !== String(editing.id));
+
+    const sortGvcnOptions = (list) => [...list].sort((a, b) => {
+        if (isGvcnElsewhere(a) !== isGvcnElsewhere(b)) return isGvcnElsewhere(a) ? 1 : -1;
+        if (a.isUnassigned !== b.isUnassigned) return a.isUnassigned ? -1 : 1;
+        if (a.isFull !== b.isFull) return a.isFull ? 1 : -1;
+        return a.full_name.localeCompare(b.full_name, 'vi');
+    });
+
+    const sortSubjectOptions = (list) => [...list].sort((a, b) => {
+        const score = (t) => {
+            if (t.isUnassigned) return -1;
+            if (t.isFull) return 3;
+            return t.load;
+        };
+        const diff = score(a) - score(b);
+        if (diff !== 0) return diff;
+        return a.full_name.localeCompare(b.full_name, 'vi');
+    });
+
+    const renderGvcnLabel = (t) => {
+        const badges = [];
+        if (isGvcnElsewhere(t)) badges.push('[GVCN lớp khác]');
+        if (t.isUnassigned) badges.push('Mới');
+        if (t.isFull) badges.push('[FULL]');
+        return `${t.full_name} ${badges.join(' ')}`.trim();
+    };
+
+    const renderSubjectLabel = (t) => {
+        const suffix = `(${t.load}/4)`;
+        const full = t.isFull ? ' [FULL]' : '';
+        return `${t.full_name} ${suffix}${full}`;
+    };
+
+    const handleHomeroomChange = (tid) => {
+        setForm(prev => {
+            const next = { ...prev, homeroom_teacher_id: tid };
+            const teacher = teachers.find(x => String(x.id) === String(tid));
+            if (teacher?.subject) {
+                next.subject_teachers = { ...prev.subject_teachers, [teacher.subject]: teacher.id };
+            }
+            return next;
+        });
+    };
+
+    const isSubjectLockedByGvcn = (subj) => {
+        const teacher = teachers.find(x => String(x.id) === String(form.homeroom_teacher_id));
+        return teacher?.subject === subj;
+    };
+
     const handleSave = async () => {
         setSaving(true);
         setError('');
@@ -71,11 +145,11 @@ export default function Classes() {
     const handleDelete = async () => {
         try {
             await deleteClass(deleteDialog.id);
-            setDeleteDialog({ open: false, id: null });
+            setDeleteDialog({ open: false, id: null, stage: 'warn' });
             load();
         } catch (err) {
-            alert(err.response?.data?.error || 'Xóa thất bại');
-            setDeleteDialog({ open: false, id: null });
+            setErrorModal(err.response?.data?.error || 'Không thể xóa lớp');
+            setDeleteDialog({ open: false, id: null, stage: 'warn' });
         }
     };
 
@@ -139,7 +213,7 @@ export default function Classes() {
                                         <td className="px-4 py-3 text-right">
                                             <div className="flex justify-end gap-1">
                                                 <button onClick={() => openEdit(cls)} className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 hover:text-indigo-500"><Pencil size={16} /></button>
-                                                <button onClick={() => setDeleteDialog({ open: true, id: cls.id })} className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 hover:text-red-500"><Trash2 size={16} /></button>
+                                            <button onClick={() => setDeleteDialog({ open: true, id: cls.id, stage: 'warn' })} className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 hover:text-red-500"><Trash2 size={16} /></button>
                                             </div>
                                         </td>
                                     </tr>
@@ -174,21 +248,79 @@ export default function Classes() {
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">GVCN</label>
-                        <select className="input-field" value={form.homeroom_teacher_id} onChange={e => setForm({ ...form, homeroom_teacher_id: e.target.value })}>
-                            <option value="">Chọn GVCN</option>
-                            {teachers.map(t => <option key={t.id} value={t.id}>{t.full_name} ({t.subject})</option>)}
+                        <select
+                            className="input-field"
+                            value={form.homeroom_teacher_id}
+                            onChange={e => handleHomeroomChange(e.target.value)}
+                        >
+                                <option value="">Chọn GVCN</option>
+                                {sortGvcnOptions(teacherMeta).map(t => {
+                                    const disableFull = t.isFull && String(form.homeroom_teacher_id) !== String(t.id);
+                                    return (
+                                        <option
+                                            key={t.id}
+                                            value={t.id}
+                                            disabled={disableFull}
+                                            style={{
+                                                fontWeight: t.isUnassigned || isGvcnElsewhere(t) ? '700' : '500',
+                                                color: t.isFull ? '#ef4444' : undefined
+                                            }}
+                                        >
+                                            {renderGvcnLabel(t)}
+                                        </option>
+                                    );
+                                })}
                         </select>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Giáo viên bộ môn</label>
+                        <div className="flex items-center justify-between mb-2">
+                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Giáo viên bộ môn</label>
+                            <button
+                                type="button"
+                                className="px-3 py-1.5 rounded-lg bg-white/5 border border-slate-700 text-slate-100 text-xs hover:bg-white/10"
+                                onClick={() => {
+                                    const pick = (arr) => sortSubjectOptions(arr.filter(t => t.load < 4))[0];
+                                    const next = { ...form, subject_teachers: { ...form.subject_teachers } };
+                                    const gvcnCandidate = pick(teacherMeta.filter(t => !isGvcnElsewhere(t)));
+                                    if (gvcnCandidate) next.homeroom_teacher_id = gvcnCandidate.id;
+                                    fixedSubjects.forEach(subj => {
+                                        const candidate = pick(teacherMeta.filter(t => t.subject === subj));
+                                        if (candidate) next.subject_teachers[subj] = candidate.id;
+                                    });
+                                    setForm(next);
+                                }}
+                            >
+                                Tự gán giáo viên
+                            </button>
+                        </div>
                         <div className="grid grid-cols-2 gap-3">
-                            {subjects.map(subj => (
+                            {fixedSubjects.map(subj => (
                                 <div key={subj}>
                                     <label className="text-xs text-slate-500 dark:text-slate-400 mb-1 block">{subj}</label>
                                     <select className="input-field text-sm" value={form.subject_teachers[subj] || ''}
-                                        onChange={e => setForm({ ...form, subject_teachers: { ...form.subject_teachers, [subj]: e.target.value || undefined } })}>
+                                        onChange={e => setForm({ ...form, subject_teachers: { ...form.subject_teachers, [subj]: e.target.value || undefined } })}
+                                        disabled={isSubjectLockedByGvcn(subj)}
+                                    >
                                         <option value="">Chưa chọn</option>
-                                        {teachers.filter(t => t.subject === subj).map(t => <option key={t.id} value={t.id}>{t.full_name}</option>)}
+                                        {sortSubjectOptions(teacherMeta.filter(t => t.subject === subj))
+                                            .map(t => {
+                                                const isCurrent = String(form.subject_teachers[subj]) === String(t.id);
+                                                const disableFull = t.isFull && !isCurrent;
+                                                const disabled = disableFull || (isSubjectLockedByGvcn(subj) && String(t.id) !== String(form.homeroom_teacher_id));
+                                                return (
+                                                    <option
+                                                        key={t.id}
+                                                        value={t.id}
+                                                        disabled={disabled}
+                                                        style={{
+                                                            fontWeight: t.isUnassigned ? '700' : '500',
+                                                            color: t.isFull ? '#ef4444' : undefined
+                                                        }}
+                                                    >
+                                                        {renderSubjectLabel(t)}
+                                                    </option>
+                                                );
+                                            })}
                                     </select>
                                 </div>
                             ))}
@@ -201,8 +333,28 @@ export default function Classes() {
                 </div>
             </Modal>
 
-            <ConfirmDialog open={deleteDialog.open} onClose={() => setDeleteDialog({ open: false, id: null })} onConfirm={handleDelete}
-                message="Bạn có chắc muốn xóa lớp học này?" />
+            <ConfirmDialog
+                open={deleteDialog.open}
+                onClose={() => setDeleteDialog({ open: false, id: null, stage: 'warn' })}
+                onConfirm={() => {
+                    if (deleteDialog.stage === 'warn') {
+                        setDeleteDialog(prev => ({ ...prev, stage: 'confirm' }));
+                    } else {
+                        handleDelete();
+                    }
+                }}
+                title={deleteDialog.stage === 'warn' ? 'Cảnh báo' : 'Xác nhận xóa'}
+                message={deleteDialog.stage === 'warn'
+                    ? 'Xóa lớp sẽ xóa học sinh và điểm danh liên quan. Tiếp tục bước xác nhận?'
+                    : 'Bạn chắc chắn muốn xóa lớp này? Hành động không thể hoàn tác.'}
+            />
+
+            <Modal open={!!errorModal} onClose={() => setErrorModal('')} title="Không thể thực hiện">
+                <div className="flex items-start gap-3 text-red-500 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-3">
+                    <AlertTriangle size={20} className="mt-0.5" />
+                    <p className="text-sm text-red-500">{errorModal}</p>
+                </div>
+            </Modal>
         </div>
     );
 }
