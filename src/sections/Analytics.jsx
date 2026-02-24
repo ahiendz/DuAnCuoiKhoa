@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import api from '@/services/api';
 import {
   Bar,
   XAxis,
@@ -15,8 +16,6 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
-
-// The component will fetch data from /api/analytics/grades
 
 const metrics = [
   {
@@ -60,6 +59,15 @@ const colorMap = {
   }
 };
 
+const FALLBACK_DATA = [
+  { subject: 'Toán', HK1: 8.5, HK2: 9.0, trend: 8.75 },
+  { subject: 'Văn', HK1: 7.5, HK2: 8.2, trend: 7.85 },
+  { subject: 'Anh', HK1: 8.0, HK2: 8.5, trend: 8.25 },
+  { subject: 'Vật Lý', HK1: 7.8, HK2: 8.4, trend: 8.1 },
+  { subject: 'Hóa Học', HK1: 7.2, HK2: 8.0, trend: 7.6 },
+  { subject: 'Sinh Học', HK1: 8.8, HK2: 9.2, trend: 9.0 }
+];
+
 export default function Analytics() {
   const sectionRef = useRef(null);
   const chartRef = useRef(null);
@@ -68,45 +76,21 @@ export default function Analytics() {
   const [chartData, setChartData] = useState([]);
 
   useEffect(() => {
-    // Fetch analytics data
     const fetchAnalytics = async () => {
       try {
-        const res = await fetch('/api/analytics/grades');
-        if (!res.ok) {
-          throw new Error(`HTTP error ${res.status}`);
-        }
-
-        const text = await res.text();
-        const data = text ? JSON.parse(text) : null;
-
+        const res = await api.get('/analytics/grades');
+        const data = res.data;
         if (data && Array.isArray(data) && data.length > 0) {
           setChartData(data);
         } else {
-          // Fallback if no real data
-          setChartData([
-            { subject: 'Toán', HK1: 8.5, HK2: 9.0, trend: 8.75 },
-            { subject: 'Văn', HK1: 7.5, HK2: 8.2, trend: 7.85 },
-            { subject: 'Anh', HK1: 8.0, HK2: 8.5, trend: 8.25 },
-            { subject: 'Vật Lý', HK1: 7.8, HK2: 8.4, trend: 8.1 },
-            { subject: 'Hóa Học', HK1: 7.2, HK2: 8.0, trend: 7.6 },
-            { subject: 'Sinh Học', HK1: 8.8, HK2: 9.2, trend: 9.0 }
-          ]);
+          setChartData(FALLBACK_DATA);
         }
       } catch (err) {
-        // Fallback on error
-        setChartData([
-          { subject: 'Toán', HK1: 8.5, HK2: 9.0, trend: 8.75 },
-          { subject: 'Văn', HK1: 7.5, HK2: 8.2, trend: 7.85 },
-          { subject: 'Anh', HK1: 8.0, HK2: 8.5, trend: 8.25 },
-          { subject: 'Vật Lý', HK1: 7.8, HK2: 8.4, trend: 8.1 },
-          { subject: 'Hóa Học', HK1: 7.2, HK2: 8.0, trend: 7.6 },
-          { subject: 'Sinh Học', HK1: 8.8, HK2: 9.2, trend: 9.0 }
-        ]);
+        setChartData(FALLBACK_DATA);
       }
     };
     fetchAnalytics();
     const ctx = gsap.context(() => {
-      // Content animation
       gsap.fromTo(
         contentRef.current,
         { x: -50, opacity: 0 },
@@ -123,7 +107,6 @@ export default function Analytics() {
         }
       );
 
-      // Chart animation
       gsap.fromTo(
         chartRef.current,
         { x: 50, opacity: 0 },
@@ -141,7 +124,6 @@ export default function Analytics() {
         }
       );
 
-      // Metrics animation
       gsap.fromTo(
         metricsRef.current,
         { y: 30, opacity: 0 },

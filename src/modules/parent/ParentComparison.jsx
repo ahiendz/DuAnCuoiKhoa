@@ -1,7 +1,8 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 
 const ParentComparison = () => {
+  const shouldReduceMotion = useReducedMotion();
   const comparisonData = [
     { subject: 'Toán', student_avg: 7.2, class_avg: 6.5 },
     { subject: 'Văn', student_avg: 6.8, class_avg: 6.2 },
@@ -9,7 +10,11 @@ const ParentComparison = () => {
   ];
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+    <motion.div
+      initial={shouldReduceMotion ? false : { opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
       <div className="container mt-4">
         <h2 className="text-center text-light">So sánh lớp</h2>
         <table className="table table-dark table-striped">

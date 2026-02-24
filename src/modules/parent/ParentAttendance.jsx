@@ -1,8 +1,9 @@
 import React from 'react';
 import { Tabs, Tab } from 'react-bootstrap';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 
 const ParentAttendance = () => {
+  const shouldReduceMotion = useReducedMotion();
   const attendanceData = [
     { date: '2026-02-01', status: 'Có mặt', note: '' },
     { date: '2026-02-02', status: 'Vắng', note: 'Bị ốm' },
@@ -16,7 +17,11 @@ const ParentAttendance = () => {
   };
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+    <motion.div
+      initial={shouldReduceMotion ? false : { opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
       <div className="container mt-4">
         <h2 className="text-center text-light">Điểm danh</h2>
         <Tabs defaultActiveKey="month" id="attendance-tabs" className="mb-3">

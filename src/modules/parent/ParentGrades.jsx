@@ -1,8 +1,9 @@
 import React from 'react';
 import { Tabs, Tab } from 'react-bootstrap';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 
 const ParentGrades = () => {
+  const shouldReduceMotion = useReducedMotion();
   const gradesData = [
     { subject: 'Toán', oral: 8, quiz: 7, test: 6, midterm: 7, final: 8, average: 7.2 },
     { subject: 'Văn', oral: 6, quiz: 6.5, test: 7, midterm: 6, final: 7, average: 6.5 },
@@ -16,7 +17,11 @@ const ParentGrades = () => {
   };
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+    <motion.div
+      initial={shouldReduceMotion ? false : { opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
       <div className="container mt-4">
         <h2 className="text-center text-light">Bảng điểm</h2>
         <Tabs defaultActiveKey="hk1" id="grades-tabs" className="mb-3">

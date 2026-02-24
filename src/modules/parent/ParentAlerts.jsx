@@ -1,7 +1,8 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 
 const ParentAlerts = () => {
+  const shouldReduceMotion = useReducedMotion();
   const alerts = [
     { type: 'academic_decline', severity: 'warning', message: 'Học lực đang giảm 1.2 điểm so với HK1' },
     { type: 'low_subject_score', severity: 'danger', message: 'Môn Toán đang dưới trung bình' },
@@ -22,7 +23,11 @@ const ParentAlerts = () => {
   };
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+    <motion.div
+      initial={shouldReduceMotion ? false : { opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
       <div className="container mt-4">
         <h2 className="text-center text-light">Cảnh báo học tập</h2>
         {alerts.map((alert, index) => (

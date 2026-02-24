@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { useParentDashboard } from '@/hooks/useParentDashboard';
 import GradeTrendByTermChart from './GradeTrendByTermChart';
 
