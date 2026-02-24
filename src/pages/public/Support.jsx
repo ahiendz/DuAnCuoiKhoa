@@ -145,8 +145,8 @@ export default function Support() {
     };
 
     return (
-        <div className="flex-1 w-full bg-slate-50 dark:bg-[#0B1120] flex flex-col transition-colors duration-300 overflow-hidden">
-            <div className="flex-1 overflow-y-auto relative pb-12 px-4 sm:px-6 lg:px-8 pt-24 lg:pt-28 custom-scrollbar">
+        <div className="flex-1 w-full bg-slate-50 dark:bg-[#0B1120] flex flex-col transition-colors duration-300">
+            <div className="relative pb-12 px-4 sm:px-6 lg:px-8 pt-24 lg:pt-28">
                 {/* Background Orbs matching relative container layer */}
                 <div className="absolute top-0 left-[-10vw] w-[40vw] h-[40vw] bg-violet/20 blur-[120px] rounded-full pointer-events-none" />
                 <div className="absolute bottom-[-10vw] right-[-10vw] w-[40vw] h-[40vw] bg-indigo/20 blur-[120px] rounded-full pointer-events-none" />

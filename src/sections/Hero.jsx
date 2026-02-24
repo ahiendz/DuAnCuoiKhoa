@@ -99,7 +99,7 @@ export default function Hero() {
     <section
       id="home"
       ref={sectionRef}
-      className="relative min-h-screen w-full flex items-center justify-center overflow-hidden pt-16"
+      className="relative min-h-screen w-full flex items-center justify-center overflow-hidden pt-[var(--nav-height)]"
       style={{ background: 'linear-gradient(180deg, #0B1120 0%, #151D2E 100%)' }}>
 
       {/* Grid Lines */}

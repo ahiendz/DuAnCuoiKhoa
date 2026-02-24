@@ -1,14 +1,14 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Menu, X, ScanFace, GraduationCap, LogIn } from 'lucide-react';
+import { Menu, X, ScanFace, LogIn } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 
 const navLinks = [
   { name: 'Trang chủ', href: '#home' },
   { name: 'Tính năng', href: '#features' },
   { name: 'Phân tích', href: '#analytics' },
-  { name: 'Liên hệ', href: '#contact' }];
-
+  { name: 'Liên hệ', href: '#contact' }
+];
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -53,21 +53,26 @@ export default function Navbar() {
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ?
-            'bg-navy/80 backdrop-blur-xl border-b border-white/10' :
-            'bg-transparent'}`
-        }>
+        className={`fixed top-0 w-full z-50 transition-all duration-500 ease-in-out ${isScrolled
+            ? 'bg-navy/95 backdrop-blur-2xl border-b border-white/10 shadow-[0_10px_40px_rgba(0,0,0,0.6)] py-1'
+            : 'bg-transparent border-b border-transparent py-2'
+          }`}>
 
         <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 xl:px-12">
-          <div className="flex items-center justify-between h-16 lg:h-18">
+          <div className="flex items-center justify-between h-20 lg:h-24">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2 group">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet to-indigo flex items-center justify-center shadow-glow group-hover:shadow-glow-lg transition-shadow">
-                <GraduationCap className="w-5 h-5 text-white" />
+            <Link to="/" className="flex items-center gap-3 group">
+              <img
+                src="/logo/img.svg"
+                alt="School Manager Pro"
+                className="h-10 lg:h-12 w-auto object-contain transition-all duration-300 group-hover:scale-110"
+              />
+              <div className="flex flex-col">
+                <span className="text-xl lg:text-2xl font-bold text-white font-heading tracking-tight leading-tight whitespace-nowrap">
+                  School Manager <span className="gradient-text">Pro</span>
+                </span>
+                <span className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-bold">Smart Education System</span>
               </div>
-              <span className="font-heading font-bold text-lg text-white hidden sm:block">
-                School Manager Pro
-              </span>
             </Link>
 
             {/* Desktop Navigation */}
@@ -121,7 +126,7 @@ export default function Navbar() {
         }>
 
         <div className="absolute inset-0 bg-navy/95 backdrop-blur-xl" onClick={() => setIsMobileMenuOpen(false)} />
-        <div className="absolute top-16 left-0 right-0 p-6">
+        <div className="absolute top-24 left-0 right-0 p-6">
           <div className="flex flex-col gap-4">
             {navLinks.map((link) =>
               <a
