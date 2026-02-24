@@ -454,6 +454,145 @@ app.get("/api/analytics/grades", async (req, res) => {
   }
 });
 
+// Attendance analytics (school-wide)
+app.get("/api/attendance/analytics", async (req, res) => {
+  try {
+    const totalsQuery = `
+      WITH eligible_students AS (
+        SELECT id
+        FROM students
+        WHERE image_url IS NOT NULL
+          AND btrim(image_url) <> ''
+      ),
+      present_total AS (
+        SELECT COUNT(*) FILTER (WHERE a.status = 'present') AS present_count
+        FROM attendance a
+        JOIN eligible_students es ON es.id = a.student_id
+      ),
+      tracked_days AS (
+        SELECT COUNT(DISTINCT date::date) AS total_days
+        FROM attendance
+      )
+      SELECT
+        (SELECT COUNT(*) FROM eligible_students) AS eligible_total,
+        (SELECT present_count FROM present_total) AS present_count,
+        (SELECT total_days FROM tracked_days) AS total_days;
+    `;
+
+    const dailyQuery = `
+      WITH eligible_students AS (
+        SELECT id
+        FROM students
+        WHERE image_url IS NOT NULL
+          AND btrim(image_url) <> ''
+      )
+      SELECT
+        a.date::date AS date,
+        COUNT(*) FILTER (WHERE a.status = 'present') AS present_count
+      FROM attendance a
+      JOIN eligible_students es ON es.id = a.student_id
+      GROUP BY a.date::date
+      ORDER BY a.date::date;
+    `;
+
+    const classRatesQuery = `
+      WITH eligible_counts AS (
+        SELECT
+          c.id AS class_id,
+          c.name AS class_name,
+          COUNT(s.id) AS eligible_count
+        FROM classes c
+        LEFT JOIN students s
+          ON s.class_id = c.id
+          AND s.image_url IS NOT NULL
+          AND btrim(s.image_url) <> ''
+        GROUP BY c.id, c.name
+      ),
+      attendance_counts AS (
+        SELECT
+          a.class_id,
+          COUNT(*) FILTER (WHERE a.status = 'present') AS present_count,
+          COUNT(DISTINCT a.date::date) AS day_count
+        FROM attendance a
+        JOIN students s
+          ON s.id = a.student_id
+          AND s.image_url IS NOT NULL
+          AND btrim(s.image_url) <> ''
+        GROUP BY a.class_id
+      )
+      SELECT
+        ec.class_id,
+        ec.class_name,
+        ec.eligible_count,
+        COALESCE(ac.present_count, 0) AS present_count,
+        COALESCE(ac.day_count, 0) AS day_count,
+        CASE
+          WHEN ec.eligible_count > 0 AND COALESCE(ac.day_count, 0) > 0
+            THEN ROUND(COALESCE(ac.present_count, 0)::decimal / NULLIF(ec.eligible_count * COALESCE(ac.day_count, 0), 0) * 100, 2)
+          ELSE 0
+        END AS rate
+      FROM eligible_counts ec
+      LEFT JOIN attendance_counts ac ON ac.class_id = ec.class_id
+      WHERE ec.eligible_count > 0
+      ORDER BY rate ASC, ec.class_name;
+    `;
+
+    const [totalsRes, dailyRes, classRes] = await Promise.all([
+      db.query(totalsQuery),
+      db.query(dailyQuery),
+      db.query(classRatesQuery)
+    ]);
+
+    const totalsRow = totalsRes.rows[0] || {};
+    const eligibleTotal = Number(totalsRow.eligible_total) || 0;
+    const presentTotal = Number(totalsRow.present_count) || 0;
+    const totalTrackedDays = Number(totalsRow.total_days) || 0;
+
+    const dailyTrend = dailyRes.rows.map(row => {
+      const presentCount = Number(row.present_count) || 0;
+      const rate = eligibleTotal > 0
+        ? Math.round((presentCount / eligibleTotal) * 10000) / 100
+        : 0;
+      return {
+        date: row.date ? String(row.date).slice(0, 10) : "",
+        rate
+      };
+    });
+
+    const lowestDay = dailyTrend.length
+      ? dailyTrend.reduce((min, cur) => (cur.rate < min.rate ? cur : min), dailyTrend[0])
+      : null;
+
+    const highestDay = dailyTrend.length
+      ? dailyTrend.reduce((max, cur) => (cur.rate > max.rate ? cur : max), dailyTrend[0])
+      : null;
+
+    const classRates = classRes.rows.map(row => ({
+      class_name: row.class_name,
+      rate: parseFloat(row.rate) || 0
+    }));
+
+    const lowestClass = classRates.length ? classRates[0] : null;
+    const highestClass = classRates.length ? classRates[classRates.length - 1] : null;
+
+    const overallRate = eligibleTotal > 0 && totalTrackedDays > 0
+      ? Math.round((presentTotal / (eligibleTotal * totalTrackedDays)) * 10000) / 100
+      : 0;
+
+    return res.json({
+      daily_trend: dailyTrend,
+      total_tracked_days: totalTrackedDays,
+      lowest_class: lowestClass,
+      highest_class: highestClass,
+      lowest_day: lowestDay,
+      highest_day: highestDay,
+      overall_rate: overallRate
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
 app.get("/api/attendance", async (req, res) => {
   const { date, class_id } = req.query;
   try {

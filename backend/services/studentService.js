@@ -119,9 +119,26 @@ async function listStudents(filter = {}) {
       s.gender,
       s.class_id,
       s.image_url AS avatar_url,
-      c.name AS class_name
+      c.name AS class_name,
+      par.parent_name,
+      par.parent_email,
+      par.parent_phone,
+      par.relationship AS parent_relation
     FROM students s
     LEFT JOIN classes c ON c.id = s.class_id
+    LEFT JOIN LATERAL (
+      SELECT 
+        p.full_name AS parent_name,
+        u.email AS parent_email,
+        p.phone AS parent_phone,
+        sp.relationship
+      FROM student_parents sp
+      JOIN parents p ON p.id = sp.parent_id
+      JOIN users u ON u.id = p.user_id
+      WHERE sp.student_id = s.id
+      ORDER BY sp.created_at DESC NULLS LAST, sp.parent_id
+      LIMIT 1
+    ) par ON TRUE
     ${where}
     ORDER BY s.full_name;
   `;
@@ -133,9 +150,13 @@ async function listStudents(filter = {}) {
     student_code: row.student_code,
     dob: row.dob ? String(row.dob).slice(0, 10) : "",
     gender: row.gender || "",
-    class_id: row.class_name || "",
+    class_id: row.class_id,
     class_name: row.class_name || "",
-    avatar_url: row.avatar_url || null
+    avatar_url: row.avatar_url || null,
+    parent_name: row.parent_name || "",
+    parent_email: row.parent_email || "",
+    parent_phone: row.parent_phone || "",
+    parent_relation: row.parent_relation || ""
   }));
 
   logDebug(classInfo ? "Filter students" : "List students", {
