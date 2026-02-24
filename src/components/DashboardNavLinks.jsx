@@ -1,7 +1,7 @@
-import React from 'react';
+﻿import React from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 
-const navLinks = [
+export const navLinks = [
     { name: 'Trang chủ', href: '/' },
     { name: 'Tính năng', href: '/#features' },
     { name: 'Phân tích', href: '/#analytics' },
