@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { NotificationProvider } from '@/context/NotificationContext';
@@ -6,7 +6,7 @@ import { ThemeProvider } from '@/context/ThemeContext';
 
 // Layouts
 import PublicLayout from '@/layouts/PublicLayout';
-import MainLayout from '@/layouts/MainLayout';
+import DashboardLayout from '@/layouts/DashboardLayout';
 
 // Public pages
 import PublicHome from '@/pages/public/Home';
@@ -23,20 +23,21 @@ import Students from '@/pages/admin/Students';
 import AdminAttendance from '@/pages/admin/Attendance';
 
 // Teacher pages
-import TeacherLayout from '@/layouts/TeacherLayout';
 import TeacherDashboard from '@/pages/teacher/Dashboard';
 import Gradebook from '@/pages/teacher/Gradebook';
 import Notes from '@/pages/teacher/Notes';
+import TeacherClasses from '@/pages/teacher/Classes';
 
 // Parent pages
 import ParentDashboard from '@/pages/parent/Dashboard';
 import ParentGrades from '@/pages/parent/Grades';
 import ParentAttendance from '@/pages/parent/Attendance';
 import ParentChangePassword from '@/modules/parent/ParentChangePassword';
+import ParentNotifications from '@/pages/parent/Notifications';
 
 import {
     LayoutDashboard, Users, GraduationCap, BookOpen,
-    ClipboardList, StickyNote, Calendar, FileText
+    ClipboardList, StickyNote, Calendar, FileText, Bell
 } from 'lucide-react';
 
 const adminNav = [
@@ -49,14 +50,16 @@ const adminNav = [
 
 const teacherNav = [
     { to: '/teacher', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/teacher/gradebook', icon: BookOpen, label: 'Nhập điểm' },
+    { to: '/teacher/classes', icon: BookOpen, label: 'Lớp phụ trách' },
+    { to: '/teacher/gradebook', icon: FileText, label: 'Nhập điểm' },
     { to: '/teacher/notes', icon: StickyNote, label: 'Ghi chú' },
 ];
 
 const parentNav = [
-    { to: '/parent', icon: LayoutDashboard, label: 'Trang chủ' },
+    { to: '/parent', icon: LayoutDashboard, label: 'Tổng quan' },
     { to: '/parent/grades', icon: FileText, label: 'Điểm số' },
-    { to: '/parent/attendance', icon: Calendar, label: 'Điểm danh' },
+    { to: '/parent/attendance', icon: Calendar, label: 'Lịch sử điểm danh' },
+    { to: '/parent/notifications', icon: Bell, label: 'Thông báo' },
 ];
 
 function ProtectedRoute({ children, allowedRoles }) {
@@ -88,7 +91,7 @@ function AppRoutes() {
             {/* Admin */}
             <Route path="/admin" element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                    <MainLayout navItems={adminNav} roleTitle="Quản trị viên" />
+                    <DashboardLayout sidebarItems={adminNav} roleTitle="Quản trị viên" />
                 </ProtectedRoute>
             }>
                 <Route index element={<AdminDashboard />} />
@@ -101,29 +104,28 @@ function AppRoutes() {
             {/* Teacher */}
             <Route path="/teacher" element={
                 <ProtectedRoute allowedRoles={['teacher']}>
-                    <TeacherLayout />
+                    <DashboardLayout sidebarItems={teacherNav} roleTitle="Giáo viên" />
                 </ProtectedRoute>
             }>
                 <Route index element={<TeacherDashboard />} />
+                <Route path="classes" element={<TeacherClasses />} />
                 <Route path="gradebook" element={<Gradebook />} />
                 <Route path="notes" element={<Notes />} />
-                {/* Feature page placeholder if needed, otherwise redirect or add */}
-                <Route path="features" element={<div className="p-10 text-center">Tính năng đang phát triển</div>} />
             </Route>
 
             {/* Parent */}
             {/* Parent - Password Change (no layout, before login redirect) */}
             <Route path="/parent/change-password" element={<ParentChangePassword />} />
 
-            {/* Parent */}
             <Route path="/parent" element={
                 <ProtectedRoute allowedRoles={['parent']}>
-                    <MainLayout navItems={parentNav} roleTitle="Phụ huynh" />
+                    <DashboardLayout sidebarItems={parentNav} roleTitle="Phụ huynh" />
                 </ProtectedRoute>
             }>
                 <Route index element={<ParentDashboard />} />
                 <Route path="grades" element={<ParentGrades />} />
                 <Route path="attendance" element={<ParentAttendance />} />
+                <Route path="notifications" element={<ParentNotifications />} />
             </Route>
 
             {/* Fallback */}
@@ -145,4 +147,3 @@ export default function App() {
         </ThemeProvider>
     );
 }
-
