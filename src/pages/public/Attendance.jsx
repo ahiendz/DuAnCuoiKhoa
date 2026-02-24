@@ -648,7 +648,7 @@ export default function Attendance() {
      RENDER
      ────────────────────────────────────────────── */
   return (
-    <div ref={containerRef} className="min-h-screen bg-navy pt-20 pb-8">
+    <div ref={containerRef} className="min-h-screen bg-navy pt-[var(--nav-height)] pb-8">
       {/* ── Header ── */}
       <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 mb-6">
         <div className="max-w-7xl mx-auto">

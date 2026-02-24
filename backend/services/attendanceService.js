@@ -57,7 +57,7 @@ async function listFaceAttendance({ date, class_name }) {
   const normalizedDate = normalizeDate(date);
   if (normalizedDate) {
     params.push(normalizedDate);
-    clauses.push(`a.date = $${params.length}`);
+    clauses.push(`a.created_at::date = $${params.length}`);
   }
 
   if (class_name) {
@@ -72,14 +72,14 @@ async function listFaceAttendance({ date, class_name }) {
       s.full_name,
       a.class_id,
       c.name AS class_name,
-      a.date,
+      TO_CHAR(a.created_at, 'YYYY-MM-DD') AS date,
       TO_CHAR(a.created_at, 'HH24:MI:SS') AS time,
       a.confidence
     FROM attendance a
     JOIN students s ON s.id = a.student_id
     LEFT JOIN classes c ON c.id = a.class_id
     ${where}
-    ORDER BY a.date DESC, time DESC;
+    ORDER BY a.created_at DESC;
   `;
 
   const { rows } = await pool.query(query, params);

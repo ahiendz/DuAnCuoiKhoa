@@ -1,34 +1,93 @@
 import React, { useEffect, useState } from 'react';
-import { Calendar } from 'lucide-react';
-import { getFaceAttendance } from '@/services/attendanceService';
+import { Download } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { getFaceAttendance, exportAttendanceDbCsv, getAttendanceAnalytics } from '@/services/attendanceService';
 import { getClasses } from '@/services/classService';
 
 export default function Attendance() {
     const [classes, setClasses] = useState([]);
     const [classFilter, setClassFilter] = useState('');
-    const [dateFilter, setDateFilter] = useState(new Date().toISOString().split('T')[0]);
+    const [dateFilter, setDateFilter] = useState('');
     const [faceData, setFaceData] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [analytics, setAnalytics] = useState({
+        daily_trend: [],
+        total_tracked_days: 0,
+        lowest_class: null,
+        highest_class: null,
+        lowest_day: null,
+        highest_day: null,
+        overall_rate: 0
+    });
+    const [analyticsError, setAnalyticsError] = useState('');
+    const [exporting, setExporting] = useState(false);
 
     useEffect(() => {
         getClasses().then(setClasses).catch(() => { });
     }, []);
 
+    const formatDate = (value) => {
+        if (!value) return '';
+        const d = new Date(value);
+        if (Number.isNaN(d.getTime())) return value;
+        return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    };
+
     const loadData = async () => {
         setLoading(true);
+        setAnalyticsError('');
         try {
             const params = {};
             if (dateFilter) params.date = dateFilter;
-            if (classFilter) {
-                const cls = classes.find(c => String(c.id) === String(classFilter));
-                if (cls) params.class_name = cls.name;
-            }
+            if (classFilter) params.class_name = classFilter;
             const data = await getFaceAttendance(params);
             setFaceData(Array.isArray(data) ? data : []);
-        } catch { } finally { setLoading(false); }
+        } catch (err) {
+            setAnalyticsError(err.response?.data?.error || 'Không tải được dữ liệu điểm danh');
+            setFaceData([]);
+        } finally { setLoading(false); }
     };
 
     useEffect(() => { loadData(); }, [dateFilter, classFilter]);
+
+    useEffect(() => {
+        const loadAnalytics = async () => {
+            setAnalyticsError('');
+            try {
+                const data = await getAttendanceAnalytics();
+                console.log("Analytics Payload:", data);
+                setAnalytics({
+                    daily_trend: Array.isArray(data?.daily_trend) ? data.daily_trend : [],
+                    total_tracked_days: Number(data?.total_tracked_days) || 0,
+                    lowest_class: data?.lowest_class ?? null,
+                    highest_class: data?.highest_class ?? null,
+                    lowest_day: data?.lowest_day ?? null,
+                    highest_day: data?.highest_day ?? null,
+                    overall_rate: Number(data?.overall_rate) || 0
+                });
+            } catch (err) {
+                setAnalyticsError(err.response?.data?.error || 'Không tải được phân tích điểm danh');
+                setAnalytics({
+                    daily_trend: [],
+                    total_tracked_days: 0,
+                    lowest_class: null,
+                    highest_class: null,
+                    lowest_day: null,
+                    highest_day: null,
+                    overall_rate: 0
+                });
+            }
+        };
+
+        loadAnalytics();
+    }, []);
+
+    const barData = [
+        { label: 'Lớp thấp nhất', value: analytics.lowest_class?.rate ?? 0 },
+        { label: 'Lớp cao nhất', value: analytics.highest_class?.rate ?? 0 },
+        { label: 'Ngày thấp nhất', value: analytics.lowest_day?.rate ?? 0 },
+        { label: 'Ngày cao nhất', value: analytics.highest_day?.rate ?? 0 }
+    ];
 
     return (
         <div className="space-y-6">
@@ -39,14 +98,106 @@ export default function Attendance() {
                 </div>
             </div>
 
+            <div className="glass-card p-4 space-y-4">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                    <div>
+                    <p className="text-sm text-slate-400">Tổng quan chuyên cần</p>
+                    <h3 className="text-xl font-semibold text-slate-50">{analytics.overall_rate != null ? `${analytics.overall_rate}%` : '0%'}</h3>
+                    <p className="text-xs text-slate-400 mt-1">Dữ liệu ngày: {analytics.total_tracked_days || 0} ngày</p>
+                </div>
+                <div className="flex gap-2">
+                    <button
+                        onClick={async () => {
+                            try {
+                                    setExporting(true);
+                                    await exportAttendanceDbCsv();
+                                } finally {
+                                    setExporting(false);
+                                }
+                            }}
+                            disabled={exporting}
+                            className="btn-secondary flex items-center gap-2 disabled:opacity-50"
+                        >
+                            <Download size={16} /> {exporting ? 'Đang xuất...' : 'Export toàn bộ DB'}
+                        </button>
+                    </div>
+                </div>
+
+                {analyticsError && <div className="text-red-400 text-sm">{analyticsError}</div>}
+
+                <div className="grid md:grid-cols-4 gap-3">
+                    <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
+                        <p className="text-xs text-slate-400 uppercase mb-1">Lớp thấp nhất</p>
+                        <div className="text-lg font-semibold text-slate-50">
+                            {analytics.lowest_class ? `${analytics.lowest_class.class_name} - ${analytics.lowest_class.rate ?? 0}%` : '—'}
+                        </div>
+                    </div>
+                    <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
+                        <p className="text-xs text-slate-400 uppercase mb-1">Lớp cao nhất</p>
+                        <div className="text-lg font-semibold text-slate-50">
+                            {analytics.highest_class ? `${analytics.highest_class.class_name} - ${analytics.highest_class.rate ?? 0}%` : '—'}
+                        </div>
+                    </div>
+                    <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
+                        <p className="text-xs text-slate-400 uppercase mb-1">Ngày thấp nhất</p>
+                        <div className="text-lg font-semibold text-slate-50">
+                            {analytics.lowest_day ? `${formatDate(analytics.lowest_day.date)} - ${analytics.lowest_day.rate ?? 0}%` : '—'}
+                        </div>
+                    </div>
+                    <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
+                        <p className="text-xs text-slate-400 uppercase mb-1">Ngày cao nhất</p>
+                        <div className="text-lg font-semibold text-slate-50">
+                            {analytics.highest_day ? `${formatDate(analytics.highest_day.date)} - ${analytics.highest_day.rate ?? 0}%` : '—'}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="h-48">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={barData}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
+                            <XAxis dataKey="label" stroke="#94a3b8" />
+                            <YAxis domain={[0, 100]} stroke="#94a3b8" tickFormatter={v => `${v}%`} />
+                            <Tooltip formatter={(v) => [`${v}%`, 'Tỷ lệ']} />
+                            <Bar dataKey="value" fill="#22d3ee" radius={[6, 6, 0, 0]} />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
+
+                <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={analytics.daily_trend || []}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
+                            <XAxis dataKey="date" stroke="#94a3b8" tickFormatter={(v) => formatDate(v).slice(0, 5)} />
+                            <YAxis domain={[0, 100]} stroke="#94a3b8" tickFormatter={v => `${v}%`} />
+                            <Tooltip formatter={(v, _name, props) => [`${v}%`, formatDate(props?.payload?.date)]} />
+                            <Line type="monotone" dataKey="rate" stroke="#a78bfa" strokeWidth={2} dot={false} />
+                        </LineChart>
+                    </ResponsiveContainer>
+                </div>
+            </div>
+
             {/* Filters */}
             <div className="flex flex-col sm:flex-row gap-3">
-                <input type="date" className="input-field w-auto" value={dateFilter} onChange={e => setDateFilter(e.target.value)} />
+                <div className="flex items-center gap-2">
+                    <input
+                        type="date"
+                        className="input-field w-auto"
+                        value={dateFilter}
+                        onChange={e => setDateFilter(e.target.value)}
+                    />
+                    <button
+                        type="button"
+                        onClick={() => setDateFilter('')}
+                        className="btn-secondary w-auto px-4"
+                    >
+                        Tất cả ngày
+                    </button>
+                </div>
                 <select className="input-field w-auto min-w-[160px]" value={classFilter} onChange={e => setClassFilter(e.target.value)}>
                     <option value="">Tất cả lớp</option>
-                    {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                    {classes.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
                 </select>
-                <button onClick={loadData} className="btn-primary w-auto px-6">Lọc dữ liệu</button>
             </div>
 
             {/* Data table */}
@@ -70,8 +221,8 @@ export default function Attendance() {
                                         <td className="px-4 py-3 text-slate-600 dark:text-slate-400 font-mono text-xs">{r.student_code}</td>
                                         <td className="px-4 py-3 font-medium text-slate-800 dark:text-white">{r.full_name}</td>
                                         <td className="px-4 py-3 text-slate-600 dark:text-slate-400">{r.class_name}</td>
-                                        <td className="px-4 py-3 text-slate-600 dark:text-slate-400 font-mono text-xs">{r.date || new Date(r.timestamp).toLocaleDateString('vi-VN')}</td>
-                                        <td className="px-4 py-3 text-slate-600 dark:text-slate-400 font-mono text-xs">{r.timestamp ? new Date(r.timestamp).toLocaleTimeString('vi-VN') : '-'}</td>
+                                        <td className="px-4 py-3 text-slate-600 dark:text-slate-400 font-mono text-xs">{formatDate(r.date)}</td>
+                                        <td className="px-4 py-3 text-slate-600 dark:text-slate-400 font-mono text-xs">{r.time || '-'}</td>
                                         <td className="px-4 py-3">
                                             <div className="flex items-center gap-2">
                                                 <div className="w-16 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
