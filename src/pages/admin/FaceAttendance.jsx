@@ -167,22 +167,22 @@ export default function FaceAttendance() {
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Điểm danh khuôn mặt</h2>
-                <p className="text-slate-500 dark:text-slate-400 text-sm">Quản lý nhận diện khuôn mặt và điểm danh</p>
+                <h2 className="text-2xl font-bold text-[var(--text-primary)]">Điểm danh khuôn mặt</h2>
+                <p className="text-[var(--text-secondary)] text-sm">Quản lý nhận diện khuôn mặt và điểm danh</p>
             </div>
 
             {/* Tabs */}
-            <div className="flex bg-slate-100 dark:bg-slate-800 rounded-lg p-1 gap-1 w-fit">
+            <div className="flex bg-[var(--hover-bg)] rounded-lg p-1 gap-1 w-fit">
                 <button onClick={() => setActiveTab('scan')}
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${activeTab === 'scan' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500'}`}>
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${activeTab === 'scan' ? 'bg-[var(--bg-elevated)] text-indigo-500 shadow-sm' : 'text-slate-500'}`}>
                     <Camera size={16} /> Quét điểm danh
                 </button>
                 <button onClick={() => setActiveTab('train')}
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${activeTab === 'train' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500'}`}>
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${activeTab === 'train' ? 'bg-[var(--bg-elevated)] text-indigo-500 shadow-sm' : 'text-slate-500'}`}>
                     <Upload size={16} /> Huấn luyện
                 </button>
                 <button onClick={() => setActiveTab('registered')}
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${activeTab === 'registered' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500'}`}>
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${activeTab === 'registered' ? 'bg-[var(--bg-elevated)] text-indigo-500 shadow-sm' : 'text-slate-500'}`}>
                     <Users size={16} /> Đã đăng ký
                 </button>
             </div>
@@ -190,9 +190,9 @@ export default function FaceAttendance() {
             {/* Scan Tab */}
             {activeTab === 'scan' && (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
-                        <h3 className="font-semibold text-slate-800 dark:text-white mb-4">Camera</h3>
-                        <div className="aspect-video bg-slate-100 dark:bg-slate-800 rounded-lg overflow-hidden mb-4">
+                    <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border-default)] p-5 shadow-sm">
+                        <h3 className="font-semibold text-[var(--text-primary)] mb-4">Camera</h3>
+                        <div className="aspect-video bg-[var(--hover-bg)] rounded-lg overflow-hidden mb-4">
                             <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
                         </div>
                         <div className="flex gap-3">
@@ -204,15 +204,15 @@ export default function FaceAttendance() {
                         </div>
 
                         {matchResult && (
-                            <div className="mt-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                            <div className="mt-4 p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
                                 <div className="flex items-start gap-3">
                                     {matchResult.avatar_url && (
                                         <img src={matchResult.avatar_url} alt="" className="w-16 h-16 rounded-full object-cover" />
                                     )}
                                     <div className="flex-1">
-                                        <p className="font-semibold text-slate-800 dark:text-white">{matchResult.full_name}</p>
-                                        <p className="text-sm text-slate-600 dark:text-slate-400">{matchResult.student_code}</p>
-                                        <p className="text-xs text-green-600 dark:text-green-400">Độ tin cậy: {(matchResult.confidence * 100).toFixed(1)}%</p>
+                                        <p className="font-semibold text-[var(--text-primary)]">{matchResult.full_name}</p>
+                                        <p className="text-sm text-[var(--text-secondary)]">{matchResult.student_code}</p>
+                                        <p className="text-xs text-green-500">Độ tin cậy: {(matchResult.confidence * 100).toFixed(1)}%</p>
                                     </div>
                                 </div>
                                 <button onClick={confirmAttendance} className="btn-primary w-full mt-3">Xác nhận điểm danh</button>
@@ -220,14 +220,14 @@ export default function FaceAttendance() {
                         )}
                     </div>
 
-                    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
-                        <h3 className="font-semibold text-slate-800 dark:text-white mb-4">Điểm danh gần đây</h3>
+                    <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border-default)] p-5 shadow-sm">
+                        <h3 className="font-semibold text-[var(--text-primary)] mb-4">Điểm danh gần đây</h3>
                         <div className="space-y-2">
                             {recentAttendance.map((r, i) => (
-                                <div key={i} className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                                <div key={i} className="flex items-center gap-3 p-3 bg-[var(--hover-bg)] rounded-lg">
                                     <CheckCircle size={16} className="text-green-500" />
                                     <div className="flex-1">
-                                        <p className="text-sm font-medium text-slate-800 dark:text-white">{r.full_name}</p>
+                                        <p className="text-sm font-medium text-[var(--text-primary)]">{r.full_name}</p>
                                         <p className="text-xs text-slate-500">{r.timestamp}</p>
                                     </div>
                                     <span className="text-xs text-slate-400">{(r.confidence * 100).toFixed(0)}%</span>
@@ -243,30 +243,30 @@ export default function FaceAttendance() {
 
             {/* Train Tab */}
             {activeTab === 'train' && (
-                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm max-w-2xl">
-                    <h3 className="font-semibold text-slate-800 dark:text-white mb-4">Huấn luyện khuôn mặt</h3>
+                <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border-default)] p-5 shadow-sm max-w-2xl">
+                    <h3 className="font-semibold text-[var(--text-primary)] mb-4">Huấn luyện khuôn mặt</h3>
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Lớp</label>
+                            <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">Lớp</label>
                             <select className="input-field" value={trainClass} onChange={e => setTrainClass(e.target.value)}>
                                 <option value="">Chọn lớp</option>
                                 {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                             </select>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Học sinh</label>
+                            <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">Học sinh</label>
                             <select className="input-field" value={selectedStudent} onChange={e => setSelectedStudent(e.target.value)} disabled={!trainClass}>
                                 <option value="">Chọn học sinh</option>
                                 {trainStudents.map(s => <option key={s.id} value={s.id}>{s.full_name} ({s.student_code})</option>)}
                             </select>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Ảnh khuôn mặt</label>
+                            <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">Ảnh khuôn mặt</label>
                             <input type="file" accept="image/*" onChange={handleTrainImage} className="input-field" />
                             {trainingImage && <p className="text-xs text-green-600 mt-1">Đã chọn: {trainingImage.name}</p>}
                         </div>
                         {trainingMsg && (
-                            <div className={`p-3 rounded-lg text-sm ${trainingMsg.includes('thành công') ? 'bg-green-50 dark:bg-green-900/20 text-green-600' : 'bg-red-50 dark:bg-red-900/20 text-red-600'}`}>
+                            <div className={`p-3 rounded-lg text-sm ${trainingMsg.includes('thành công') ? 'bg-green-500/10 text-green-600' : 'bg-red-500/10 text-red-600'}`}>
                                 {trainingMsg}
                             </div>
                         )}
@@ -277,29 +277,29 @@ export default function FaceAttendance() {
 
             {/* Registered Tab */}
             {activeTab === 'registered' && (
-                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+                <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border-default)] overflow-hidden shadow-sm">
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                             <thead>
-                                <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+                                <tr className="bg-[var(--hover-bg)] border-b border-[var(--border-default)]">
                                     <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Mã HS</th>
                                     <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Họ tên</th>
                                     <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Lớp</th>
                                     <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Trạng thái</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                            <tbody className="divide-y divide-[var(--border-subtle)]">
                                 {loading ? (
                                     <tr><td colSpan={4} className="text-center py-8 text-slate-400">Đang tải...</td></tr>
                                 ) : registeredStudents.length === 0 ? (
                                     <tr><td colSpan={4} className="text-center py-8 text-slate-400">Chưa có học sinh đăng ký</td></tr>
                                 ) : registeredStudents.map(s => (
-                                    <tr key={s.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30">
+                                    <tr key={s.id} className="hover:bg-[var(--hover-bg)]/30">
                                         <td className="px-4 py-3 font-mono text-xs text-slate-500">{s.student_code}</td>
-                                        <td className="px-4 py-3 font-medium text-slate-800 dark:text-white">{s.full_name}</td>
-                                        <td className="px-4 py-3 text-slate-600 dark:text-slate-400">{s.class_name}</td>
+                                        <td className="px-4 py-3 font-medium text-[var(--text-primary)]">{s.full_name}</td>
+                                        <td className="px-4 py-3 text-[var(--text-secondary)]">{s.class_name}</td>
                                         <td className="px-4 py-3">
-                                            <span className="text-xs px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-900/20 text-green-600 flex items-center gap-1 w-fit">
+                                            <span className="text-xs px-2 py-0.5 rounded-full bg-green-500/10 text-green-600 flex items-center gap-1 w-fit">
                                                 <CheckCircle size={12} /> Đã đăng ký
                                             </span>
                                         </td>
