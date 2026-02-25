@@ -90,8 +90,8 @@ export default function AdminDashboard() {
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div>
-                    <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Admin Dashboard</h2>
-                    <p className="text-slate-500 dark:text-slate-400 text-sm">Tổng quan hệ thống</p>
+                    <h2 className="text-2xl font-bold text-[var(--text-primary)]">Admin Dashboard</h2>
+                    <p className="text-[var(--text-secondary)] text-sm">Tổng quan hệ thống</p>
                 </div>
             </div>
 
@@ -106,8 +106,8 @@ export default function AdminDashboard() {
             {/* Charts row 1 */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Student distribution */}
-                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
-                    <h3 className="font-semibold text-slate-800 dark:text-white mb-4">Phân bố học sinh theo khối</h3>
+                <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border-default)] p-5 shadow-sm">
+                    <h3 className="font-semibold text-[var(--text-primary)] mb-4">Phân bố học sinh theo khối</h3>
                     {studentDistData.length > 0 ? (
                         <ResponsiveContainer width="100%" height={250}>
                             <BarChart data={studentDistData}>
@@ -122,8 +122,8 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Teacher distribution */}
-                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
-                    <h3 className="font-semibold text-slate-800 dark:text-white mb-4">Phân bố giáo viên theo môn</h3>
+                <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border-default)] p-5 shadow-sm">
+                    <h3 className="font-semibold text-[var(--text-primary)] mb-4">Phân bố giáo viên theo môn</h3>
                     {teacherDistData.length > 0 ? (
                         <ResponsiveContainer width="100%" height={250}>
                             <PieChart>
@@ -139,8 +139,8 @@ export default function AdminDashboard() {
             </div>
 
             {/* Charts row 2 - Class size */}
-            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
-                <h3 className="font-semibold text-slate-800 dark:text-white mb-4">Top lớp có sĩ số cao nhất</h3>
+            <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border-default)] p-5 shadow-sm">
+                <h3 className="font-semibold text-[var(--text-primary)] mb-4">Top lớp có sĩ số cao nhất</h3>
                 {classSizeData.length > 0 ? (
                     <ResponsiveContainer width="100%" height={250}>
                         <BarChart data={classSizeData} layout="vertical">
@@ -155,8 +155,8 @@ export default function AdminDashboard() {
             </div>
 
             {/* Notes panel */}
-            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
-                <h3 className="font-semibold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
+            <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border-default)] p-5 shadow-sm">
+                <h3 className="font-semibold text-[var(--text-primary)] mb-4 flex items-center gap-2">
                     <StickyNote size={18} className="text-yellow-500" /> Ghi chú hệ thống
                 </h3>
                 <div className="flex gap-2 mb-4">
@@ -165,12 +165,12 @@ export default function AdminDashboard() {
                 </div>
                 <div className="space-y-2 max-h-60 overflow-y-auto">
                     {notes.map(n => (
-                        <div key={n.id} className="flex items-start gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+                        <div key={n.id} className="flex items-start gap-3 p-3 rounded-lg bg-[var(--hover-bg)] border border-[var(--border-subtle)]">
                             <div className="flex-1">
-                                <p className="text-sm text-slate-800 dark:text-white">{n.text}</p>
+                                <p className="text-sm text-[var(--text-primary)]">{n.text}</p>
                                 <p className="text-[10px] text-slate-400 mt-1">{n.date}</p>
                             </div>
-                            <button onClick={() => deleteNote(n.id)} className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 hover:text-red-500 shrink-0"><Trash2 size={12} /></button>
+                            <button onClick={() => deleteNote(n.id)} className="p-1 rounded hover:bg-[var(--hover-bg)] text-slate-400 hover:text-red-500 shrink-0"><Trash2 size={12} /></button>
                         </div>
                     ))}
                     {notes.length === 0 && <p className="text-sm text-slate-400 text-center py-4">Chưa có ghi chú</p>}

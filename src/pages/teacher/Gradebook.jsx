@@ -146,14 +146,14 @@ export default function Gradebook() {
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Nhập điểm</h2>
-                    <p className="text-slate-500 dark:text-slate-400 text-sm">Quản lý điểm số học sinh</p>
+                    <h2 className="text-2xl font-bold text-[var(--text-primary)]">Nhập điểm</h2>
+                    <p className="text-[var(--text-secondary)] text-sm">Quản lý điểm số học sinh</p>
                 </div>
                 <div className="flex gap-2 flex-wrap">
-                    <button onClick={() => setImportModal(true)} className="px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 text-sm flex items-center gap-2">
+                    <button onClick={() => setImportModal(true)} className="px-3 py-2 rounded-lg border border-[var(--border-default)] text-[var(--text-secondary)] hover:bg-[var(--hover-bg)] text-sm flex items-center gap-2">
                         <Upload size={16} /> Import
                     </button>
-                    <button onClick={handleExport} className="px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 text-sm flex items-center gap-2">
+                    <button onClick={handleExport} className="px-3 py-2 rounded-lg border border-[var(--border-default)] text-[var(--text-secondary)] hover:bg-[var(--hover-bg)] text-sm flex items-center gap-2">
                         <Download size={16} /> Export
                     </button>
                     <button onClick={handleSaveAll} disabled={saving} className="btn-primary flex items-center gap-2 text-sm">
@@ -179,7 +179,7 @@ export default function Gradebook() {
                         <option value="TB">Trung bình</option>
                         <option value="Yếu">Yếu</option>
                     </select>
-                    <button onClick={applyQuickTag} className="px-3 py-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 text-sm hover:bg-indigo-200 dark:hover:bg-indigo-900/30 flex items-center gap-1">
+                    <button onClick={applyQuickTag} className="px-3 py-2 rounded-lg bg-indigo-500/15 text-indigo-500 text-sm hover:bg-indigo-200  flex items-center gap-1">
                         <Tag size={14} /> Áp dụng
                     </button>
                 </div>
@@ -187,44 +187,44 @@ export default function Gradebook() {
 
             {
                 loading ? <div className="text-center py-10 text-slate-500">Đang tải...</div> : (
-                    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+                    <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border-default)] overflow-hidden shadow-sm">
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm">
                                 <thead>
-                                    <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
-                                        <th className="text-left px-3 py-3 text-xs font-semibold text-slate-500 uppercase sticky left-0 bg-slate-50 dark:bg-slate-800/50">STT</th>
-                                        <th className="text-left px-3 py-3 text-xs font-semibold text-slate-500 uppercase sticky left-10 bg-slate-50 dark:bg-slate-800/50">Mã HS</th>
-                                        <th className="text-left px-3 py-3 text-xs font-semibold text-slate-500 uppercase sticky left-28 bg-slate-50 dark:bg-slate-800/50 min-w-[140px]">Họ tên</th>
+                                    <tr className="bg-[var(--hover-bg)] border-b border-[var(--border-default)]">
+                                        <th className="text-left px-3 py-3 text-xs font-semibold text-slate-500 uppercase sticky left-0 bg-[var(--hover-bg)]">STT</th>
+                                        <th className="text-left px-3 py-3 text-xs font-semibold text-slate-500 uppercase sticky left-10 bg-[var(--hover-bg)]">Mã HS</th>
+                                        <th className="text-left px-3 py-3 text-xs font-semibold text-slate-500 uppercase sticky left-28 bg-[var(--hover-bg)] min-w-[140px]">Họ tên</th>
                                         {SCORE_COLS.map(c => (
                                             <th key={c.key} className="text-center px-2 py-3 text-xs font-semibold text-slate-500 uppercase min-w-[70px]">{c.label}</th>
                                         ))}
-                                        <th className="text-center px-3 py-3 text-xs font-semibold text-slate-500 uppercase bg-indigo-50 dark:bg-indigo-900/20">TBHK</th>
+                                        <th className="text-center px-3 py-3 text-xs font-semibold text-slate-500 uppercase bg-indigo-500/10">TBHK</th>
                                         <th className="text-center px-3 py-3 text-xs font-semibold text-slate-500 uppercase">Tag</th>
                                         <th className="text-left px-3 py-3 text-xs font-semibold text-slate-500 uppercase min-w-[120px]">Nhận xét</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                                <tbody className="divide-y divide-[var(--border-subtle)]">
                                     {grades.map((g, idx) => {
                                         const avg = calcAverage(g);
                                         return (
-                                            <tr key={g.student_id || idx} className="hover:bg-slate-50 dark:hover:bg-slate-800/30">
-                                                <td className="px-3 py-2 text-slate-500 sticky left-0 bg-white dark:bg-slate-900 text-xs">{idx + 1}</td>
-                                                <td className="px-3 py-2 text-slate-600 dark:text-slate-400 font-mono text-xs sticky left-10 bg-white dark:bg-slate-900">{g.student_code}</td>
-                                                <td className="px-3 py-2 font-medium text-slate-800 dark:text-white text-xs sticky left-28 bg-white dark:bg-slate-900">{g.full_name}</td>
+                                            <tr key={g.student_id || idx} className="hover:bg-[var(--hover-bg)]/30">
+                                                <td className="px-3 py-2 text-slate-500 sticky left-0 bg-[var(--bg-surface)] text-xs">{idx + 1}</td>
+                                                <td className="px-3 py-2 text-[var(--text-secondary)] font-mono text-xs sticky left-10 bg-[var(--bg-surface)]">{g.student_code}</td>
+                                                <td className="px-3 py-2 font-medium text-[var(--text-primary)] text-xs sticky left-28 bg-[var(--bg-surface)]">{g.full_name}</td>
                                                 {SCORE_COLS.map(c => (
                                                     <td key={c.key} className="px-1 py-1 text-center">
                                                         <input
                                                             type="text"
                                                             value={g[c.key] ?? ''}
                                                             onChange={e => handleScoreChange(idx, c.key, e.target.value)}
-                                                            className={`w-14 text-center px-1 py-1 rounded border bg-transparent text-sm text-slate-800 dark:text-white focus:ring-1 outline-none transition-colors ${g[c.key] !== '' && g[c.key] != null && (isNaN(g[c.key]) || parseFloat(g[c.key]) < 0 || parseFloat(g[c.key]) > 10)
-                                                                ? 'border-red-500 ring-1 ring-red-500 bg-red-50 dark:bg-red-900/10'
-                                                                : 'border-slate-200 dark:border-slate-700 focus:border-indigo-500 focus:ring-indigo-500'
+                                                            className={`w-14 text-center px-1 py-1 rounded border bg-transparent text-sm text-[var(--text-primary)] focus:ring-1 outline-none transition-colors ${g[c.key] !== '' && g[c.key] != null && (isNaN(g[c.key]) || parseFloat(g[c.key]) < 0 || parseFloat(g[c.key]) > 10)
+                                                                ? 'border-red-500 ring-1 ring-red-500 bg-red-500/5'
+                                                                : 'border-[var(--border-default)] focus:border-indigo-500 focus:ring-indigo-500'
                                                                 }`}
                                                         />
                                                     </td>
                                                 ))}
-                                                <td className="px-3 py-2 text-center font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-900/10">
+                                                <td className="px-3 py-2 text-center font-bold text-indigo-500 bg-indigo-500/5">
                                                     {avg || '—'}
                                                 </td>
                                                 <td className="px-1 py-1 text-center relative">
@@ -236,7 +236,7 @@ export default function Gradebook() {
                                                             updated[idx] = { ...updated[idx], quick_tag: val };
                                                             setGrades(updated);
                                                         }}
-                                                        className="w-full px-2 py-1 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs text-slate-600 dark:text-slate-300 focus:border-indigo-500 outline-none relative z-10"
+                                                        className="w-full px-2 py-1 rounded border border-[var(--border-default)] bg-[var(--bg-surface)] text-xs text-[var(--text-secondary)] focus:border-indigo-500 outline-none relative z-10"
                                                         style={{ minWidth: '80px' }}
                                                     >
                                                         <option value="">--</option>
@@ -251,7 +251,7 @@ export default function Gradebook() {
                                                         type="text"
                                                         value={g.comment_text ?? ''}
                                                         onChange={e => handleCommentChange(idx, e.target.value)}
-                                                        className="w-full px-2 py-1 rounded border border-slate-200 dark:border-slate-700 bg-transparent text-xs text-slate-600 dark:text-slate-300 focus:border-indigo-500 outline-none"
+                                                        className="w-full px-2 py-1 rounded border border-[var(--border-default)] bg-transparent text-xs text-[var(--text-secondary)] focus:border-indigo-500 outline-none"
                                                         placeholder="Nhận xét..."
                                                     />
                                                 </td>
@@ -269,9 +269,9 @@ export default function Gradebook() {
             <Modal open={importModal} onClose={() => setImportModal(false)} title="Import điểm từ CSV">
                 <div className="space-y-4">
                     <input type="file" accept=".csv" ref={fileRef}
-                        className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 dark:file:bg-indigo-900/20 file:text-indigo-600 dark:file:text-indigo-400" />
-                    <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
-                        <button onClick={() => setImportModal(false)} className="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm">Hủy</button>
+                        className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50  file:text-indigo-600 " />
+                    <div className="flex justify-end gap-3 pt-4 border-t border-[var(--border-default)]">
+                        <button onClick={() => setImportModal(false)} className="px-4 py-2 rounded-lg border border-[var(--border-default)] text-[var(--text-secondary)] text-sm">Hủy</button>
                         <button onClick={handleImport} className="btn-primary text-sm">Import</button>
                     </div>
                 </div>

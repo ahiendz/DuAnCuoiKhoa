@@ -71,8 +71,8 @@ export default function Notes() {
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Ghi chú</h2>
-                <p className="text-slate-500 dark:text-slate-400 text-sm">Ghi chú theo lớp</p>
+                <h2 className="text-2xl font-bold text-[var(--text-primary)]">Ghi chú</h2>
+                <p className="text-[var(--text-secondary)] text-sm">Ghi chú theo lớp</p>
             </div>
 
             {/* Class filter */}
@@ -99,17 +99,17 @@ export default function Notes() {
             {/* Notes list */}
             <div className="space-y-3">
                 {displayNotes.map(n => (
-                    <div key={n.id} className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 flex items-start gap-3 shadow-sm">
+                    <div key={n.id} className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border-default)] p-4 flex items-start gap-3 shadow-sm">
                         <StickyNote size={18} className="text-yellow-500 mt-0.5 shrink-0" />
                         <div className="flex-1">
-                            <p className="text-sm text-slate-800 dark:text-white">{n.text}</p>
+                            <p className="text-sm text-[var(--text-primary)]">{n.text}</p>
                             <div className="flex items-center gap-2 mt-1">
-                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 font-medium">{n.className}</span>
+                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-500 font-medium">{n.className}</span>
                                 <span className="text-xs text-slate-400">{n.date}</span>
                             </div>
                         </div>
                         <button onClick={() => deleteNote(selectedClass === 'all' ? Object.keys(allNotes).find(k => (allNotes[k] || []).some(note => note.id === n.id)) : selectedClass, n.id)}
-                            className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-red-500"><Trash2 size={14} /></button>
+                            className="p-1 rounded hover:bg-[var(--hover-bg)] text-slate-400 hover:text-red-500"><Trash2 size={14} /></button>
                     </div>
                 ))}
                 {displayNotes.length === 0 && <p className="text-center py-10 text-slate-400 text-sm">Chưa có ghi chú nào</p>}

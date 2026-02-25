@@ -22,7 +22,7 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (email, password, role) => {
         const res = await api.post('/auth/login', { email, password, role });
-        const { token, force_change_password, ...userData } = res.data;
+        const { token, force_change_password, theme_preference, ...userData } = res.data;
 
         const userWithFlags = { ...userData, force_change_password };
         setUser(userWithFlags);

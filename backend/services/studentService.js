@@ -199,12 +199,34 @@ async function createStudent(payload) {
 
     const student_id = insertRes.rows[0].id;
 
-    // Create parent account if parent details provided
-    if (parent_email && parent_name) {
+    function toSlug(name) {
+      const map = {
+        à: 'a', á: 'a', ả: 'a', ã: 'a', ạ: 'a',
+        ă: 'a', ắ: 'a', ằ: 'a', ẳ: 'a', ẵ: 'a', ặ: 'a',
+        â: 'a', ấ: 'a', ầ: 'a', ẩ: 'a', ẫ: 'a', ậ: 'a',
+        è: 'e', é: 'e', ẻ: 'e', ẽ: 'e', ẹ: 'e',
+        ê: 'e', ế: 'e', ề: 'e', ể: 'e', ễ: 'e', ệ: 'e',
+        ì: 'i', í: 'i', ỉ: 'i', ĩ: 'i', ị: 'i',
+        ò: 'o', ó: 'o', ỏ: 'o', õ: 'o', ọ: 'o',
+        ô: 'o', ố: 'o', ồ: 'o', ổ: 'o', ỗ: 'o', ộ: 'o',
+        ơ: 'o', ớ: 'o', ờ: 'o', ở: 'o', ỡ: 'o', ợ: 'o',
+        ù: 'u', ú: 'u', ủ: 'u', ũ: 'u', ụ: 'u',
+        ư: 'u', ứ: 'u', ừ: 'u', ử: 'u', ữ: 'u', ự: 'u',
+        ỳ: 'y', ý: 'y', ỷ: 'y', ỹ: 'y', ỵ: 'y',
+        đ: 'd'
+      };
+      return name.split('').map(c => map[c.toLowerCase()] || map[c] || c).join('').toLowerCase().replace(/\s+/g, '.').replace(/[^a-z0-9.]/g, '');
+    }
+
+    // Create parent account automatically (using generated email if no email provided)
+    const finalParentEmail = parent_email || `ph.${toSlug(full_name)}@school.local`;
+    const finalParentName = parent_name || `PH. ${full_name}`;
+
+    try {
       const parentService = require("./parentService");
       const { parent_id } = await parentService.createOrGetParent({
-        email: parent_email,
-        full_name: parent_name,
+        email: finalParentEmail,
+        full_name: finalParentName,
         phone: parent_phone || null,
         default_password: student_code, // Use student_code as default password
         client // Pass transaction client
@@ -214,9 +236,11 @@ async function createStudent(payload) {
       await parentService.linkParentToStudent({
         parent_id,
         student_id,
-        relationship: relationship || null,
+        relationship: relationship || 'father',
         client // Pass transaction client
       });
+    } catch (parentErr) {
+      console.warn(`[createStudent] failed to auto-create parent for ${student_code}:`, parentErr.message);
     }
 
     await client.query("COMMIT");
@@ -413,27 +437,47 @@ async function importStudents(rows, mode, selectedClass) {
         inserted += 1;
       }
 
-      // Per-row parent creation (optional columns: parent_email, parent_name, parent_phone, relationship)
-      if (row.parent_email && row.parent_name) {
-        try {
-          const parentService = require("./parentService");
-          const { parent_id } = await parentService.createOrGetParent({
-            email: row.parent_email,
-            full_name: row.parent_name,
-            phone: row.parent_phone || null,
-            default_password: row.student_code,
-            client // reuse same transaction client
-          });
-          await parentService.linkParentToStudent({
-            parent_id,
-            student_id,
-            relationship: row.relationship || null,
-            client
-          });
-        } catch (parentErr) {
-          // Non-fatal: log and continue so the student import is not blocked
-          console.warn(`[import] parent link failed for ${row.student_code}:`, parentErr.message);
-        }
+      function toSlug(name) {
+        const map = {
+          à: 'a', á: 'a', ả: 'a', ã: 'a', ạ: 'a',
+          ă: 'a', ắ: 'a', ằ: 'a', ẳ: 'a', ẵ: 'a', ặ: 'a',
+          â: 'a', ấ: 'a', ầ: 'a', ẩ: 'a', ẫ: 'a', ậ: 'a',
+          è: 'e', é: 'e', ẻ: 'e', ẽ: 'e', ẹ: 'e',
+          ê: 'e', ế: 'e', ề: 'e', ể: 'e', ễ: 'e', ệ: 'e',
+          ì: 'i', í: 'i', ỉ: 'i', ĩ: 'i', ị: 'i',
+          ò: 'o', ó: 'o', ỏ: 'o', õ: 'o', ọ: 'o',
+          ô: 'o', ố: 'o', ồ: 'o', ổ: 'o', ỗ: 'o', ộ: 'o',
+          ơ: 'o', ớ: 'o', ờ: 'o', ở: 'o', ỡ: 'o', ợ: 'o',
+          ù: 'u', ú: 'u', ủ: 'u', ũ: 'u', ụ: 'u',
+          ư: 'u', ứ: 'u', ừ: 'u', ử: 'u', ữ: 'u', ự: 'u',
+          ỳ: 'y', ý: 'y', ỷ: 'y', ỹ: 'y', ỵ: 'y',
+          đ: 'd'
+        };
+        return name.split('').map(c => map[c.toLowerCase()] || map[c] || c).join('').toLowerCase().replace(/\s+/g, '.').replace(/[^a-z0-9.]/g, '');
+      }
+
+      // Per-row parent creation (defaulting to generated email)
+      const finalParentEmail = row.parent_email || `ph.${toSlug(row.full_name)}@school.local`;
+      const finalParentName = row.parent_name || `PH. ${row.full_name}`;
+
+      try {
+        const parentService = require("./parentService");
+        const { parent_id } = await parentService.createOrGetParent({
+          email: finalParentEmail,
+          full_name: finalParentName,
+          phone: row.parent_phone || null,
+          default_password: row.student_code,
+          client // reuse same transaction client
+        });
+        await parentService.linkParentToStudent({
+          parent_id,
+          student_id,
+          relationship: row.relationship || 'father',
+          client
+        });
+      } catch (parentErr) {
+        // Non-fatal: log and continue so the student import is not blocked
+        console.warn(`[import] parent link failed for ${row.student_code}:`, parentErr.message);
       }
     }
 

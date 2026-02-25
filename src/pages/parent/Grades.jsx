@@ -8,24 +8,24 @@ import { useAuth } from '@/context/AuthContext';
 import api from '@/services/api';
 
 function Skeleton({ className = '' }) {
-    return <div className={`animate-pulse bg-slate-200 dark:bg-slate-700 rounded-lg ${className}`} />;
+    return <div className={`animate-pulse bg-slate-200  rounded-lg ${className}`} />;
 }
 
 function EmptyState() {
     return (
-        <div className="flex flex-col items-center py-14 text-slate-400 dark:text-slate-600">
+        <div className="flex flex-col items-center py-14 text-[var(--text-placeholder)]">
             <BookOpen size={44} className="opacity-30 mb-3" />
-            <p className="font-medium text-slate-500 dark:text-slate-400">Chưa có dữ liệu điểm số</p>
+            <p className="font-medium text-[var(--text-secondary)]">Chưa có dữ liệu điểm số</p>
             <p className="text-sm text-center mt-1 max-w-xs">Điểm sẽ xuất hiện khi giáo viên nhập điểm cho học sinh.</p>
         </div>
     );
 }
 
 function scoreColor(score) {
-    if (score >= 8) return 'text-emerald-600 dark:text-emerald-400';
-    if (score >= 6.5) return 'text-blue-600 dark:text-blue-400';
-    if (score >= 5) return 'text-amber-600 dark:text-amber-400';
-    return 'text-red-600 dark:text-red-400';
+    if (score >= 8) return 'text-emerald-500';
+    if (score >= 6.5) return 'text-blue-500';
+    if (score >= 5) return 'text-amber-500';
+    return 'text-red-500';
 }
 
 export default function ParentGrades() {
@@ -87,8 +87,8 @@ export default function ParentGrades() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
-                    <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Bảng điểm</h2>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Chi tiết điểm số của con theo môn học</p>
+                    <h2 className="text-2xl font-bold text-[var(--text-primary)]">Bảng điểm</h2>
+                    <p className="text-sm text-[var(--text-secondary)] mt-0.5">Chi tiết điểm số của con theo môn học</p>
                 </div>
                 {students.length > 1 && !loadingStudents && (
                     <div className="relative">
@@ -96,7 +96,7 @@ export default function ParentGrades() {
                             id="grades-student-select"
                             value={selectedId || ''}
                             onChange={(e) => { setSelectedId(parseInt(e.target.value)); setActiveTerm('all'); }}
-                            className="appearance-none pl-3 pr-8 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            className="appearance-none pl-3 pr-8 py-2 rounded-lg border border-[var(--border-default)] bg-[var(--bg-surface)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         >
                             {students.map((s) => <option key={s.id} value={s.id}>{s.full_name}</option>)}
                         </select>
@@ -107,11 +107,11 @@ export default function ParentGrades() {
 
             {/* Student info badge */}
             {selectedStudent && (
-                <div className="flex items-center gap-3 p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-800">
+                <div className="flex items-center gap-3 p-3 bg-indigo-500/10 rounded-xl border border-indigo-500/20">
                     <BookOpen size={18} className="text-indigo-500 flex-shrink-0" />
                     <div className="text-sm">
-                        <span className="font-semibold text-slate-800 dark:text-white">{selectedStudent.full_name}</span>
-                        <span className="text-slate-500 dark:text-slate-400 ml-2">— Lớp {selectedStudent.class_name}</span>
+                        <span className="font-semibold text-[var(--text-primary)]">{selectedStudent.full_name}</span>
+                        <span className="text-[var(--text-secondary)] ml-2">— Lớp {selectedStudent.class_name}</span>
                     </div>
                     {grades?.overall_average != null && (
                         <div className="ml-auto text-right">
@@ -123,10 +123,10 @@ export default function ParentGrades() {
             )}
 
             {/* Bar chart */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
-                <h3 className="font-semibold text-slate-800 dark:text-white text-sm mb-4">Điểm trung bình theo môn</h3>
+            <div className="bg-[var(--bg-surface)] rounded-2xl border border-[var(--border-default)] p-5 shadow-sm">
+                <h3 className="font-semibold text-[var(--text-primary)] text-sm mb-4">Điểm trung bình theo môn</h3>
                 {loading ? (
-                    <div className="animate-pulse bg-slate-200 dark:bg-slate-700 rounded-lg h-48" />
+                    <div className="animate-pulse bg-slate-200  rounded-lg h-48" />
                 ) : barData.length === 0 ? (
                     <EmptyState />
                 ) : (
@@ -147,14 +147,14 @@ export default function ParentGrades() {
             </div>
 
             {/* Term filter + table */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
+            <div className="bg-[var(--bg-surface)] rounded-2xl border border-[var(--border-default)] p-5 shadow-sm">
                 <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-                    <h3 className="font-semibold text-slate-800 dark:text-white text-sm">Chi tiết điểm theo kỳ</h3>
+                    <h3 className="font-semibold text-[var(--text-primary)] text-sm">Chi tiết điểm theo kỳ</h3>
                     {terms.length > 0 && (
                         <div className="flex gap-1.5 flex-wrap">
-                            <button onClick={() => setActiveTerm('all')} className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${activeTerm === 'all' ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'}`}>Tất cả</button>
+                            <button onClick={() => setActiveTerm('all')} className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${activeTerm === 'all' ? 'bg-indigo-600 text-white' : 'bg-[var(--hover-bg)] text-[var(--text-secondary)] hover:bg-[var(--hover-bg)]'}`}>Tất cả</button>
                             {terms.map((t) => (
-                                <button key={t} onClick={() => setActiveTerm(String(t))} className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${activeTerm === String(t) ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'}`}>Kỳ {t}</button>
+                                <button key={t} onClick={() => setActiveTerm(String(t))} className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${activeTerm === String(t) ? 'bg-indigo-600 text-white' : 'bg-[var(--hover-bg)] text-[var(--text-secondary)] hover:bg-[var(--hover-bg)]'}`}>Kỳ {t}</button>
                             ))}
                         </div>
                     )}
@@ -168,31 +168,31 @@ export default function ParentGrades() {
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                             <thead>
-                                <tr className="border-b border-slate-100 dark:border-slate-800">
-                                    <th className="text-left py-2 px-3 text-xs font-semibold text-slate-500 dark:text-slate-400">Học kỳ</th>
-                                    <th className="text-left py-2 px-3 text-xs font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap">Môn học</th>
-                                    <th className="text-right py-2 px-3 text-xs font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap">Thường xuyên</th>
-                                    <th className="text-right py-2 px-3 text-xs font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap">1 Tiết</th>
-                                    <th className="text-right py-2 px-3 text-xs font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap">Giữa kỳ</th>
-                                    <th className="text-right py-2 px-3 text-xs font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap">Cuối kỳ</th>
-                                    <th className="text-right py-2 px-3 text-xs font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap">Điểm TB</th>
+                                <tr className="border-b border-[var(--border-subtle)]">
+                                    <th className="text-left py-2 px-3 text-xs font-semibold text-[var(--text-secondary)]">Học kỳ</th>
+                                    <th className="text-left py-2 px-3 text-xs font-semibold text-[var(--text-secondary)] whitespace-nowrap">Môn học</th>
+                                    <th className="text-right py-2 px-3 text-xs font-semibold text-[var(--text-secondary)] whitespace-nowrap">Thường xuyên</th>
+                                    <th className="text-right py-2 px-3 text-xs font-semibold text-[var(--text-secondary)] whitespace-nowrap">1 Tiết</th>
+                                    <th className="text-right py-2 px-3 text-xs font-semibold text-[var(--text-secondary)] whitespace-nowrap">Giữa kỳ</th>
+                                    <th className="text-right py-2 px-3 text-xs font-semibold text-[var(--text-secondary)] whitespace-nowrap">Cuối kỳ</th>
+                                    <th className="text-right py-2 px-3 text-xs font-semibold text-[var(--text-secondary)] whitespace-nowrap">Điểm TB</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {filteredRows.map((row, i) => (
-                                    <tr key={i} className="border-b border-slate-50 dark:border-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                                        <td className="py-2.5 px-3 text-slate-500 dark:text-slate-400 whitespace-nowrap">Kỳ {row.semester}</td>
-                                        <td className="py-2.5 px-3 font-medium text-slate-800 dark:text-white whitespace-nowrap">{row.subject_name}</td>
-                                        <td className="py-2.5 px-3 text-right text-slate-500 dark:text-slate-400">
+                                    <tr key={i} className="border-b border-[var(--border-subtle)] hover:bg-[var(--hover-bg)]/50 transition-colors">
+                                        <td className="py-2.5 px-3 text-[var(--text-secondary)] whitespace-nowrap">Kỳ {row.semester}</td>
+                                        <td className="py-2.5 px-3 font-medium text-[var(--text-primary)] whitespace-nowrap">{row.subject_name}</td>
+                                        <td className="py-2.5 px-3 text-right text-[var(--text-secondary)]">
                                             {[row.mieng_1, row.mieng_2, row.phut15_1, row.phut15_2].filter(v => v != null).join(', ') || '-'}
                                         </td>
-                                        <td className="py-2.5 px-3 text-right text-slate-500 dark:text-slate-400">
+                                        <td className="py-2.5 px-3 text-right text-[var(--text-secondary)]">
                                             {[row.tiet1_1, row.tiet1_2].filter(v => v != null).join(', ') || '-'}
                                         </td>
-                                        <td className="py-2.5 px-3 text-right text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                                        <td className="py-2.5 px-3 text-right text-[var(--text-secondary)] whitespace-nowrap">
                                             {row.giuaki != null ? row.giuaki : '-'}
                                         </td>
-                                        <td className="py-2.5 px-3 text-right text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                                        <td className="py-2.5 px-3 text-right text-[var(--text-secondary)] whitespace-nowrap">
                                             {row.cuoiki != null ? row.cuoiki : '-'}
                                         </td>
                                         <td className={`py-2.5 px-3 text-right font-bold whitespace-nowrap ${scoreColor(row.weighted_average)}`}>

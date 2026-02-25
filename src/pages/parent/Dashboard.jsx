@@ -13,13 +13,13 @@ import { useTheme } from '@/context/ThemeContext';
 
 // ── Skeleton ─────────────────────────────────────────────────────────────────
 function Skeleton({ className = '' }) {
-    return <div className={`animate-pulse bg-slate-200 dark:bg-slate-700 rounded-lg ${className}`} />;
+    return <div className={`animate-pulse bg-slate-200  rounded-lg ${className}`} />;
 }
 
 // ── KPI Card ─────────────────────────────────────────────────────────────────
 function KpiCard({ icon: Icon, iconBg, value, label, sub, loading }) {
     return (
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm flex items-center gap-4">
+        <div className="bg-[var(--bg-surface)] rounded-2xl border border-[var(--border-default)] p-5 shadow-sm flex items-center gap-4">
             {loading ? (
                 <>
                     <Skeleton className="w-12 h-12 flex-shrink-0" />
@@ -34,9 +34,9 @@ function KpiCard({ icon: Icon, iconBg, value, label, sub, loading }) {
                         <Icon size={22} />
                     </div>
                     <div className="min-w-0">
-                        <p className="text-2xl font-bold text-slate-800 dark:text-white truncate">{value}</p>
-                        <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{label}</p>
-                        {sub && <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{sub}</p>}
+                        <p className="text-2xl font-bold text-[var(--text-primary)] truncate">{value}</p>
+                        <p className="text-sm font-medium text-[var(--text-secondary)]">{label}</p>
+                        {sub && <p className="text-xs text-[var(--text-placeholder)] mt-0.5">{sub}</p>}
                     </div>
                 </>
             )}
@@ -56,9 +56,9 @@ function ChartSkeleton({ height = 220 }) {
 // ── Empty state ───────────────────────────────────────────────────────────────
 function EmptyState({ icon: Icon, title, desc }) {
     return (
-        <div className="flex flex-col items-center justify-center py-12 text-slate-400 dark:text-slate-600">
+        <div className="flex flex-col items-center justify-center py-12 text-[var(--text-placeholder)]">
             <Icon size={40} className="mb-3 opacity-40" />
-            <p className="font-medium text-slate-500 dark:text-slate-400">{title}</p>
+            <p className="font-medium text-[var(--text-secondary)]">{title}</p>
             {desc && <p className="text-sm mt-1 text-center max-w-xs">{desc}</p>}
         </div>
     );
@@ -66,9 +66,9 @@ function EmptyState({ icon: Icon, title, desc }) {
 
 // ── Alert badge ───────────────────────────────────────────────────────────────
 const severityStyles = {
-    critical: 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-700 dark:text-red-400',
-    high: 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-400',
-    medium: 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400',
+    critical: 'bg-red-500/10 border-red-500/20 text-red-500',
+    high: 'bg-orange-500/10 border-orange-500/20 text-orange-500',
+    medium: 'bg-amber-500/10 border-amber-500/20 text-amber-500',
 };
 
 // ── Pie colours ───────────────────────────────────────────────────────────────
@@ -143,7 +143,7 @@ export default function ParentDashboard() {
         return (
             <div className="flex flex-col items-center justify-center py-20 gap-4">
                 <ShieldAlert size={48} className="text-red-400" />
-                <p className="text-slate-600 dark:text-slate-400 text-center max-w-sm">{error}</p>
+                <p className="text-[var(--text-secondary)] text-center max-w-sm">{error}</p>
                 <button onClick={refetch} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm hover:bg-indigo-700 transition-colors">
                     <RefreshCw size={14} /> Thử lại
                 </button>
@@ -156,8 +156,8 @@ export default function ParentDashboard() {
             {/* ── Page header + student selector ── */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
-                    <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Dashboard Phụ Huynh</h2>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Theo dõi quá trình học tập của con</p>
+                    <h2 className="text-2xl font-bold text-[var(--text-primary)]">Dashboard Phụ Huynh</h2>
+                    <p className="text-sm text-[var(--text-secondary)] mt-0.5">Theo dõi quá trình học tập của con</p>
                 </div>
 
                 {/* Student selector */}
@@ -173,7 +173,7 @@ export default function ParentDashboard() {
                                         onClick={() => setSelectedStudentId(s.id)}
                                         className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${selectedStudentId === s.id
                                             ? 'bg-indigo-600 text-white shadow'
-                                            : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-indigo-300'
+                                            : 'bg-[var(--bg-surface)] text-[var(--text-secondary)] border border-[var(--border-default)] hover:border-indigo-300'
                                             }`}
                                     >
                                         {s.full_name}
@@ -187,7 +187,7 @@ export default function ParentDashboard() {
                                     id="student-select"
                                     value={selectedStudentId || ''}
                                     onChange={(e) => setSelectedStudentId(parseInt(e.target.value))}
-                                    className="appearance-none pl-3 pr-8 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                    className="appearance-none pl-3 pr-8 py-2 rounded-lg border border-[var(--border-default)] bg-[var(--bg-surface)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 >
                                     {students.map((s) => (
                                         <option key={s.id} value={s.id}>{s.full_name} — Lớp {s.class_name}</option>
@@ -219,7 +219,7 @@ export default function ParentDashboard() {
                 <KpiCard
                     loading={loadingData}
                     icon={BookOpen}
-                    iconBg="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400"
+                    iconBg="bg-indigo-500/15 text-indigo-500"
                     value={summary ? (summary.current_term_average || 'N/A') : '—'}
                     label="Điểm trung bình"
                     sub={summary?.comparison_summary?.performance === 'above_average' ? '↑ Trên TB lớp' : summary ? '↓ Dưới TB lớp' : null}
@@ -227,7 +227,7 @@ export default function ParentDashboard() {
                 <KpiCard
                     loading={loadingData}
                     icon={Calendar}
-                    iconBg="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400"
+                    iconBg="bg-emerald-500/15 text-emerald-500"
                     value={summary ? `${summary.attendance_rate}%` : '—'}
                     label="Chuyên cần"
                     sub={attendance ? `${attendance.present_days}/${attendance.total_days} buổi có mặt` : null}
@@ -235,7 +235,7 @@ export default function ParentDashboard() {
                 <KpiCard
                     loading={loadingData}
                     icon={AlertTriangle}
-                    iconBg={alerts.length > 0 ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400' : 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'}
+                    iconBg={alerts.length > 0 ? 'bg-red-500/10 text-red-500' : 'bg-green-500/10 text-green-500'}
                     value={loadingData ? '—' : alerts.length}
                     label="Cảnh báo"
                     sub={alerts.length === 0 && !loadingData ? 'Không có vấn đề' : null}
@@ -243,7 +243,7 @@ export default function ParentDashboard() {
                 <KpiCard
                     loading={loadingData}
                     icon={Users}
-                    iconBg="bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400"
+                    iconBg="bg-purple-500/10 text-purple-500"
                     value={summary?.comparison_summary ? (
                         summary.comparison_summary.performance === 'above_average' ? 'Trên TB' : 'Dưới TB'
                     ) : '—'}
@@ -261,10 +261,10 @@ export default function ParentDashboard() {
                 </div>
 
                 {/* Pie chart — attendance */}
-                <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
+                <div className="bg-[var(--bg-surface)] rounded-2xl border border-[var(--border-default)] p-5 shadow-sm">
                     <div className="flex items-center gap-2 mb-4">
                         <Calendar size={18} className="text-emerald-500" />
-                        <h3 className="font-semibold text-slate-800 dark:text-white text-sm">Tỷ lệ chuyên cần</h3>
+                        <h3 className="font-semibold text-[var(--text-primary)] text-sm">Tỷ lệ chuyên cần</h3>
                     </div>
                     {loadingData ? (
                         <ChartSkeleton height={220} />
@@ -294,9 +294,9 @@ export default function ParentDashboard() {
                                     <div key={d.name} className="flex items-center justify-between text-xs">
                                         <div className="flex items-center gap-1.5">
                                             <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ background: PIE_COLORS[i] }} />
-                                            <span className="text-slate-600 dark:text-slate-400">{d.name}</span>
+                                            <span className="text-[var(--text-secondary)]">{d.name}</span>
                                         </div>
-                                        <span className="font-semibold text-slate-800 dark:text-white">{d.value} buổi</span>
+                                        <span className="font-semibold text-[var(--text-primary)]">{d.value} buổi</span>
                                     </div>
                                 ))}
                             </div>
@@ -306,10 +306,10 @@ export default function ParentDashboard() {
             </div>
 
             {/* ── Bar chart — per subject ── */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
+            <div className="bg-[var(--bg-surface)] rounded-2xl border border-[var(--border-default)] p-5 shadow-sm">
                 <div className="flex items-center gap-2 mb-4">
                     <BookOpen size={18} className="text-blue-500" />
-                    <h3 className="font-semibold text-slate-800 dark:text-white text-sm">Điểm trung bình theo môn học</h3>
+                    <h3 className="font-semibold text-[var(--text-primary)] text-sm">Điểm trung bình theo môn học</h3>
                 </div>
                 {loadingData ? (
                     <ChartSkeleton height={200} />
@@ -351,11 +351,11 @@ export default function ParentDashboard() {
             {/* ── Alerts + Timeline row ── */}
             < div className="grid grid-cols-1 lg:grid-cols-2 gap-4" >
                 {/* Smart Alerts */}
-                < div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm" >
+                < div className="bg-[var(--bg-surface)] rounded-2xl border border-[var(--border-default)] p-5 shadow-sm" >
                     <div className="flex items-center gap-2 mb-4">
                         <AlertTriangle size={18} className="text-amber-500" />
-                        <h3 className="font-semibold text-slate-800 dark:text-white text-sm">Cảnh báo thông minh</h3>
-                        {!loadingData && <span className={`ml-auto text-xs font-semibold px-2 py-0.5 rounded-full ${alerts.length > 0 ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400' : 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'}`}>{alerts.length}</span>}
+                        <h3 className="font-semibold text-[var(--text-primary)] text-sm">Cảnh báo thông minh</h3>
+                        {!loadingData && <span className={`ml-auto text-xs font-semibold px-2 py-0.5 rounded-full ${alerts.length > 0 ? 'bg-red-500/10 text-red-500' : 'bg-green-500/10 text-green-500'}`}>{alerts.length}</span>}
                     </div>
                     {
                         loadingData ? (
@@ -380,10 +380,10 @@ export default function ParentDashboard() {
                 </div >
 
                 {/* Teacher Notes Timeline */}
-                < div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm" >
+                < div className="bg-[var(--bg-surface)] rounded-2xl border border-[var(--border-default)] p-5 shadow-sm" >
                     <div className="flex items-center gap-2 mb-4">
                         <MessageSquare size={18} className="text-blue-500" />
-                        <h3 className="font-semibold text-slate-800 dark:text-white text-sm">Nhận xét từ giáo viên</h3>
+                        <h3 className="font-semibold text-[var(--text-primary)] text-sm">Nhận xét từ giáo viên</h3>
                     </div>
                     {
                         loadingData ? (
@@ -395,25 +395,25 @@ export default function ParentDashboard() {
                         ) : (
                             <div className="relative pl-5 space-y-4">
                                 {/* timeline line */}
-                                <div className="absolute left-[7px] top-1 bottom-1 w-px bg-slate-200 dark:bg-slate-700" />
+                                <div className="absolute left-[7px] top-1 bottom-1 w-px bg-slate-200 " />
                                 {notes.map((n, i) => (
                                     <div key={i} className="relative">
-                                        <div className="absolute -left-5 top-1.5 w-3.5 h-3.5 rounded-full bg-indigo-500 border-2 border-white dark:border-slate-900" />
+                                        <div className="absolute -left-5 top-1.5 w-3.5 h-3.5 rounded-full bg-indigo-500 border-2 border-[var(--bg-base)]" />
                                         <div className="flex flex-col gap-1">
                                             <div className="flex items-center gap-2">
-                                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">
+                                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-indigo-500/15 text-indigo-500 uppercase tracking-wider">
                                                     {n.subject_name}
                                                 </span>
                                                 {n.quick_tag && (
-                                                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+                                                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-500 uppercase tracking-wider">
                                                         {n.quick_tag}
                                                     </span>
                                                 )}
                                             </div>
-                                            <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
+                                            <p className="text-sm text-[var(--text-primary)] leading-relaxed font-medium">
                                                 {n.comment_text || 'Chưa có nội dung cụ thể'}
                                             </p>
-                                            <p className="text-xs text-slate-400 dark:text-slate-500">
+                                            <p className="text-xs text-[var(--text-placeholder)]">
                                                 {n.teacher_name} · {n.semester} · {formatDate(n.updated_at)}
                                             </p>
                                         </div>

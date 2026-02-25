@@ -164,11 +164,11 @@ export default function Classes() {
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Quản lý Lớp học</h2>
-                    <p className="text-slate-500 dark:text-slate-400 text-sm">{classes.length} lớp trong hệ thống</p>
+                    <h2 className="text-2xl font-bold text-[var(--text-primary)]">Quản lý Lớp học</h2>
+                    <p className="text-[var(--text-secondary)] text-sm">{classes.length} lớp trong hệ thống</p>
                 </div>
                 <div className="flex gap-2">
-                    <button onClick={exportClassesCsv} className="px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 text-sm flex items-center gap-2">
+                    <button onClick={exportClassesCsv} className="px-3 py-2 rounded-lg border border-[var(--border-default)] text-[var(--text-secondary)] hover:bg-[var(--hover-bg)] text-sm flex items-center gap-2">
                         <Download size={16} /> CSV
                     </button>
                     <button onClick={openAdd} className="btn-primary flex items-center gap-2 text-sm">
@@ -183,11 +183,11 @@ export default function Classes() {
             </div>
 
             {loading ? <div className="text-center py-10 text-slate-500">Đang tải...</div> : (
-                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+                <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border-default)] overflow-hidden shadow-sm">
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                             <thead>
-                                <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+                                <tr className="bg-[var(--hover-bg)] border-b border-[var(--border-default)]">
                                     <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Tên lớp</th>
                                     <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Khối</th>
                                     <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">GVCN</th>
@@ -195,16 +195,16 @@ export default function Classes() {
                                     <th className="text-right px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Thao tác</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                            <tbody className="divide-y divide-[var(--border-subtle)]">
                                 {filtered.map(cls => (
-                                    <tr key={cls.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
-                                        <td className="px-4 py-3 font-medium text-slate-800 dark:text-white">{cls.name}</td>
-                                        <td className="px-4 py-3 text-slate-600 dark:text-slate-400">{cls.grade_level}</td>
-                                        <td className="px-4 py-3 text-slate-600 dark:text-slate-400">{teacherName(cls.homeroom_teacher_id)}</td>
+                                    <tr key={cls.id} className="hover:bg-[var(--hover-bg)]/30 transition-colors">
+                                        <td className="px-4 py-3 font-medium text-[var(--text-primary)]">{cls.name}</td>
+                                        <td className="px-4 py-3 text-[var(--text-secondary)]">{cls.grade_level}</td>
+                                        <td className="px-4 py-3 text-[var(--text-secondary)]">{teacherName(cls.homeroom_teacher_id)}</td>
                                         <td className="px-4 py-3">
                                             <div className="flex flex-wrap gap-1">
                                                 {Object.entries(cls.subject_teachers || {}).map(([subj, tid]) => (
-                                                    <span key={subj} className="text-xs px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400">
+                                                    <span key={subj} className="text-xs px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-500">
                                                         {subj}: {teacherName(tid)}
                                                     </span>
                                                 ))}
@@ -212,8 +212,8 @@ export default function Classes() {
                                         </td>
                                         <td className="px-4 py-3 text-right">
                                             <div className="flex justify-end gap-1">
-                                                <button onClick={() => openEdit(cls)} className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 hover:text-indigo-500"><Pencil size={16} /></button>
-                                            <button onClick={() => setDeleteDialog({ open: true, id: cls.id, stage: 'warn' })} className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 hover:text-red-500"><Trash2 size={16} /></button>
+                                                <button onClick={() => openEdit(cls)} className="p-1.5 rounded-lg hover:bg-[var(--hover-bg)] text-slate-500 hover:text-indigo-500"><Pencil size={16} /></button>
+                                            <button onClick={() => setDeleteDialog({ open: true, id: cls.id, stage: 'warn' })} className="p-1.5 rounded-lg hover:bg-[var(--hover-bg)] text-slate-500 hover:text-red-500"><Trash2 size={16} /></button>
                                             </div>
                                         </td>
                                     </tr>
@@ -226,15 +226,15 @@ export default function Classes() {
             )}
 
             <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Sửa lớp học' : 'Thêm lớp học'} size="lg">
-                {error && <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm rounded-lg">{error}</div>}
+                {error && <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 text-red-500 text-sm rounded-lg">{error}</div>}
                 <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Tên lớp</label>
+                            <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">Tên lớp</label>
                             <input className="input-field" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="VD: 12A1" />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Khối</label>
+                            <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">Khối</label>
                             <input
                                 type="number"
                                 className="input-field"
@@ -247,7 +247,7 @@ export default function Classes() {
                         </div>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">GVCN</label>
+                        <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">GVCN</label>
                         <select
                             className="input-field"
                             value={form.homeroom_teacher_id}
@@ -274,7 +274,7 @@ export default function Classes() {
                     </div>
                     <div>
                         <div className="flex items-center justify-between mb-2">
-                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Giáo viên bộ môn</label>
+                            <label className="block text-sm font-medium text-[var(--text-primary)]">Giáo viên bộ môn</label>
                             <button
                                 type="button"
                                 className="px-3 py-1.5 rounded-lg bg-white/5 border border-slate-700 text-slate-100 text-xs hover:bg-white/10"
@@ -296,7 +296,7 @@ export default function Classes() {
                         <div className="grid grid-cols-2 gap-3">
                             {fixedSubjects.map(subj => (
                                 <div key={subj}>
-                                    <label className="text-xs text-slate-500 dark:text-slate-400 mb-1 block">{subj}</label>
+                                    <label className="text-xs text-[var(--text-secondary)] mb-1 block">{subj}</label>
                                     <select className="input-field text-sm" value={form.subject_teachers[subj] || ''}
                                         onChange={e => setForm({ ...form, subject_teachers: { ...form.subject_teachers, [subj]: e.target.value || undefined } })}
                                         disabled={isSubjectLockedByGvcn(subj)}
@@ -326,8 +326,8 @@ export default function Classes() {
                             ))}
                         </div>
                     </div>
-                    <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
-                        <button onClick={() => setModalOpen(false)} className="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm">Hủy</button>
+                    <div className="flex justify-end gap-3 pt-4 border-t border-[var(--border-default)]">
+                        <button onClick={() => setModalOpen(false)} className="px-4 py-2 rounded-lg border border-[var(--border-default)] text-[var(--text-secondary)] text-sm">Hủy</button>
                         <button onClick={handleSave} disabled={saving} className="btn-primary text-sm">{saving ? 'Đang lưu...' : 'Lưu'}</button>
                     </div>
                 </div>
@@ -350,7 +350,7 @@ export default function Classes() {
             />
 
             <Modal open={!!errorModal} onClose={() => setErrorModal('')} title="Không thể thực hiện">
-                <div className="flex items-start gap-3 text-red-500 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-3">
+                <div className="flex items-start gap-3 text-red-500 bg-red-500/10 border border-red-500/20 rounded-xl p-3">
                     <AlertTriangle size={20} className="mt-0.5" />
                     <p className="text-sm text-red-500">{errorModal}</p>
                 </div>

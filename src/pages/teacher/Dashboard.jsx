@@ -145,7 +145,7 @@ export default function TeacherDashboard() {
             )}
 
             {/* 1. FILTERS SECTION */}
-            <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row gap-4 items-end md:items-center justify-between">
+            <div className="bg-[var(--bg-surface)] p-4 rounded-xl border border-[var(--border-default)] shadow-sm flex flex-col md:flex-row gap-4 items-end md:items-center justify-between">
                 <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
                     {/* Class Selector */}
                     <div className="flex flex-col gap-1">
@@ -201,22 +201,22 @@ export default function TeacherDashboard() {
             {/* 2. SUMMARY CARDS */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <SummaryCard
-                    icon={TrendingUp} color="text-indigo-500" bg="bg-indigo-50 dark:bg-indigo-900/20"
+                    icon={TrendingUp} color="text-indigo-500" bg="bg-indigo-500/10"
                     value={dashboard?.class_average?.toFixed(2) || '—'}
                     label="Trung bình lớp"
                 />
                 <SummaryCard
-                    icon={Users} color="text-green-500" bg="bg-green-50 dark:bg-green-900/20"
+                    icon={Users} color="text-green-500" bg="bg-green-500/10"
                     value={dashboard?.total_students || 0}
                     label="Sĩ số lớp"
                 />
                 <SummaryCard
-                    icon={ClipboardList} color="text-blue-500" bg="bg-blue-50 dark:bg-blue-900/20"
+                    icon={ClipboardList} color="text-blue-500" bg="bg-blue-500/10"
                     value={dashboard?.graded_count || 0}
                     label="Bản ghi điểm"
                 />
                 <SummaryCard
-                    icon={BookOpen} color="text-yellow-500" bg="bg-yellow-50 dark:bg-yellow-900/20"
+                    icon={BookOpen} color="text-yellow-500" bg="bg-yellow-500/10"
                     value={dashboard?.subject || '—'}
                     label="Môn dạy"
                 />
@@ -225,8 +225,8 @@ export default function TeacherDashboard() {
             {/* 3. CHARTS */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Left: Distribution */}
-                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm min-h-[350px]">
-                    <h3 className="font-bold text-slate-800 dark:text-white mb-6 flex items-center gap-2">
+                <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border-default)] p-5 shadow-sm min-h-[350px]">
+                    <h3 className="font-bold text-[var(--text-primary)] mb-6 flex items-center gap-2">
                         <TrendingUp size={18} className="text-indigo-500" />
                         Phân bố điểm cuối kỳ
                     </h3>
@@ -245,8 +245,8 @@ export default function TeacherDashboard() {
                 </div>
 
                 {/* Right: Comparison */}
-                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm min-h-[350px]">
-                    <h3 className="font-bold text-slate-800 dark:text-white mb-6 flex items-center gap-2">
+                <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border-default)] p-5 shadow-sm min-h-[350px]">
+                    <h3 className="font-bold text-[var(--text-primary)] mb-6 flex items-center gap-2">
                         <Calendar size={18} className="text-cyan-500" />
                         So sánh TBHK1 và TBHK2
                     </h3>
@@ -269,8 +269,8 @@ export default function TeacherDashboard() {
             {/* 4. NOTES */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Generated Insights */}
-                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
-                    <h3 className="font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
+                <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border-default)] p-5 shadow-sm">
+                    <h3 className="font-bold text-[var(--text-primary)] mb-4 flex items-center gap-2">
                         <AlertCircle size={18} className="text-orange-500" />
                         Ghi chú vận hành (Tự động)
                     </h3>
@@ -279,9 +279,9 @@ export default function TeacherDashboard() {
                             <p className="text-slate-500 italic text-sm">Chưa có dữ liệu phân tích.</p>
                         ) : (
                             dynamicInsights.map((insight, idx) => (
-                                <div key={idx} className="flex items-start gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700">
+                                <div key={idx} className="flex items-start gap-3 p-3 bg-[var(--hover-bg)] rounded-lg border border-[var(--border-subtle)]">
                                     <div className={`mt-1 w-2 h-2 rounded-full ${insight.type === 'trend' ? 'bg-purple-500' : 'bg-blue-500'}`}></div>
-                                    <p className="text-sm text-slate-700 dark:text-slate-300 font-medium">{insight.text}</p>
+                                    <p className="text-sm text-[var(--text-primary)] font-medium">{insight.text}</p>
                                 </div>
                             ))
                         )}
@@ -289,18 +289,18 @@ export default function TeacherDashboard() {
                 </div>
 
                 {/* Manual Notes */}
-                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
-                    <h3 className="font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
+                <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border-default)] p-5 shadow-sm">
+                    <h3 className="font-bold text-[var(--text-primary)] mb-4 flex items-center gap-2">
                         <ClipboardList size={18} className="text-slate-500" />
                         Ghi chú đã lưu
                     </h3>
                     {classNotes.length === 0 ? (
-                        <p className="text-sm text-slate-500 dark:text-slate-400">Chưa có ghi chú nào. Thêm tại trang "Ghi chú".</p>
+                        <p className="text-sm text-[var(--text-secondary)]">Chưa có ghi chú nào. Thêm tại trang "Ghi chú".</p>
                     ) : (
                         <div className="space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
                             {classNotes.slice(0, 5).map((n, i) => (
-                                <div key={i} className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 text-sm border border-slate-100 dark:border-slate-700">
-                                    <p className="text-slate-800 dark:text-white mb-1">{n.text}</p>
+                                <div key={i} className="p-3 rounded-lg bg-[var(--hover-bg)] text-sm border border-[var(--border-subtle)]">
+                                    <p className="text-[var(--text-primary)] mb-1">{n.text}</p>
                                     <p className="text-[10px] text-slate-400">{n.date}</p>
                                 </div>
                             ))}
@@ -310,7 +310,7 @@ export default function TeacherDashboard() {
             </div>
 
             {/* DEBUG INFO */}
-            <div className="mt-8 p-4 bg-slate-100 dark:bg-slate-900 rounded border border-slate-300 dark:border-slate-700 text-xs font-mono text-slate-500">
+            <div className="mt-8 p-4 bg-slate-100  rounded border border-[var(--border-default)] text-xs font-mono text-slate-500">
                 <p><strong>DEBUG INFO:</strong></p>
                 <p>User ID: {user?.id} ({typeof user?.id})</p>
                 <p>User Name: {user?.name}</p>
@@ -325,13 +325,13 @@ export default function TeacherDashboard() {
 
 function SummaryCard({ icon: Icon, color, bg, value, label }) {
     return (
-        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm hover:shadow-md transition-shadow">
+        <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border-default)] p-5 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center gap-4">
                 <div className={`w-12 h-12 rounded-xl ${bg} flex items-center justify-center shrink-0`}>
                     <Icon className={color} size={24} />
                 </div>
                 <div>
-                    <p className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">{value}</p>
+                    <p className="text-2xl font-bold text-[var(--text-primary)] tracking-tight">{value}</p>
                     <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{label}</p>
                 </div>
             </div>

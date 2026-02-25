@@ -22,7 +22,7 @@ function StrengthBar({ password }) {
         {[0, 1, 2, 3].map((i) => (
           <div
             key={i}
-            className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${i < score ? colors[score - 1] : 'bg-slate-200 dark:bg-slate-700'
+            className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${i < score ? colors[score - 1] : 'bg-slate-200 '
               }`}
           />
         ))}
@@ -93,10 +93,10 @@ export default function ParentChangePassword() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-950 dark:to-slate-900 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50  p-4">
       <div className="w-full max-w-md">
         {/* Card */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <div className="bg-[var(--bg-surface)] rounded-2xl shadow-xl border border-[var(--border-default)] overflow-hidden">
           {/* Header */}
           <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-8 text-center">
             <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-4">
@@ -109,7 +109,7 @@ export default function ParentChangePassword() {
           {/* Body */}
           <div className="p-6">
             {/* Notice */}
-            <div className="flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg mb-5 text-sm text-amber-700 dark:text-amber-300">
+            <div className="flex items-start gap-2 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg mb-5 text-sm text-amber-500">
               <AlertTriangle size={16} className="mt-0.5 flex-shrink-0" />
               <span>Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ cái và số. Không được sử dụng mật khẩu mặc định.</span>
             </div>
@@ -117,23 +117,23 @@ export default function ParentChangePassword() {
             {/* Success state */}
             {success ? (
               <div className="text-center py-6">
-                <div className="w-14 h-14 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
+                <div className="w-14 h-14 bg-emerald-500/15 rounded-full flex items-center justify-center mx-auto mb-3">
                   <ShieldCheck size={28} className="text-emerald-500" />
                 </div>
-                <p className="font-semibold text-slate-800 dark:text-white">Đổi mật khẩu thành công!</p>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Đang chuyển đến Dashboard...</p>
+                <p className="font-semibold text-[var(--text-primary)]">Đổi mật khẩu thành công!</p>
+                <p className="text-sm text-[var(--text-secondary)] mt-1">Đang chuyển đến Dashboard...</p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
                 {error && (
-                  <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-600 dark:text-red-400">
+                  <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-sm text-red-500">
                     {error}
                   </div>
                 )}
 
                 {/* New password */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                  <label className="block text-sm font-medium text-[var(--text-primary)] mb-1.5">
                     Mật khẩu mới
                   </label>
                   <div className="relative">
@@ -143,7 +143,7 @@ export default function ParentChangePassword() {
                       type={showNew ? 'text' : 'password'}
                       value={form.newPassword}
                       onChange={(e) => { setForm({ ...form, newPassword: e.target.value }); setError(''); }}
-                      className="w-full pl-9 pr-10 py-2.5 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full pl-9 pr-10 py-2.5 text-sm rounded-lg border border-[var(--border-default)] bg-[var(--bg-surface)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="Nhập mật khẩu mới"
                       required
                     />
@@ -156,7 +156,7 @@ export default function ParentChangePassword() {
 
                 {/* Confirm password */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                  <label className="block text-sm font-medium text-[var(--text-primary)] mb-1.5">
                     Xác nhận mật khẩu
                   </label>
                   <div className="relative">
@@ -166,7 +166,7 @@ export default function ParentChangePassword() {
                       type={showConfirm ? 'text' : 'password'}
                       value={form.confirmPassword}
                       onChange={(e) => { setForm({ ...form, confirmPassword: e.target.value }); setError(''); }}
-                      className="w-full pl-9 pr-10 py-2.5 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full pl-9 pr-10 py-2.5 text-sm rounded-lg border border-[var(--border-default)] bg-[var(--bg-surface)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="Nhập lại mật khẩu mới"
                       required
                     />

@@ -106,7 +106,7 @@ const CustomTooltip = ({ active, payload, label }) => {
             </p>
             {entry.hk1 !== null && (
                 <div className="flex justify-between items-center gap-6 my-1.5">
-                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                    <span className="text-xs font-semibold flex items-center gap-1.5" style={{ color: 'var(--text-secondary)' }}>
                         <span className="w-2 h-2 rounded-full bg-blue-400" />
                         HK1
                     </span>
@@ -115,7 +115,7 @@ const CustomTooltip = ({ active, payload, label }) => {
             )}
             {entry.hk2 !== null && (
                 <div className="flex justify-between items-center gap-6 my-1.5">
-                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                    <span className="text-xs font-semibold flex items-center gap-1.5" style={{ color: 'var(--text-secondary)' }}>
                         <span className="w-2 h-2 rounded-full bg-purple-500" />
                         HK2
                     </span>
@@ -192,10 +192,10 @@ const TrendLines = (props) => {
 // --- Main Component ---
 
 const GradeTrendByTermChart = ({ grades, loading }) => {
-    const { theme } = useTheme();
-    const isDark = theme === 'dark';
+    const { resolvedTheme } = useTheme();
+    const isDark = resolvedTheme === 'dark';
 
-    // Theme-based colors
+    // Theme-based colors — using CSS vars where possible, fallback for SVG
     const colors = {
         grid: isDark ? '#334155' : '#f1f5f9',
         axis: isDark ? '#94a3b8' : '#64748b',
@@ -244,7 +244,7 @@ const GradeTrendByTermChart = ({ grades, loading }) => {
             <div className="flex-1 min-h-[300px] w-full">
                 {loading ? (
                     <div className="flex flex-col items-center justify-center h-full text-slate-400 gap-3">
-                        <div className="animate-pulse w-full h-full bg-slate-200 dark:bg-slate-700/50 rounded-xl" />
+                        <div className="animate-pulse w-full h-full rounded-xl" style={{ backgroundColor: 'var(--border-default)' }} />
                     </div>
                 ) : !hasData ? (
                     <div className="flex flex-col items-center justify-center h-full text-slate-400 gap-3">
