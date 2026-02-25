@@ -7,14 +7,14 @@ import {
 export const StudentDistributionChart = ({ data }) => {
     return (
         <div className="card-panel h-80 p-4">
-            <h3 className="text-lg font-semibold mb-4 text-[var(--text-primary)]">Phân bố học sinh theo Khối</h3>
+            <h3 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Phân bố học sinh theo Khối</h3>
             <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={data}>
-                    <CartesianGrid stroke="var(--border-color)" strokeDasharray="3 3" opacity={0.5} />
+                    <CartesianGrid stroke="var(--border-default)" strokeDasharray="3 3" opacity={0.5} />
                     <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} stroke="var(--text-placeholder)" />
                     <YAxis fontSize={12} tickLine={false} axisLine={false} stroke="var(--text-placeholder)" />
                     <Tooltip
-                        contentStyle={{ backgroundColor: 'var(--bg-card)', borderRadius: '8px', borderColor: 'var(--border-color)', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
+                        contentStyle={{ backgroundColor: 'var(--bg-surface)', borderRadius: '8px', borderColor: 'var(--border-default)', boxShadow: 'var(--shadow-dropdown)' }}
                         itemStyle={{ color: 'var(--text-primary)' }}
                     />
                     <Bar dataKey="students" fill="#6366f1" radius={[4, 4, 0, 0]} />
@@ -28,8 +28,8 @@ export const TeacherSubjectChart = ({ data }) => {
     const COLORS = ['#6366f1', '#ec4899', '#10b981', '#f59e0b', '#8b5cf6'];
 
     return (
-        <div className="card h-80">
-            <h3 className="text-lg font-semibold mb-4 text-slate-800 dark:text-white">Giáo viên theo Bộ môn</h3>
+        <div className="card-panel h-80 p-4">
+            <h3 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Giáo viên theo Bộ môn</h3>
             <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                     <Pie
@@ -46,7 +46,8 @@ export const TeacherSubjectChart = ({ data }) => {
                         ))}
                     </Pie>
                     <Tooltip
-                        contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.9)', borderRadius: '8px', border: 'none' }}
+                        contentStyle={{ backgroundColor: 'var(--bg-surface)', borderRadius: '8px', border: '1px solid var(--border-default)', boxShadow: 'var(--shadow-dropdown)' }}
+                        itemStyle={{ color: 'var(--text-primary)' }}
                     />
                     <Legend verticalAlign="bottom" height={36} />
                 </PieChart>

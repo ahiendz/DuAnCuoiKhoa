@@ -1,0 +1,16 @@
+{
+  "projectId": "prj_NbPzgFRLHT4SghwTP7eZ0RvIUPUo",
+  "orgId": "team_HGAueZIS2dnFwJPx4KEOI1Ux",
+  "projectName": "temp_duan",
+  "settings": {
+    "createdAt": 1772021842140,
+    "framework": null,
+    "devCommand": null,
+    "installCommand": null,
+    "buildCommand": null,
+    "outputDirectory": null,
+    "rootDirectory": null,
+    "directoryListing": false,
+    "nodeVersion": "24.x"
+  }
+}

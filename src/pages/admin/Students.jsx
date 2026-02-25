@@ -375,14 +375,14 @@ export default function Students() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Quản lý Học sinh</h2>
-          <p className="text-slate-500 dark:text-slate-400 text-sm">{students.length} học sinh</p>
+          <h2 className="text-2xl font-bold text-[var(--text-primary)]">Quản lý Học sinh</h2>
+          <p className="text-[var(--text-secondary)] text-sm">{students.length} học sinh</p>
         </div>
         <div className="flex gap-2">
-          <button onClick={() => setImportModal(true)} className="px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm flex items-center gap-2">
+          <button onClick={() => setImportModal(true)} className="px-3 py-2 rounded-lg border border-[var(--border-default)] text-[var(--text-secondary)] text-sm flex items-center gap-2">
             <Upload size={16} /> Import
           </button>
-          <button onClick={() => exportStudentsTemplate()} className="px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm flex items-center gap-2">
+          <button onClick={() => exportStudentsTemplate()} className="px-3 py-2 rounded-lg border border-[var(--border-default)] text-[var(--text-secondary)] text-sm flex items-center gap-2">
             <Download size={16} /> CSV
           </button>
           <button onClick={openAdd} className="btn-primary flex items-center gap-2 text-sm">
@@ -410,11 +410,11 @@ export default function Students() {
       {loading ? (
         <div className="text-center py-10 text-slate-500">Đang tải...</div>
       ) : (
-        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+        <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border-default)] overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+                <tr className="bg-[var(--hover-bg)] border-b border-[var(--border-default)]">
                   <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Avatar</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Mã HS</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Họ tên</th>
@@ -423,31 +423,31 @@ export default function Students() {
                   <th className="text-right px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Thao tác</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              <tbody className="divide-y divide-[var(--border-subtle)]">
                 {filteredStudents.map((student) => (
-                  <tr key={student.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                  <tr key={student.id} className="hover:bg-[var(--hover-bg)]/30 transition-colors">
                     <td className="px-4 py-3">
                       {student.avatar_url ? (
                         <img src={student.avatar_url} alt="" className="w-8 h-8 rounded-full object-cover" />
                       ) : (
-                        <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-full bg-slate-200  flex items-center justify-center">
                           <User size={14} className="text-slate-400" />
                         </div>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-slate-600 dark:text-slate-400 font-mono text-xs">{student.student_code}</td>
-                    <td className="px-4 py-3 font-medium text-slate-800 dark:text-white">{student.full_name}</td>
-                    <td className="px-4 py-3 text-slate-600 dark:text-slate-400">{formatDob(student.dob)}</td>
+                    <td className="px-4 py-3 text-[var(--text-secondary)] font-mono text-xs">{student.student_code}</td>
+                    <td className="px-4 py-3 font-medium text-[var(--text-primary)]">{student.full_name}</td>
+                    <td className="px-4 py-3 text-[var(--text-secondary)]">{formatDob(student.dob)}</td>
                     <td className="px-4 py-3">
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400">
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-green-500/10 text-green-500">
                         {className(student)}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex justify-end gap-1">
-                        <button onClick={() => setViewing(student)} className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 hover:text-indigo-500"><Eye size={16} /></button>
-                        <button onClick={() => openEdit(student)} className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 hover:text-indigo-500"><Pencil size={16} /></button>
-                        <button onClick={() => setDeleteDialog({ open: true, id: student.id })} className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 hover:text-red-500"><Trash2 size={16} /></button>
+                        <button onClick={() => setViewing(student)} className="p-1.5 rounded-lg hover:bg-[var(--hover-bg)] text-slate-500 hover:text-indigo-500"><Eye size={16} /></button>
+                        <button onClick={() => openEdit(student)} className="p-1.5 rounded-lg hover:bg-[var(--hover-bg)] text-slate-500 hover:text-indigo-500"><Pencil size={16} /></button>
+                        <button onClick={() => setDeleteDialog({ open: true, id: student.id })} className="p-1.5 rounded-lg hover:bg-[var(--hover-bg)] text-slate-500 hover:text-red-500"><Trash2 size={16} /></button>
                       </div>
                     </td>
                   </tr>
@@ -465,22 +465,22 @@ export default function Students() {
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Sửa học sinh' : 'Thêm học sinh'}>
         {error && (
-          <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm rounded-lg">
+          <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 text-red-500 text-sm rounded-lg">
             {error}
           </div>
         )}
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Họ và tên</label>
+            <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">Họ và tên</label>
             <input className="input-field" value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Ngày sinh</label>
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">Ngày sinh</label>
               <input type="date" className="input-field" value={form.dob} onChange={(e) => setForm({ ...form, dob: e.target.value })} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Giới tính</label>
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">Giới tính</label>
               <select className="input-field" value={form.gender} onChange={(e) => setForm({ ...form, gender: e.target.value })}>
                 <option value="">Chọn</option>
                 <option value="male">Nam</option>
@@ -489,36 +489,36 @@ export default function Students() {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Lớp</label>
+            <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">Lớp</label>
             <select className="input-field" value={form.class_id} onChange={(e) => setForm({ ...form, class_id: e.target.value })}>
               <option value="">Chọn lớp</option>
               {classes.map((cls) => <option key={cls.id} value={cls.id}>{cls.name}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Avatar URL (tùy chọn)</label>
+            <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">Avatar URL (tùy chọn)</label>
             <input className="input-field" value={form.avatar_url} onChange={(e) => setForm({ ...form, avatar_url: e.target.value })} placeholder="https://..." />
           </div>
-          <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
-            <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Thông tin phụ huynh (bắt buộc)</h4>
+          <div className="pt-4 border-t border-[var(--border-default)]">
+            <h4 className="text-sm font-semibold text-[var(--text-primary)] mb-3">Thông tin phụ huynh (bắt buộc)</h4>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email PH</label>
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">Email PH</label>
               <input type="email" className="input-field" value={form.parent_email} onChange={(e) => setForm({ ...form, parent_email: e.target.value })} placeholder="parent@email.com" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Họ tên PH</label>
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">Họ tên PH</label>
               <input className="input-field" value={form.parent_name} onChange={(e) => setForm({ ...form, parent_name: e.target.value })} placeholder="Nguyễn Văn A" />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">SĐT PH</label>
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">SĐT PH</label>
               <input type="tel" className="input-field" value={form.parent_phone} onChange={(e) => setForm({ ...form, parent_phone: e.target.value })} placeholder="0909123456" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Quan hệ</label>
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">Quan hệ</label>
               <select className="input-field" value={form.relationship} onChange={(e) => setForm({ ...form, relationship: e.target.value })}>
                 <option value="">Chọn</option>
                 <option value="father">Cha</option>
@@ -527,11 +527,11 @@ export default function Students() {
               </select>
             </div>
           </div>
-          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 text-xs text-blue-700 dark:text-blue-300">
+          <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 text-xs text-blue-500">
             Hệ thống tạo tài khoản phụ huynh nếu có email; mật khẩu mặc định là mã học sinh.
           </div>
-          <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
-            <button onClick={() => setModalOpen(false)} className="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm">Hủy</button>
+          <div className="flex justify-end gap-3 pt-4 border-t border-[var(--border-default)]">
+            <button onClick={() => setModalOpen(false)} className="px-4 py-2 rounded-lg border border-[var(--border-default)] text-[var(--text-secondary)] text-sm">Hủy</button>
             <button onClick={handleSave} disabled={saving} className="btn-primary text-sm">{saving ? 'Đang lưu...' : 'Lưu'}</button>
           </div>
         </div>
@@ -552,22 +552,22 @@ export default function Students() {
       >
         <div className="space-y-4">
           {importError && (
-            <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm rounded-lg">
+            <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-500 text-sm rounded-lg">
               {importError}
             </div>
           )}
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Chọn lớp</label>
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">Chọn lớp</label>
               <select className="input-field" value={importClassId} onChange={(e) => setImportClassId(e.target.value)}>
                 <option value="">-- Chọn lớp --</option>
                 {classes.map((cls) => <option key={cls.id} value={cls.id}>{cls.name}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Chế độ</label>
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">Chế độ</label>
               <div className="flex items-center gap-3 mt-2">
-                <span className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Merge</span>
+                <span className="text-xs uppercase tracking-wide text-[var(--text-secondary)]">Merge</span>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input
                     type="checkbox"
@@ -575,13 +575,13 @@ export default function Students() {
                     checked={importMode === 'replace'}
                     onChange={(e) => setImportMode(e.target.checked ? 'replace' : 'merge')}
                   />
-                  <div className="relative w-12 h-6 bg-slate-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-slate-700 peer-checked:bg-red-500 transition-colors">
+                  <div className="relative w-12 h-6 bg-slate-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-300  rounded-full peer  peer-checked:bg-red-500 transition-colors">
                     <span className="absolute left-1 top-1 h-4 w-4 bg-white rounded-full shadow transform transition-transform peer-checked:translate-x-6" />
                   </div>
                 </label>
-                <span className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Replace</span>
+                <span className="text-xs uppercase tracking-wide text-[var(--text-secondary)]">Replace</span>
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              <p className="text-xs text-[var(--text-secondary)] mt-1">
                 {importMode === 'merge'
                   ? 'Giữ dữ liệu cũ, thêm mới/ghi đè theo mã HS.'
                   : 'Thay thế toàn bộ lớp này trước khi import.'}
@@ -589,14 +589,14 @@ export default function Students() {
             </div>
             <div className="flex items-end justify-between gap-2">
               <div className="w-full">
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">File Excel (.xlsx)</label>
+                <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">File Excel (.xlsx)</label>
                 <input
                   type="file"
                   accept=".xlsx,.xls"
                   ref={fileRef}
                   onChange={handleFileUpload}
                   disabled={!importClassId}
-                  className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 dark:file:bg-indigo-900/20 file:text-indigo-600 dark:file:text-indigo-400 hover:file:bg-indigo-100 disabled:opacity-50"
+                  className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50  file:text-indigo-600  hover:file:bg-indigo-100 disabled:opacity-50"
                 />
                 {!importClassId && <p className="text-xs text-slate-500 pt-1">Chọn lớp trước khi tải file.</p>}
               </div>
@@ -612,11 +612,11 @@ export default function Students() {
           {rows.length > 0 && (
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <p className="text-sm text-slate-600 dark:text-slate-400">
+                <p className="text-sm text-[var(--text-secondary)]">
                   {rows.length} dòng | Lỗi: <span className={errorCount > 0 ? 'text-red-500' : 'text-green-500'}>{errorCount}</span>
                 </p>
                 <button
-                  className="px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm hover:bg-slate-50 dark:hover:bg-slate-800"
+                  className="px-3 py-2 rounded-lg border border-[var(--border-default)] text-[var(--text-secondary)] text-sm hover:bg-[var(--hover-bg)]"
                   onClick={() => {
                     setRows([]);
                     setRowErrors({});
@@ -627,9 +627,9 @@ export default function Students() {
                   Xóa dữ liệu
                 </button>
               </div>
-              <div className="overflow-x-auto max-h-[320px] border border-slate-200 dark:border-slate-800 rounded-lg">
+              <div className="overflow-x-auto max-h-[320px] border border-[var(--border-default)] rounded-lg">
                 <table className="min-w-full text-sm">
-                  <thead className="bg-slate-50 dark:bg-slate-800/50 sticky top-0">
+                  <thead className="bg-[var(--hover-bg)] sticky top-0">
                     <tr>
                       {['student_code', 'full_name', 'dob', 'gender', 'class_id', 'avatar_url', ...(showParentCols ? SUBJECTS_PARENT_COLS : [])].map((col) => (
                         <th key={col} className="text-left px-3 py-2 font-semibold text-slate-500 uppercase text-xs">{col}</th>
@@ -638,13 +638,13 @@ export default function Students() {
                   </thead>
                   <tbody>
                     {rows.map((row, idx) => (
-                      <tr key={idx} className="border-b border-slate-100 dark:border-slate-800">
+                      <tr key={idx} className="border-b border-[var(--border-subtle)]">
                         {['student_code', 'full_name', 'dob', 'gender', 'class_id', 'avatar_url', ...(showParentCols ? SUBJECTS_PARENT_COLS : [])].map((field) => {
                           const hasError = rowErrors[idx]?.[field];
                           return (
                             <td key={field} className="px-3 py-2">
                               <input
-                                className={`input-field text-xs ${hasError ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : ''}`}
+                                className={`input-field text-xs ${hasError ? 'border-red-500 bg-red-500/10' : ''}`}
                                 value={row[field] || ''}
                                 onChange={(e) => handleCellChange(idx, field, e.target.value)}
                               />
@@ -659,8 +659,8 @@ export default function Students() {
               </div>
             </div>
           )}
-          <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
-            <button onClick={() => setImportModal(false)} className="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm">Hủy</button>
+          <div className="flex justify-end gap-3 pt-4 border-t border-[var(--border-default)]">
+            <button onClick={() => setImportModal(false)} className="px-4 py-2 rounded-lg border border-[var(--border-default)] text-[var(--text-secondary)] text-sm">Hủy</button>
             <button
               onClick={() => {
                 if (importMode === 'replace' && !replaceWarn) {
