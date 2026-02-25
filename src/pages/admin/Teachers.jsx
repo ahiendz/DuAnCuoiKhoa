@@ -93,11 +93,11 @@ export default function Teachers() {
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Quản lý Giáo viên</h2>
-                    <p className="text-slate-500 dark:text-slate-400 text-sm">{teachers.length} giáo viên</p>
+                    <h2 className="text-2xl font-bold text-[var(--text-primary)]">Quản lý Giáo viên</h2>
+                    <p className="text-[var(--text-secondary)] text-sm">{teachers.length} giáo viên</p>
                 </div>
                 <div className="flex gap-2">
-                    <button onClick={exportTeachersCsv} className="px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 text-sm flex items-center gap-2">
+                    <button onClick={exportTeachersCsv} className="px-3 py-2 rounded-lg border border-[var(--border-default)] text-[var(--text-secondary)] hover:bg-[var(--hover-bg)] text-sm flex items-center gap-2">
                         <Download size={16} /> CSV
                     </button>
                     <button onClick={openAdd} className="btn-primary flex items-center gap-2 text-sm">
@@ -112,11 +112,11 @@ export default function Teachers() {
             </div>
 
             {loading ? <div className="text-center py-10 text-slate-500">Đang tải...</div> : (
-                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+                <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border-default)] overflow-hidden shadow-sm">
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                             <thead>
-                                <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+                                <tr className="bg-[var(--hover-bg)] border-b border-[var(--border-default)]">
                                     <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Họ tên</th>
                                     <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Email</th>
                                     <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Môn</th>
@@ -125,29 +125,29 @@ export default function Teachers() {
                                     <th className="text-right px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Thao tác</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                            <tbody className="divide-y divide-[var(--border-subtle)]">
                                 {filtered.map(t => (
-                                    <tr key={t.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
-                                        <td className="px-4 py-3 font-medium text-slate-800 dark:text-white">{t.full_name}</td>
-                                        <td className="px-4 py-3 text-slate-600 dark:text-slate-400">{t.contact_email || '—'}</td>
+                                    <tr key={t.id} className="hover:bg-[var(--hover-bg)]/30 transition-colors">
+                                        <td className="px-4 py-3 font-medium text-[var(--text-primary)]">{t.full_name}</td>
+                                        <td className="px-4 py-3 text-[var(--text-secondary)]">{t.contact_email || '—'}</td>
                                         <td className="px-4 py-3">
                                             <span
                                                 className={`text-xs px-2 py-0.5 rounded-full ${t.isFull
-                                                        ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 font-semibold'
-                                                        : 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
+                                                        ? 'bg-red-500/10 text-red-500 font-semibold'
+                                                        : 'bg-blue-500/10 text-blue-500'
                                                     }`}
                                             >
                                                 {t.subject} {t.isFull && '[FULL]'}
                                             </span>
                                         </td>
-                                        <td className="px-4 py-3 text-slate-600 dark:text-slate-400">{(t.teaching_classes || []).length}/4</td>
+                                        <td className="px-4 py-3 text-[var(--text-secondary)]">{(t.teaching_classes || []).length}/4</td>
                                         <td className="px-4 py-3">
                                             {t.is_homeroom ? <Award size={16} className="text-yellow-500" /> : <span className="text-slate-300">—</span>}
                                         </td>
                                         <td className="px-4 py-3 text-right">
                                             <div className="flex justify-end gap-1">
-                                                <button onClick={() => openEdit(t)} className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 hover:text-indigo-500"><Pencil size={16} /></button>
-                                                <button onClick={() => setDeleteDialog({ open: true, id: t.id })} className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 hover:text-red-500"><Trash2 size={16} /></button>
+                                                <button onClick={() => openEdit(t)} className="p-1.5 rounded-lg hover:bg-[var(--hover-bg)] text-slate-500 hover:text-indigo-500"><Pencil size={16} /></button>
+                                                <button onClick={() => setDeleteDialog({ open: true, id: t.id })} className="p-1.5 rounded-lg hover:bg-[var(--hover-bg)] text-slate-500 hover:text-red-500"><Trash2 size={16} /></button>
                                             </div>
                                         </td>
                                     </tr>
@@ -160,19 +160,19 @@ export default function Teachers() {
             )}
 
             <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Sửa giáo viên' : 'Thêm giáo viên'}>
-                {error && <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm rounded-lg">{error}</div>}
+                {error && <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 text-red-500 text-sm rounded-lg">{error}</div>}
                 <div className="space-y-4">
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Họ và tên</label>
+                        <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">Họ và tên</label>
                         <input className="input-field" value={form.full_name} onChange={e => setForm({ ...form, full_name: e.target.value })} />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email</label>
+                        <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">Email</label>
                         <input className="input-field" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Giới tính</label>
+                            <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">Giới tính</label>
                             <select className="input-field" value={form.gender} onChange={e => setForm({ ...form, gender: e.target.value })}>
                                 <option value="">Chọn</option>
                                 <option value="male">Nam</option>
@@ -180,7 +180,7 @@ export default function Teachers() {
                             </select>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Môn giảng dạy</label>
+                            <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">Môn giảng dạy</label>
                             <select className="input-field" value={form.subject} onChange={e => setForm({ ...form, subject: e.target.value })}>
                                 <option value="">Chọn môn</option>
                                 {fixedSubjects.map(s => <option key={s} value={s}>{s}</option>)}
@@ -188,7 +188,7 @@ export default function Teachers() {
                         </div>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                        <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
                             {editing ? 'Mật khẩu mới (để trống nếu không đổi)' : 'Mật khẩu (để trống để tự động tạo)'}
                         </label>
                         <input
@@ -199,8 +199,8 @@ export default function Teachers() {
                             placeholder={editing ? 'Nhập mật khẩu mới' : 'Tự động tạo nếu để trống'}
                         />
                     </div>
-                    <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
-                        <button onClick={() => setModalOpen(false)} className="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm">Hủy</button>
+                    <div className="flex justify-end gap-3 pt-4 border-t border-[var(--border-default)]">
+                        <button onClick={() => setModalOpen(false)} className="px-4 py-2 rounded-lg border border-[var(--border-default)] text-[var(--text-secondary)] text-sm">Hủy</button>
                         <button onClick={handleSave} disabled={saving} className="btn-primary text-sm">{saving ? 'Đang lưu...' : 'Lưu'}</button>
                     </div>
                 </div>
@@ -210,7 +210,7 @@ export default function Teachers() {
                 message="Bạn có chắc muốn xóa giáo viên này?" />
 
             <Modal open={!!errorModal} onClose={() => setErrorModal('')} title="Không thể xóa">
-                <div className="flex items-start gap-3 text-red-500 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-3">
+                <div className="flex items-start gap-3 text-red-500 bg-red-500/10 border border-red-500/20 rounded-xl p-3">
                     <AlertTriangle size={20} className="mt-0.5" />
                     <p className="text-sm">{errorModal}</p>
                 </div>

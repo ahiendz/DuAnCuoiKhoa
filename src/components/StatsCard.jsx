@@ -13,13 +13,13 @@ export default function StatsCard({ title, value, icon: Icon, color }) {
     const bgGradient = gradientMap[color] || gradientMap.indigo;
 
     return (
-        <div className="card hover:shadow-lg transition-shadow border-l-4 border-l-transparent hover:border-l-indigo-500 dark:hover:border-l-indigo-400">
+        <div className="card-panel p-5 hover:shadow-lg transition-shadow border-l-4 border-l-transparent hover:border-l-indigo-500">
             <div className="flex items-center justify-between">
                 <div>
-                    <p className="text-slate-500 dark:text-slate-400 text-sm font-medium uppercase tracking-wide">
+                    <p className="text-sm font-medium uppercase tracking-wide" style={{ color: 'var(--text-secondary)' }}>
                         {title}
                     </p>
-                    <h3 className="text-2xl font-bold mt-1 text-slate-800 dark:text-white">
+                    <h3 className="text-2xl font-bold mt-1" style={{ color: 'var(--text-primary)' }}>
                         {value}
                     </h3>
                 </div>

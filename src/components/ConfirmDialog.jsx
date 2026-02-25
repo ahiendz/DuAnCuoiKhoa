@@ -6,12 +6,21 @@ export default function ConfirmDialog({ open, onClose, onConfirm, title = 'Xác 
     return (
         <Modal open={open} onClose={onClose} title={title} size="sm">
             <div className="text-center">
-                <div className="mx-auto w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center mb-4">
+                <div className="mx-auto w-12 h-12 rounded-full flex items-center justify-center mb-4" style={{ backgroundColor: 'var(--hover-bg-danger)' }}>
                     <AlertTriangle className="text-red-500" size={24} />
                 </div>
-                <p className="text-slate-600 dark:text-slate-400 mb-6">{message}</p>
+                <p className="mb-6" style={{ color: 'var(--text-secondary)' }}>{message}</p>
                 <div className="flex gap-3 justify-center">
-                    <button onClick={onClose} className="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 text-sm font-medium">
+                    <button
+                        onClick={onClose}
+                        className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                        style={{
+                            border: '1px solid var(--border-default)',
+                            color: 'var(--text-primary)',
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--hover-bg)'}
+                        onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                    >
                         Hủy
                     </button>
                     <button onClick={onConfirm} disabled={loading}

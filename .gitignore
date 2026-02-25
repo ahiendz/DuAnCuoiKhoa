@@ -47,3 +47,4 @@ anti-gravity-quota/
 DISK_SPACE_ALERT.md
 .tmp/
 *.log
+.vercel
