@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, forwardRef, useImperativeHandle, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -104,10 +103,14 @@ const DebugConsole = forwardRef(function DebugConsole(_props, ref) {
 
   return (
     <div
-      className="glass-card p-4 mt-6 h-48 overflow-y-auto font-mono text-xs custom-scrollbar bg-black/50"
+      className="p-4 mt-6 h-48 overflow-y-auto font-mono text-xs custom-scrollbar rounded-2xl"
       ref={containerRef}
+      style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}
     >
-      <h4 className="text-slate-400 mb-2 border-b border-white/10 pb-2">Debug Console Logs</h4>
+      <h4 className="mb-2 border-b pb-2"
+        style={{ color: 'var(--text-secondary)', borderColor: 'var(--border-subtle)' }}>
+        Debug Console Logs
+      </h4>
       {logs.map((log, i) => (
         <div
           key={i}
@@ -123,7 +126,7 @@ const DebugConsole = forwardRef(function DebugConsole(_props, ref) {
           <span className="opacity-50">[{log.time}]</span> {log.msg}
         </div>
       ))}
-      {logs.length === 0 && <p className="text-slate-500 italic">No logs yet...</p>}
+      {logs.length === 0 && <p className="italic" style={{ color: 'var(--text-muted)' }}>No logs yet...</p>}
     </div>
   );
 });
@@ -648,13 +651,15 @@ export default function Attendance() {
      RENDER
      ────────────────────────────────────────────── */
   return (
-    <div ref={containerRef} className="min-h-screen bg-navy pt-[var(--nav-height)] pb-8">
+    <div ref={containerRef} className="min-h-screen pt-[var(--nav-height)] pb-8"
+      style={{ background: 'var(--public-hero-bg)' }}>
       {/* ── Header ── */}
       <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 mb-6">
         <div className="max-w-7xl mx-auto">
           <button
             onClick={() => navigate("/")}
-            className="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-4"
+            className="inline-flex items-center gap-2 transition-colors mb-4"
+            style={{ color: 'var(--glass-text-muted)' }}
           >
             <ArrowLeft className="w-5 h-5" />
             <span>Quay lại trang chủ</span>
@@ -666,7 +671,7 @@ export default function Attendance() {
                 <Sparkles className="w-4 h-4" />
                 <span>Hệ thống điểm danh AI</span>
               </div>
-              <h1 className="font-heading text-2xl sm:text-3xl lg:text-4xl font-bold text-white">
+              <h1 className="font-heading text-2xl sm:text-3xl lg:text-4xl font-bold">
                 Điểm danh <span className="gradient-text">thông minh</span>
               </h1>
             </div>
@@ -695,7 +700,8 @@ export default function Attendance() {
             {/* Left: Camera Section */}
             <div ref={cameraRef} className="lg:col-span-8 space-y-5">
               <div className="glass-card p-1 overflow-hidden relative shadow-2xl">
-                <div className="relative aspect-video bg-navy-light rounded-2xl overflow-hidden">
+                <div className="relative aspect-video rounded-2xl overflow-hidden"
+                  style={{ background: 'var(--bg-elevated)' }}>
                   {/* Progress Bar */}
                   <div className="absolute top-0 left-0 w-full h-1.5 bg-white/10 z-30">
                     <div
@@ -719,13 +725,15 @@ export default function Attendance() {
 
                   {/* UI Overlays */}
                   {!isScanning ? (
-                    <div className="absolute inset-0 flex items-center justify-center bg-navy/40 backdrop-blur-sm">
-                      <div className="text-center p-8 rounded-3xl bg-white/5 border border-white/10 scale-in">
-                        <div className="w-20 h-20 rounded-2xl bg-violet-500/20 border border-violet-500/30 flex items-center justify-center mx-auto mb-6">
-                          <Camera className="w-10 h-10 text-violet-400" />
+                    <div className="absolute inset-0 flex items-center justify-center backdrop-blur-sm"
+                      style={{ background: 'var(--overlay-bg)' }}>
+                      <div className="text-center p-8 rounded-3xl scale-in"
+                        style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}>
+                        <div className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 icon-box-violet">
+                          <Camera className="w-10 h-10 text-violet-500" />
                         </div>
-                        <p className="text-white text-lg font-semibold">Camera sẵn sàng</p>
-                        <p className="text-sm text-slate-400 mt-2">Nhấn nút bên dưới để bắt đầu quét</p>
+                        <p className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Camera sẵn sàng</p>
+                        <p className="text-sm mt-2" style={{ color: 'var(--text-secondary)' }}>Nhấn nút bên dưới để bắt đầu quét</p>
                       </div>
                     </div>
                   ) : (
@@ -744,10 +752,15 @@ export default function Attendance() {
 
                   {/* Status Overlay */}
                   <div className="absolute bottom-6 left-0 right-0 text-center z-20">
-                    <span className="inline-block px-6 py-2.5 rounded-full text-sm font-semibold backdrop-blur-xl border border-white/20 bg-black/60 text-white shadow-lg tracking-wide">
+                    <span className="inline-block px-6 py-2.5 rounded-full text-sm font-semibold backdrop-blur-xl shadow-lg tracking-wide"
+                      style={{
+                        background: 'var(--bg-surface)',
+                        border: '1px solid var(--border-default)',
+                        color: 'var(--text-primary)'
+                      }}>
                       {isScanning ? (
                         <span className="flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                           {scanStatusMsg}
                         </span>
                       ) : "Hệ thống đang chờ"}
@@ -798,8 +811,8 @@ export default function Attendance() {
             {/* Right: Stats & Bento Controls */}
             <div className="lg:col-span-4 space-y-6">
               {/* Stats Block */}
-              <div className="backdrop-blur-md bg-slate-900/40 border border-white/10 rounded-3xl p-6 shadow-xl">
-                <h3 className="text-white font-bold mb-6 flex items-center gap-2 text-lg">
+              <div className="glass-card p-6">
+                <h3 className="font-bold mb-6 flex items-center gap-2 text-lg">
                   <Activity className="w-5 h-5 text-violet-400" />
                   Thống kê nhanh
                 </h3>
@@ -807,27 +820,27 @@ export default function Attendance() {
                   <div className="flex items-center justify-between p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
-                        <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                        <CheckCircle2 className="w-5 h-5 text-emerald-500" />
                       </div>
-                      <span className="text-slate-300 font-medium">Có mặt</span>
+                      <span className="font-medium">Có mặt</span>
                     </div>
-                    <span className="text-3xl font-black text-emerald-400">{presentCount}</span>
+                    <span className="text-3xl font-black text-emerald-500">{presentCount}</span>
                   </div>
                   <div className="flex items-center justify-between p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-rose-500/20 flex items-center justify-center">
-                        <XCircle className="w-5 h-5 text-rose-400" />
+                        <XCircle className="w-5 h-5 text-rose-500" />
                       </div>
-                      <span className="text-slate-300 font-medium">Vắng mặt</span>
+                      <span className="font-medium">Vắng mặt</span>
                     </div>
-                    <span className="text-3xl font-black text-rose-400">{absentCount}</span>
+                    <span className="text-3xl font-black text-rose-500">{absentCount}</span>
                   </div>
                 </div>
               </div>
 
               {/* Date Picker Block */}
-              <div className="backdrop-blur-md bg-slate-900/40 border border-white/10 rounded-3xl p-6 shadow-xl">
-                <h3 className="text-white font-bold mb-4 flex items-center gap-2">
+              <div className="glass-card p-6">
+                <h3 className="font-bold mb-4 flex items-center gap-2">
                   <Calendar className="w-5 h-5 text-violet-400" />
                   Lịch điểm danh
                 </h3>
@@ -835,21 +848,24 @@ export default function Attendance() {
                   type="date"
                   value={selectedDate}
                   onChange={(e) => setSelectedDate(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-violet-500/50 transition-all cursor-pointer"
+                  className="w-full rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-violet-500/50 transition-all cursor-pointer"
+                  style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', color: 'var(--text-primary)' }}
                 />
               </div>
 
               {/* Recent Scroll Feed */}
-              <div className="backdrop-blur-md bg-slate-900/40 border border-white/10 rounded-3xl p-6 shadow-xl">
-                <h3 className="text-white font-bold mb-4 flex items-center gap-2">
-                  <RefreshCw className="w-4 h-4 text-emerald-400" />
+              <div className="glass-card p-6">
+                <h3 className="font-bold mb-4 flex items-center gap-2">
+                  <RefreshCw className="w-4 h-4 text-emerald-500" />
                   Hoạt động gần đây
                 </h3>
                 <div className="space-y-3 max-h-[220px] overflow-y-auto pr-2 custom-scrollbar">
                   {students.filter(s => s.status === 'present').length > 0 ? (
                     students.filter(s => s.status === 'present').slice(-5).reverse().map(student => (
-                      <div key={`feed-${student.id}`} className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5">
-                        <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-white/10">
+                      <div key={`feed-${student.id}`} className="flex items-center gap-3 p-3 rounded-xl"
+                        style={{ background: 'var(--hover-bg)', border: '1px solid var(--border-subtle)' }}>
+                        <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0"
+                          style={{ border: '1px solid var(--border-default)' }}>
                           {student.avatar_url ? (
                             <img src={student.avatar_url} className="w-full h-full object-cover" alt="" />
                           ) : (
@@ -859,13 +875,13 @@ export default function Attendance() {
                           )}
                         </div>
                         <div className="min-w-0">
-                          <p className="text-white text-sm font-bold truncate">{student.name}</p>
-                          <p className="text-[10px] text-emerald-400/80 font-mono italic">{student.time || '--:--'}</p>
+                          <p className="text-sm font-bold truncate">{student.name}</p>
+                          <p className="text-[10px] text-emerald-500 font-mono italic">{student.time || '--:--'}</p>
                         </div>
                       </div>
                     ))
                   ) : (
-                    <div className="text-center py-8 text-slate-500 text-sm italic">Chưa có hoạt động</div>
+                    <div className="text-center py-8 text-sm italic" style={{ color: 'var(--glass-text-muted)' }}>Chưa có hoạt động</div>
                   )}
                 </div>
               </div>
@@ -874,18 +890,19 @@ export default function Attendance() {
 
           {/* Bottom Row: Main Student List Bento */}
           <div className="mt-8">
-            <div className="backdrop-blur-md bg-slate-900/40 border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
-                <Users className="w-32 h-32 text-white" />
+            <div className="glass-card p-8 relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
+                <Users className="w-32 h-32" />
               </div>
 
               <div className="flex items-center justify-between mb-8">
                 <div>
-                  <h3 className="text-2xl font-black text-white uppercase tracking-tight">Danh sách học sinh</h3>
-                  <p className="text-slate-400 text-sm mt-1">Tổng cộng: {students.length} học sinh • Đã nhận diện {presentCount}</p>
+                  <h3 className="text-2xl font-black uppercase tracking-tight">Danh sách học sinh</h3>
+                  <p className="text-sm mt-1" style={{ color: 'var(--glass-text-muted)' }}>Tổng cộng: {students.length} học sinh • Đã nhận diện {presentCount}</p>
                 </div>
                 <div className="flex gap-2">
-                  <div className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-sm font-bold">
+                  <div className="px-4 py-2 rounded-xl text-sm font-bold"
+                    style={{ background: 'var(--hover-bg)', border: '1px solid var(--border-default)' }}>
                     {selectedDate}
                   </div>
                 </div>
@@ -897,34 +914,36 @@ export default function Attendance() {
                     key={student.id || student.student_code}
                     className={`flex items-center gap-4 p-4 rounded-2xl border transition-all duration-300 group ${student.status === 'present'
                       ? 'bg-emerald-500/10 border-emerald-500/20'
-                      : 'bg-white/5 border-white/5 hover:border-white/20'
+                      : 'border-[var(--border-subtle)] hover:border-[var(--border-default)]'
                       }`}
+                    style={student.status !== 'present' ? { background: 'var(--hover-bg)' } : {}}
                   >
-                    <div className="w-14 h-14 rounded-2xl overflow-hidden flex-shrink-0 shadow-lg relative ring-2 ring-white/5 group-hover:ring-violet-500/30 transition-all">
+                    <div className="w-14 h-14 rounded-2xl overflow-hidden flex-shrink-0 shadow-lg relative ring-2 ring-black/5 group-hover:ring-violet-500/30 transition-all">
                       {student.avatar_url ? (
                         <img src={student.avatar_url} className="w-full h-full object-cover" alt={student.name} />
                       ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-violet-500/20 to-indigo-500/20 flex items-center justify-center text-white font-black">
+                        <div className="w-full h-full bg-gradient-to-br from-violet-500/20 to-indigo-500/20 flex items-center justify-center font-black"
+                          style={{ color: 'var(--glass-text-primary)' }}>
                           {getInitials(student.name)}
                         </div>
                       )}
                       {student.status === 'present' && (
                         <div className="absolute inset-0 bg-emerald-500/20 flex items-center justify-center">
-                          <CheckCircle2 className="w-6 h-6 text-emerald-400 drop-shadow-md" />
+                          <CheckCircle2 className="w-6 h-6 text-emerald-500 drop-shadow-md" />
                         </div>
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-white font-bold leading-tight truncate text-base">{student.name}</p>
+                      <p className="font-bold leading-tight truncate text-base">{student.name}</p>
                       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
-                        <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">{student.student_code}</span>
-                        <span className="text-[11px] font-medium text-violet-400 px-2 py-0.5 rounded-md bg-violet-400/10 border border-violet-400/20">{student.class_name || "LỚP TỰ DO"}</span>
+                        <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--glass-text-muted)' }}>{student.student_code}</span>
+                        <span className="text-[11px] font-medium text-violet-500 px-2 py-0.5 rounded-md bg-violet-400/10 border border-violet-400/20">{student.class_name || "LỚP TỰ DO"}</span>
                       </div>
                     </div>
                     {student.status === 'present' && (
                       <div className="text-right">
-                        <div className="text-xs font-black text-emerald-400 tracking-tighter">{student.time}</div>
-                        <div className="text-[9px] text-slate-500 font-bold">SUCCESS</div>
+                        <div className="text-xs font-black text-emerald-500 tracking-tighter">{student.time}</div>
+                        <div className="text-[9px] font-bold" style={{ color: 'var(--glass-text-muted)' }}>SUCCESS</div>
                       </div>
                     )}
                   </div>
@@ -937,8 +956,10 @@ export default function Attendance() {
 
       {/* ── Training Modal Redesign ── */}
       {showTrainModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-navy/95 backdrop-blur-xl animate-in fade-in duration-300">
-          <div className="bg-slate-900 border border-white/10 max-w-4xl w-full p-5 sm:p-8 rounded-3xl shadow-[0_0_100px_rgba(139,92,246,0.15)] flex flex-col relative overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 backdrop-blur-xl animate-in fade-in duration-300"
+          style={{ background: 'var(--overlay-bg)' }}>
+          <div className="max-w-4xl w-full p-5 sm:p-8 rounded-3xl shadow-[0_0_100px_rgba(139,92,246,0.15)] flex flex-col relative overflow-hidden"
+            style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}>
             {/* Modal Decor Accents */}
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-violet-600 via-fuchsia-500 to-emerald-500 opacity-50" />
             <div className="absolute -top-24 -left-24 w-64 h-64 bg-violet-600/10 blur-[100px] pointer-events-none" />
@@ -950,13 +971,16 @@ export default function Attendance() {
                   <Database className="w-6 h-6 sm:w-7 sm:h-7 text-violet-400" />
                 </div>
                 <div>
-                  <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">Cập nhật dữ liệu AI</h2>
-                  <p className="text-slate-400 mt-1 text-xs sm:text-sm font-medium italic">Xác nhận danh sách học sinh nạp vào mô hình</p>
+                  <h2 className="text-xl sm:text-2xl font-black tracking-tight"
+                    style={{ color: 'var(--text-primary)' }}>Cập nhật dữ liệu AI</h2>
+                  <p className="mt-1 text-xs sm:text-sm font-medium italic"
+                    style={{ color: 'var(--text-secondary)' }}>Xác nhận danh sách học sinh nạp vào mô hình</p>
                 </div>
               </div>
               <button
                 onClick={() => setShowTrainModal(false)}
-                className="p-2 rounded-xl bg-white/5 text-slate-400 hover:text-white hover:bg-rose-500/20 hover:text-rose-400 transition-all border border-white/5 shrink-0"
+                className="p-2 rounded-xl hover:bg-rose-500/20 transition-all shrink-0"
+                style={{ background: 'var(--hover-bg)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}
               >
                 <XCircle className="w-6 h-6 sm:w-7 sm:h-7" />
               </button>
@@ -968,7 +992,8 @@ export default function Attendance() {
                 trainCandidates.map((c) => (
                   <div
                     key={c.student_code}
-                    className="flex items-center gap-3 sm:gap-4 bg-white/5 border border-white/5 rounded-2xl p-3 sm:p-4 hover:bg-white/10 hover:border-violet-500/30 transition-all duration-300 group h-full"
+                    className="flex items-center gap-3 sm:gap-4 rounded-2xl p-3 sm:p-4 hover:border-violet-500/30 transition-all duration-300 group h-full"
+                    style={{ background: 'var(--hover-bg)', border: '1px solid var(--border-subtle)' }}
                   >
                     {/* Professional Avatar */}
                     <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden ring-2 ring-white/5 shadow-md flex-shrink-0 group-hover:ring-violet-500/30 transition-all">
@@ -982,11 +1007,13 @@ export default function Attendance() {
 
                     {/* Accurate Info Detail */}
                     <div className="flex-1 min-w-0 space-y-1">
-                      <p className="text-white text-sm sm:text-base font-bold leading-tight break-words">
+                      <p className="text-sm sm:text-base font-bold leading-tight break-words"
+                        style={{ color: 'var(--text-primary)' }}>
                         {c.full_name}
                       </p>
                       <div className="flex flex-col gap-1 items-start">
-                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{c.student_code}</span>
+                        <span className="text-[10px] font-bold uppercase tracking-wider"
+                          style={{ color: 'var(--text-secondary)' }}>{c.student_code}</span>
                         {c.class_name && (
                           <span className="px-2 py-0.5 rounded-md text-[9px] sm:text-[10px] font-black bg-violet-500/20 text-violet-300 border border-violet-500/20 uppercase">
                             {c.class_name}
