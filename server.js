@@ -27,12 +27,14 @@ app.use("/api/teacher", teacherRoutes);
 app.use("/api/notes", noteRoutes);
 app.use("/api/ai", aiRoutes);
 
+const os = require("os");
 const BACKEND_DIR = path.join(__dirname, "backend");
 const FACE_DIR = path.join(BACKEND_DIR, "face");
 const FACE_ENGINE_PATH = path.join(FACE_DIR, "face_engine.py");
 const TRAIN_SCRIPT_PATH = path.join(FACE_DIR, "train_faces.py");
-const TEMP_IMAGE_PATH = path.join(FACE_DIR, "temp.jpg");
-const TEMP_DETECT_PATH = path.join(FACE_DIR, "temp_detect.jpg");
+const TMP_DIR = process.env.VERCEL ? os.tmpdir() : FACE_DIR;
+const TEMP_IMAGE_PATH = path.join(TMP_DIR, "temp.jpg");
+const TEMP_DETECT_PATH = path.join(TMP_DIR, "temp_detect.jpg");
 const PYTHON_BIN = process.env.PYTHON_BIN || "python";
 
 function ensureDir(dirPath) {
@@ -648,6 +650,7 @@ app.post("/api/auth/change-password-first-time", async (req, res) => {
   }
 });
 
+
 app.get("/api/face/train/candidates", async (req, res) => {
   try {
     const students = await studentService.listStudents();
@@ -682,7 +685,7 @@ app.post("/api/face/train", async (req, res) => {
       });
     }
 
-    trainInputPath = path.join(FACE_DIR, `train_input_${Date.now()}.json`);
+    trainInputPath = path.join(TMP_DIR, `train_input_${Date.now()}.json`);
     fs.writeFileSync(
       trainInputPath,
       JSON.stringify({ students: candidates }, null, 2),
@@ -802,16 +805,17 @@ app.post("/api/face/verify", async (req, res) => {
   }
 });
 
-const PORT = 5000;
+// Xuất app để Vercel serverless function có thể gọi
+if (require.main === module) {
+  const PORT = process.env.PORT || 5000;
+  const server = app.listen(PORT, () => {
+    console.log(`Server running at http://localhost:${PORT}`);
+    warmupPython();
+  });
 
-const server = app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
-  warmupPython();
-});
+  server.on("error", err => {
+    console.error("Server error:", err);
+  });
+}
 
-// Giữ server reference
-server.on("error", err => {
-  console.error("Server error:", err);
-});
-
-setInterval(() => { }, 1000);
+module.exports = app;
