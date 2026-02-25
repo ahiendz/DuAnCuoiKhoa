@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Menu, X, ScanFace, LogIn } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
@@ -20,7 +20,7 @@ export default function Navbar() {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -54,9 +54,13 @@ export default function Navbar() {
     <>
       <nav
         className={`fixed top-0 w-full z-50 transition-all duration-500 ease-in-out ${isScrolled
-            ? 'bg-navy/95 backdrop-blur-2xl border-b border-white/10 shadow-[0_10px_40px_rgba(0,0,0,0.6)] py-1'
-            : 'bg-transparent border-b border-transparent py-2'
-          }`}>
+          ? 'backdrop-blur-2xl shadow-[0_10px_40px_rgba(0,0,0,0.15)] py-1'
+          : 'bg-transparent border-b border-transparent py-2'
+          }`}
+        style={isScrolled ? {
+          background: 'var(--public-nav-scrolled-bg)',
+          borderBottom: '1px solid var(--public-nav-border)'
+        } : {}}>
 
         <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 xl:px-12">
           <div className="flex items-center justify-between h-20 lg:h-24">
@@ -65,13 +69,15 @@ export default function Navbar() {
               <img
                 src="/logo/img.svg"
                 alt="School Manager Pro"
-                className="h-10 lg:h-12 w-auto object-contain transition-all duration-300 group-hover:scale-110"
+                className="h-16 lg:h-20 w-auto object-contain transition-all duration-300 group-hover:scale-110"
               />
               <div className="flex flex-col">
-                <span className="text-xl lg:text-2xl font-bold text-white font-heading tracking-tight leading-tight whitespace-nowrap">
+                <span className="text-xl lg:text-2xl font-bold font-heading tracking-tight leading-tight whitespace-nowrap"
+                  style={{ color: 'var(--public-nav-text)' }}>
                   School Manager <span className="gradient-text">Pro</span>
                 </span>
-                <span className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-bold">Smart Education System</span>
+                <span className="text-[10px] uppercase tracking-[0.2em] font-bold"
+                  style={{ color: 'var(--glass-text-muted)' }}>Smart Education System</span>
               </div>
             </Link>
 
@@ -82,7 +88,8 @@ export default function Navbar() {
                   key={link.name}
                   href={link.href}
                   onClick={(e) => handleNavClick(e, link.href)}
-                  className="text-sm font-medium text-slate-300 hover:text-white transition-colors relative group">
+                  className="text-sm font-medium transition-colors relative group"
+                  style={{ color: 'var(--public-nav-text)' }}>
 
                   {link.name}
                   <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-violet transition-all duration-300 group-hover:w-full" />
@@ -94,7 +101,8 @@ export default function Navbar() {
             <div className="hidden md:flex items-center gap-3">
               <ThemeToggle />
 
-              <Link to="/login" className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all text-slate-300 hover:text-white hover:bg-white/10 dark:hover:bg-slate-800">
+              <Link to="/login" className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all hover:bg-white/10"
+                style={{ color: 'var(--public-nav-text)' }}>
                 <LogIn className="w-4 h-4" />
                 <span>Đăng nhập</span>
               </Link>
@@ -125,7 +133,14 @@ export default function Navbar() {
         className={`fixed inset-0 z-40 md:hidden transition-all duration-300 ${isMobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`
         }>
 
-        <div className="absolute inset-0 bg-navy/95 backdrop-blur-xl" onClick={() => setIsMobileMenuOpen(false)} />
+        <div
+          role="button"
+          tabIndex={0}
+          aria-label="Close menu"
+          className="absolute inset-0 bg-navy/95 backdrop-blur-xl"
+          onClick={() => setIsMobileMenuOpen(false)}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setIsMobileMenuOpen(false); }}
+        />
         <div className="absolute top-24 left-0 right-0 p-6">
           <div className="flex flex-col gap-4">
             {navLinks.map((link) =>
@@ -154,3 +169,5 @@ export default function Navbar() {
     </>);
 
 }
+
+

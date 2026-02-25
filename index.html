@@ -13,13 +13,12 @@
     <div id="root"></div>
 
     <script>
-        // Dark mode init to prevent flash
-        const stored = localStorage.getItem('theme-preference');
-        if (stored === 'dark' || (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark')
-        } else {
-            document.documentElement.classList.remove('dark')
-        }
+        // Theme init to prevent FOUC — runs synchronously before React
+        (function () {
+            var t = localStorage.getItem('theme-preference') || 'system';
+            var dark = t === 'dark' || (t === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+        })();
     </script>
 </body>
 

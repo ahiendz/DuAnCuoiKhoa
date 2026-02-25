@@ -19,19 +19,6 @@
   :root {
     /* Layout */
     --nav-height: 80px;
-
-    /* Light mode variables */
-    --bg-page: #F3F4F6;
-    --bg-card: #FFFFFF;
-    --bg-sidebar: #FFFFFF;
-    --text-primary: #111827;
-    --text-placeholder: #9CA3AF;
-    --border-color: #E5E7EB;
-
-    --chart-grid: #F1F5F9;
-    --chart-text: #64748B;
-    --chart-tooltip-bg: rgba(255, 255, 255, 0.95);
-    --chart-tooltip-text: #1E293B;
   }
 
   @media (min-width: 1024px) {
@@ -40,24 +27,8 @@
     }
   }
 
-  .dark {
-    /* Dark mode variables */
-    --bg-page: #0B1120;
-    --bg-card: #111827;
-    --bg-sidebar: #111827;
-    --text-primary: #F3F4F6;
-    --text-placeholder: #6B7280;
-    --border-color: #374151;
-
-    --chart-grid: #334155;
-    --chart-text: #94A3B8;
-    --chart-tooltip-bg: #1E293B;
-    --chart-tooltip-text: #F8FAFC;
-  }
-
   body {
-    @apply transition-colors duration-300;
-    background-color: var(--bg-page);
+    background-color: var(--bg-base);
     color: var(--text-primary);
     -webkit-font-smoothing: antialiased;
     min-height: 100vh;
@@ -78,17 +49,17 @@
 
   /* Theme-aware card utility */
   .card-panel {
-    background-color: var(--bg-card);
-    border: 1px solid var(--border-color);
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-default);
     border-radius: 1rem;
-    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.04);
+    box-shadow: var(--shadow-card);
   }
 
   /* Standardizing input fields */
   .input-field {
     @apply w-full px-4 py-2.5 rounded-xl border focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all text-sm;
-    background-color: var(--bg-card);
-    border-color: var(--border-color);
+    background-color: var(--bg-surface);
+    border-color: var(--border-default);
     color: var(--text-primary);
   }
 
@@ -107,28 +78,55 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
+    background: var(--scrollbar-thumb);
     border-radius: 9999px;
   }
 
-  .dark ::-webkit-scrollbar-thumb {
-    background: #334155;
-  }
-
   ::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
-  }
-
-  .dark ::-webkit-scrollbar-thumb:hover {
-    background: #64748b;
+    background: var(--scrollbar-thumb-hover);
   }
 
   .glass-card {
     @apply relative overflow-hidden;
-    background: rgba(15, 23, 42, 0.72);
-    border: 1px solid rgba(148, 163, 184, 0.14);
+    background: var(--glass-card-bg);
+    border: 1px solid var(--glass-card-border);
     border-radius: 28px;
-    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+    box-shadow: var(--glass-card-shadow);
+    backdrop-filter: blur(16px) saturate(120%);
+    color: var(--glass-text-primary);
+  }
+
+  /* Glass card text hierarchy */
+  .glass-card h1,
+  .glass-card h2,
+  .glass-card h3,
+  .glass-card h4 {
+    color: var(--glass-text-primary);
+  }
+
+  .glass-card p {
+    color: var(--glass-text-body);
+  }
+
+  /* Preserve explicit color overrides on spans/buttons inside glass-card */
+  .glass-card .text-white {
+    color: var(--glass-text-primary) !important;
+  }
+
+  .glass-card .text-slate-200 {
+    color: var(--glass-text-primary) !important;
+  }
+
+  .glass-card .text-slate-300 {
+    color: var(--glass-text-body) !important;
+  }
+
+  .glass-card .text-slate-400 {
+    color: var(--glass-text-muted) !important;
+  }
+
+  .glass-card .text-slate-500 {
+    color: var(--glass-text-muted) !important;
   }
 
   .glass-card::before {
@@ -137,7 +135,7 @@
     inset: 0;
     border-radius: 28px;
     padding: 1px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, transparent 50%);
+    background: var(--glass-card-before);
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
@@ -147,9 +145,9 @@
 
   .glass-nav {
     @apply fixed top-0 left-0 right-0 z-50;
-    background: rgba(11, 17, 32, 0.72);
+    background: var(--glass-nav-bg);
     backdrop-filter: blur(12px) saturate(120%);
-    border-bottom: 1px solid rgba(148, 163, 184, 0.10);
+    border-bottom: 1px solid var(--public-nav-border);
   }
 
   .btn-primary {
@@ -166,13 +164,13 @@
 
   .btn-secondary {
     @apply inline-flex items-center justify-center px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-200;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(148, 163, 184, 0.2);
-    color: #F8FAFC;
+    background: var(--btn-secondary-bg);
+    border: 1px solid var(--btn-secondary-border);
+    color: var(--btn-secondary-text);
   }
 
   .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--btn-secondary-hover-bg);
     transform: translateY(-2px);
   }
 
@@ -182,7 +180,7 @@
   }
 
   .gradient-text {
-    background: linear-gradient(135deg, #F8FAFC 0%, #A78BFA 100%);
+    background: var(--public-heading-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -207,8 +205,8 @@
     position: absolute;
     inset: 0;
     background-image:
-      linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+      linear-gradient(var(--grid-lines-color) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-lines-color) 1px, transparent 1px);
     background-size: 60px 60px;
     pointer-events: none;
     opacity: 0.5;
@@ -223,8 +221,116 @@
     mix-blend-mode: overlay;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
   }
+
+  /* ─── Icon box utilities (theme-adaptive) ─── */
+  .icon-box-violet {
+    background: var(--icon-bg-violet);
+    border: 1px solid var(--icon-border-violet);
+  }
+
+  .icon-box-indigo {
+    background: var(--icon-bg-indigo);
+    border: 1px solid var(--icon-border-indigo);
+  }
+
+  .icon-box-emerald {
+    background: var(--icon-bg-emerald);
+    border: 1px solid var(--icon-border-emerald);
+  }
+
+  .icon-box-blue {
+    background: var(--icon-bg-blue);
+    border: 1px solid var(--icon-border-blue);
+  }
+
+  .icon-box-amber {
+    background: var(--icon-bg-amber);
+    border: 1px solid var(--icon-border-amber);
+  }
+
+  .icon-box-rose {
+    background: var(--icon-bg-rose);
+    border: 1px solid var(--icon-border-rose);
+  }
 }
 
-/* DEBUG: To check theme variables in browser, run in console:
-   getComputedStyle(document.body).getPropertyValue('--bg-primary')
-*/
+/* ─── Dark mode: boost faint /10 &amp; /20 icon backgrounds globally ─── */
+[data-theme="dark"] .bg-violet\/10,
+[data-theme="dark"] .bg-violet\/20 {
+  background-color: rgba(124, 58, 237, 0.28) !important;
+}
+
+[data-theme="dark"] .bg-indigo\/10,
+[data-theme="dark"] .bg-indigo\/20 {
+  background-color: rgba(79, 70, 229, 0.28) !important;
+}
+
+[data-theme="dark"] .bg-violet-500\/10,
+[data-theme="dark"] .bg-violet-500\/20 {
+  background-color: rgba(124, 58, 237, 0.28) !important;
+}
+
+[data-theme="dark"] .bg-indigo-500\/10,
+[data-theme="dark"] .bg-indigo-500\/20 {
+  background-color: rgba(79, 70, 229, 0.28) !important;
+}
+
+[data-theme="dark"] .bg-emerald-500\/10,
+[data-theme="dark"] .bg-emerald-500\/20 {
+  background-color: rgba(16, 185, 129, 0.25) !important;
+}
+
+[data-theme="dark"] .bg-blue-500\/10,
+[data-theme="dark"] .bg-blue-500\/20 {
+  background-color: rgba(59, 130, 246, 0.25) !important;
+}
+
+[data-theme="dark"] .bg-amber-500\/10,
+[data-theme="dark"] .bg-amber-500\/20 {
+  background-color: rgba(245, 158, 11, 0.25) !important;
+}
+
+[data-theme="dark"] .bg-rose-500\/10,
+[data-theme="dark"] .bg-rose-500\/20 {
+  background-color: rgba(239, 68, 68, 0.25) !important;
+}
+
+[data-theme="dark"] .bg-red-500\/10,
+[data-theme="dark"] .bg-red-500\/20 {
+  background-color: rgba(239, 68, 68, 0.25) !important;
+}
+
+[data-theme="dark"] .bg-purple-500\/10,
+[data-theme="dark"] .bg-purple-500\/20 {
+  background-color: rgba(168, 85, 247, 0.28) !important;
+}
+
+[data-theme="dark"] .bg-green-500\/10,
+[data-theme="dark"] .bg-green-500\/20 {
+  background-color: rgba(34, 197, 94, 0.25) !important;
+}
+
+[data-theme="dark"] .bg-orange-500\/10,
+[data-theme="dark"] .bg-orange-500\/20 {
+  background-color: rgba(249, 115, 22, 0.25) !important;
+}
+
+[data-theme="dark"] .bg-pink-500\/10,
+[data-theme="dark"] .bg-pink-500\/20 {
+  background-color: rgba(236, 72, 153, 0.25) !important;
+}
+
+[data-theme="dark"] .bg-yellow-500\/10,
+[data-theme="dark"] .bg-yellow-500\/20 {
+  background-color: rgba(234, 179, 8, 0.25) !important;
+}
+
+[data-theme="dark"] .bg-teal-500\/10,
+[data-theme="dark"] .bg-teal-500\/20 {
+  background-color: rgba(20, 184, 166, 0.25) !important;
+}
+
+[data-theme="dark"] .bg-cyan-500\/10,
+[data-theme="dark"] .bg-cyan-500\/20 {
+  background-color: rgba(6, 182, 212, 0.25) !important;
+}

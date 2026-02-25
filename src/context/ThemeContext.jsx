@@ -1,81 +1,66 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 
 const ThemeContext = createContext(null);
 const THEME_STORAGE_KEY = 'theme-preference';
+const VALID_THEMES = ['light', 'dark', 'system'];
 
-/**
- * Reads initial theme preference:
- * 1. localStorage persisted value ('light', 'dark', 'system')
- * 2. Default: 'system'
- */
 function getInitialTheme() {
     const stored = localStorage.getItem(THEME_STORAGE_KEY);
-    if (['light', 'dark', 'system'].includes(stored)) return stored;
+    if (VALID_THEMES.includes(stored)) return stored;
     return 'system';
 }
 
+function resolveSystemTheme() {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
 export function ThemeProvider({ children }) {
-    const [theme, setTheme] = useState(getInitialTheme);
-    const [resolvedTheme, setResolvedTheme] = useState('light'); // actual applied theme (light or dark)
+    const [theme, setThemeState] = useState(getInitialTheme);
+    const [resolvedTheme, setResolvedTheme] = useState(() => {
+        const initial = getInitialTheme();
+        return initial === 'system' ? resolveSystemTheme() : initial;
+    });
 
-    // Apply class to <html> whenever theme changes
+    const applyTheme = useCallback((resolved) => {
+        document.documentElement.setAttribute('data-theme', resolved);
+        setResolvedTheme(resolved);
+    }, []);
+
     useEffect(() => {
-        const root = document.documentElement;
-
-        const applyTheme = (mode) => {
-            if (mode === 'dark') {
-                root.classList.add('dark');
-                setResolvedTheme('dark');
-            } else {
-                root.classList.remove('dark');
-                setResolvedTheme('light');
-            }
-        };
-
-        if (theme === 'system') {
-            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            applyTheme(systemPrefersDark ? 'dark' : 'light');
-        } else {
-            applyTheme(theme);
-        }
-
+        const resolved = theme === 'system' ? resolveSystemTheme() : theme;
+        applyTheme(resolved);
         localStorage.setItem(THEME_STORAGE_KEY, theme);
+    }, [theme, applyTheme]);
 
-        // DEBUG: Log theme and check if class is set
-        setTimeout(() => {
-            console.log('[ThemeProvider] mode:', theme, '| resolved:', resolvedTheme, '| html.classList:', root.className);
-        }, 50);
-    }, [theme]);
-
-    // Listen for OS theme changes (when user is in system mode)
+    // Lắng nghe OS thay đổi khi đang mode System
     useEffect(() => {
-        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        if (theme !== 'system') return;
+        const mq = window.matchMedia('(prefers-color-scheme: dark)');
+        const handler = (e) => applyTheme(e.matches ? 'dark' : 'light');
+        mq.addEventListener('change', handler);
+        return () => mq.removeEventListener('change', handler);
+    }, [theme, applyTheme]);
 
-        const handleChange = (e) => {
-            if (theme === 'system') {
-                const root = document.documentElement;
-                if (e.matches) {
-                    root.classList.add('dark');
-                    setResolvedTheme('dark');
-                } else {
-                    root.classList.remove('dark');
-                    setResolvedTheme('light');
-                }
+    // Lắng nghe StorageEvent (từ AuthContext khi login lần đầu)
+    useEffect(() => {
+        const handler = (e) => {
+            if (e.key === THEME_STORAGE_KEY && VALID_THEMES.includes(e.newValue)) {
+                setThemeState(e.newValue);
             }
         };
+        window.addEventListener('storage', handler);
+        return () => window.removeEventListener('storage', handler);
+    }, []);
 
-        // Modern browsers use addEventListener
-        mediaQuery.addEventListener('change', handleChange);
-        return () => mediaQuery.removeEventListener('change', handleChange);
-    }, [theme]);
+    const setTheme = useCallback((mode) => {
+        if (VALID_THEMES.includes(mode)) setThemeState(mode);
+    }, []);
 
-    const toggleTheme = () => {
-        setTheme((prev) => {
-            if (prev === 'light') return 'dark';
-            if (prev === 'dark') return 'system';
-            return 'light';
-        });
-    };
+    const toggleTheme = useCallback(() => {
+        setThemeState((prev) =>
+            prev === 'light' ? 'dark' : prev === 'dark' ? 'system' : 'light'
+        );
+    }, []);
 
     return (
         <ThemeContext.Provider value={{ theme, resolvedTheme, setTheme, toggleTheme }}>

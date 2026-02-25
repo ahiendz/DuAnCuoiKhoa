@@ -131,7 +131,7 @@ export default function Contact() {
       id="contact"
       ref={sectionRef}
       className="relative w-full py-20 lg:py-32 overflow-hidden"
-      style={{ background: 'linear-gradient(180deg, #0B1120 0%, #1A0F2E 100%)' }}>
+      style={{ background: 'var(--public-contact-bg)' }}>
 
       {/* Decorative Orbs */}
       <div className="orb orb-violet w-[32vw] h-[32vw] right-[-8vw] top-[15vh] opacity-25" />
@@ -142,10 +142,11 @@ export default function Contact() {
           {/* Section Header */}
           <div ref={headerRef} className="text-center mb-16">
             <div className="eyebrow mb-4 justify-center flex">Liên hệ</div>
-            <h2 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">
+            <h2 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-bold mb-6"
+              style={{ color: 'var(--public-text-primary)' }}>
               Chúng tôi luôn sẵn sàng <span className="gradient-text">Hỗ trợ</span>
             </h2>
-            <p className="text-lg text-slate-300 max-w-2xl mx-auto">
+            <p className="text-lg max-w-2xl mx-auto" style={{ color: 'var(--public-text-body)' }}>
               Liên hệ để được hỗ trợ tích hợp, đào tạo hoặc hỗ trợ kỹ thuật—phản hồi nhanh, luôn luôn.
             </p>
           </div>
