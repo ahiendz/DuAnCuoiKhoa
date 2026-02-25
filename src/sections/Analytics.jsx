@@ -150,7 +150,7 @@ export default function Analytics() {
       id="analytics"
       ref={sectionRef}
       className="relative w-full py-20 lg:py-32 overflow-hidden"
-      style={{ background: 'linear-gradient(180deg, #1A0F2E 0%, #0B1120 100%)' }}>
+      style={{ background: 'var(--public-analytics-bg)' }}>
 
       {/* Decorative Orbs */}
       <div className="orb orb-indigo w-[35vw] h-[35vw] left-[-10vw] top-[20vh] opacity-25" />
@@ -166,12 +166,13 @@ export default function Analytics() {
                 <span>Phân tích</span>
               </div>
 
-              <h2 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">
+              <h2 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-bold mb-6"
+                style={{ color: 'var(--public-text-primary)' }}>
                 Thông tin chi tiết để đưa ra{' '}
                 <span className="gradient-text block lg:inline-block">Quyết định</span>
               </h2>
 
-              <p className="text-lg text-slate-300 leading-relaxed mb-8">
+              <p className="text-lg leading-relaxed mb-8" style={{ color: 'var(--public-text-body)' }}>
                 Từ thành tích lớp học đến sự phát triển cá nhân—trực quan hóa những gì quan trọng, ngay lập tức.
                 Bảng điều khiển phân tích của chúng tôi cung cấp thông tin chi tiết thờigian thực về tiến độ học tập
                 và xu hướng toàn trường.

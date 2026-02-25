@@ -100,7 +100,7 @@ export default function Hero() {
       id="home"
       ref={sectionRef}
       className="relative min-h-screen w-full flex items-center justify-center overflow-hidden pt-[var(--nav-height)]"
-      style={{ background: 'linear-gradient(180deg, #0B1120 0%, #151D2E 100%)' }}>
+      style={{ background: 'var(--public-hero-bg)' }}>
 
       {/* Grid Lines */}
       <div className="grid-lines opacity-30" />
@@ -135,14 +135,20 @@ export default function Hero() {
               alt="Giáo dục AI"
               className="w-full h-full object-cover" />
 
-            {/* Overlay gradient */}
-            <div className="absolute inset-0 bg-gradient-to-t from-navy/60 via-transparent to-transparent" />
+            {/* Overlay gradient — always dark since image is dark */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
-            {/* Floating stats card */}
-            <div className="absolute bottom-4 left-4 right-4 glass-card p-4 flex items-center justify-between">
+            {/* Floating stats card — force dark glass (sits on dark image) */}
+            <div className="absolute bottom-4 left-4 right-4 p-4 flex items-center justify-between rounded-2xl"
+              style={{
+                background: 'rgba(15,23,42,0.80)',
+                border: '1px solid rgba(148,163,184,0.15)',
+                backdropFilter: 'blur(16px)'
+              }}>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-violet/20 flex items-center justify-center">
-                  <TrendingUp className="w-5 h-5 text-violet-light" />
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+                  style={{ background: 'rgba(124,58,237,0.30)' }}>
+                  <TrendingUp className="w-5 h-5 text-violet-300" />
                 </div>
                 <div>
                   <p className="text-xs text-slate-400">Hiệu suất</p>
@@ -151,8 +157,9 @@ export default function Hero() {
               </div>
               <div className="h-8 w-px bg-white/10" />
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-indigo/20 flex items-center justify-center">
-                  <ScanFace className="w-5 h-5 text-indigo-light" />
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+                  style={{ background: 'rgba(79,70,229,0.30)' }}>
+                  <ScanFace className="w-5 h-5 text-indigo-300" />
                 </div>
                 <div>
                   <p className="text-xs text-slate-400">Độ chính xác</p>
@@ -174,7 +181,8 @@ export default function Hero() {
 
             <h1
               ref={headlineRef}
-              className="font-heading text-3xl sm:text-4xl lg:text-5xl xl:text-[56px] font-bold text-white leading-tight mb-6">
+              className="font-heading text-3xl sm:text-4xl lg:text-5xl xl:text-[56px] font-bold leading-tight mb-6"
+              style={{ color: 'var(--public-text-primary)' }}>
 
               Cách mạng hóa giáo dục bằng{' '}
               <span className="gradient-text block lg:inline-block">Trí tuệ nhân tạo</span>
@@ -182,7 +190,8 @@ export default function Hero() {
 
             <p
               ref={subheadlineRef}
-              className="text-base lg:text-lg text-slate-300 leading-relaxed mb-8">
+              className="text-base lg:text-lg leading-relaxed mb-8"
+              style={{ color: 'var(--public-text-body)' }}>
 
               Tích hợp liền mạch điểm danh, phân tích và quản lý—được xây dựng cho các trường học hiện đại.
               Trải nghiệm tương lai của giáo dục với nhận diện khuôn mặt thờigian thực và thông tin chi tiết thông minh.
@@ -193,24 +202,21 @@ export default function Hero() {
                 <ScanFace className="w-5 h-5" />
                 <span>Điểm danh AI</span>
               </button>
-              <a
-                href="#analytics"
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById('analytics')?.scrollIntoView({ behavior: 'smooth' });
-                }}
+              <button
+                type="button"
+                onClick={() => document.getElementById('analytics')?.scrollIntoView({ behavior: 'smooth' })}
                 className="btn-secondary gap-2">
-
                 <span>Xem bảng điều khiển</span>
                 <ArrowRight className="w-4 h-4" />
-              </a>
+              </button>
             </div>
           </div>
         </div>
       </div>
 
       {/* Bottom gradient fade */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-navy to-transparent pointer-events-none" />
+      <div className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none"
+        style={{ background: 'linear-gradient(to top, var(--public-hero-bg), transparent)' }} />
     </section>);
 
 }

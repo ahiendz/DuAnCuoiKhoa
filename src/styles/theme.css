@@ -1,0 +1,231 @@
+/* ============================================================
+   THEME.CSS — Enterprise Design Token System
+   School Manager Pro
+   
+   All semantic tokens live here. Components consume only these
+   variables. Adding a new theme = adding a new [data-theme] block.
+   ============================================================ */
+
+/* ─── Light Theme (Default) ─── */
+:root {
+    /* Background */
+    --bg-base: #F3F4F6;
+    --bg-surface: #FFFFFF;
+    --bg-elevated: #FFFFFF;
+    --bg-sidebar: #FFFFFF;
+
+    /* Text */
+    --text-primary: #111827;
+    --text-secondary: #64748B;
+    --text-placeholder: #9CA3AF;
+    --text-inverse: #FFFFFF;
+
+    /* Border */
+    --border-default: #E5E7EB;
+    --border-subtle: #F1F5F9;
+
+    /* Brand */
+    --color-primary: #4F46E5;
+    --color-primary-hover: #4338CA;
+    --color-success: #16A34A;
+    --color-danger: #DC2626;
+    --color-warning: #F59E0B;
+
+    /* Interactive */
+    --hover-bg: rgba(0, 0, 0, 0.04);
+    --hover-bg-danger: rgba(239, 68, 68, 0.06);
+    --active-bg: rgba(0, 0, 0, 0.08);
+
+    /* Shadows */
+    --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06);
+    --shadow-dropdown: 0 10px 40px rgba(0, 0, 0, 0.12);
+    --shadow-modal: 0 25px 60px rgba(0, 0, 0, 0.15);
+
+    /* Chart */
+    --chart-grid: #F1F5F9;
+    --chart-text: #64748B;
+    --chart-tooltip-bg: rgba(255, 255, 255, 0.95);
+    --chart-tooltip-text: #1E293B;
+
+    /* Scrollbar */
+    --scrollbar-thumb: #CBD5E1;
+    --scrollbar-thumb-hover: #94A3B8;
+
+    /* Overlay */
+    --overlay-bg: rgba(0, 0, 0, 0.5);
+
+    /* ─── Public Landing Sections ─── */
+    --public-hero-bg: linear-gradient(180deg, #eef2ff 0%, #f5f3ff 100%);
+    --public-features-bg: linear-gradient(180deg, #f5f3ff 0%, #ede9fe 100%);
+    --public-analytics-bg: linear-gradient(180deg, #ede9fe 0%, #eef2ff 100%);
+    --public-contact-bg: linear-gradient(180deg, #eef2ff 0%, #f5f3ff 100%);
+    --public-footer-bg: #1e1b4b;
+    --public-nav-scrolled-bg: rgba(255, 255, 255, 0.92);
+    --public-nav-border: rgba(99, 102, 241, 0.15);
+    --public-nav-text: #1e293b;
+    --public-nav-text-hover: #4f46e5;
+    --glass-card-bg: rgba(255, 255, 255, 0.65);
+    --glass-card-border: rgba(99, 102, 241, 0.15);
+    --glass-card-shadow: 0 24px 70px rgba(99, 102, 241, 0.1);
+    --glass-card-before: linear-gradient(180deg, rgba(99, 102, 241, 0.08) 0%, transparent 50%);
+    --glass-nav-bg: rgba(238, 242, 255, 0.82);
+    --public-text-primary: #1e1b4b;
+    --public-text-secondary: #4338ca;
+    --public-text-body: #374151;
+    --public-heading-gradient: linear-gradient(135deg, #1e1b4b 0%, #7c3aed 100%);
+    --btn-secondary-bg: rgba(99, 102, 241, 0.08);
+    --btn-secondary-border: rgba(99, 102, 241, 0.25);
+    --btn-secondary-text: #4338ca;
+    --btn-secondary-hover-bg: rgba(99, 102, 241, 0.15);
+    --grid-lines-color: rgba(99, 102, 241, 0.06);
+    --glass-text-primary: #1e1b4b;
+    --glass-text-secondary: #4338ca;
+    --glass-text-muted: #6b7280;
+    --glass-text-body: #374151;
+    --glass-orb-opacity: 0.08;
+    --orb-opacity: 0.12;
+    /* Icon backgrounds (light mode = slightly visible) */
+    --icon-bg-violet: rgba(124, 58, 237, 0.12);
+    --icon-bg-indigo: rgba(79, 70, 229, 0.12);
+    --icon-bg-emerald: rgba(16, 185, 129, 0.12);
+    --icon-bg-blue: rgba(59, 130, 246, 0.12);
+    --icon-bg-amber: rgba(245, 158, 11, 0.12);
+    --icon-bg-rose: rgba(239, 68, 68, 0.12);
+    --icon-border-violet: rgba(124, 58, 237, 0.20);
+    --icon-border-indigo: rgba(79, 70, 229, 0.20);
+    --icon-border-emerald: rgba(16, 185, 129, 0.20);
+    --icon-border-blue: rgba(59, 130, 246, 0.20);
+    --icon-border-amber: rgba(245, 158, 11, 0.20);
+    --icon-border-rose: rgba(239, 68, 68, 0.20);
+}
+
+/* ─── Dark Theme ─── */
+[data-theme="dark"] {
+    /* Background */
+    --bg-base: #0B1120;
+    --bg-surface: #111827;
+    --bg-elevated: #1E293B;
+    --bg-sidebar: #111827;
+
+    /* Text */
+    --text-primary: #F3F4F6;
+    --text-secondary: #94A3B8;
+    --text-placeholder: #6B7280;
+    --text-inverse: #111827;
+
+    /* Border */
+    --border-default: #374151;
+    --border-subtle: #1E293B;
+
+    /* Brand */
+    --color-primary: #6366F1;
+    --color-primary-hover: #818CF8;
+    --color-success: #22C55E;
+    --color-danger: #EF4444;
+    --color-warning: #FACC15;
+
+    /* Interactive */
+    --hover-bg: rgba(255, 255, 255, 0.06);
+    --hover-bg-danger: rgba(239, 68, 68, 0.1);
+    --active-bg: rgba(255, 255, 255, 0.1);
+
+    /* Shadows */
+    --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --shadow-dropdown: 0 10px 40px rgba(0, 0, 0, 0.5);
+    --shadow-modal: 0 25px 60px rgba(0, 0, 0, 0.6);
+
+    /* Chart */
+    --chart-grid: #334155;
+    --chart-text: #94A3B8;
+    --chart-tooltip-bg: #1E293B;
+    --chart-tooltip-text: #F8FAFC;
+
+    /* Scrollbar */
+    --scrollbar-thumb: #334155;
+    --scrollbar-thumb-hover: #64748B;
+
+    /* Overlay */
+    --overlay-bg: rgba(0, 0, 0, 0.7);
+
+    /* ─── Public Landing Sections ─── */
+    --public-hero-bg: linear-gradient(180deg, #0B1120 0%, #151D2E 100%);
+    --public-features-bg: linear-gradient(180deg, #151D2E 0%, #1A0F2E 100%);
+    --public-analytics-bg: linear-gradient(180deg, #1A0F2E 0%, #0B1120 100%);
+    --public-contact-bg: linear-gradient(180deg, #0B1120 0%, #1A0F2E 100%);
+    --public-footer-bg: #0B1120;
+    --public-nav-scrolled-bg: rgba(11, 17, 32, 0.95);
+    --public-nav-border: rgba(148, 163, 184, 0.1);
+    --public-nav-text: #cbd5e1;
+    --public-nav-text-hover: #ffffff;
+    --glass-card-bg: rgba(15, 23, 42, 0.72);
+    --glass-card-border: rgba(148, 163, 184, 0.14);
+    --glass-card-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+    --glass-card-before: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, transparent 50%);
+    --glass-nav-bg: rgba(11, 17, 32, 0.72);
+    --public-text-primary: #ffffff;
+    --public-text-secondary: #a78bfa;
+    --public-text-body: #cbd5e1;
+    --public-heading-gradient: linear-gradient(135deg, #F8FAFC 0%, #A78BFA 100%);
+    --btn-secondary-bg: rgba(255, 255, 255, 0.05);
+    --btn-secondary-border: rgba(148, 163, 184, 0.2);
+    --btn-secondary-text: #F8FAFC;
+    --btn-secondary-hover-bg: rgba(255, 255, 255, 0.1);
+    --grid-lines-color: rgba(148, 163, 184, 0.08);
+    --glass-text-primary: #ffffff;
+    --glass-text-secondary: #a78bfa;
+    --glass-text-muted: #94a3b8;
+    --glass-text-body: #cbd5e1;
+    --glass-orb-opacity: 1;
+    --orb-opacity: 1;
+    /* Icon backgrounds (dark mode = more visible) */
+    --icon-bg-violet: rgba(124, 58, 237, 0.25);
+    --icon-bg-indigo: rgba(79, 70, 229, 0.25);
+    --icon-bg-emerald: rgba(16, 185, 129, 0.22);
+    --icon-bg-blue: rgba(59, 130, 246, 0.22);
+    --icon-bg-amber: rgba(245, 158, 11, 0.22);
+    --icon-bg-rose: rgba(239, 68, 68, 0.22);
+    --icon-border-violet: rgba(124, 58, 237, 0.35);
+    --icon-border-indigo: rgba(79, 70, 229, 0.35);
+    --icon-border-emerald: rgba(16, 185, 129, 0.30);
+    --icon-border-blue: rgba(59, 130, 246, 0.30);
+    --icon-border-amber: rgba(245, 158, 11, 0.30);
+    --icon-border-rose: rgba(239, 68, 68, 0.30);
+}
+
+/* ─── Bootstrap Variable Overrides ─── */
+:root,
+[data-theme="light"],
+[data-theme="dark"] {
+    --bs-body-bg: var(--bg-base);
+    --bs-body-color: var(--text-primary);
+    --bs-border-color: var(--border-default);
+    --bs-card-bg: var(--bg-surface);
+    --bs-modal-bg: var(--bg-surface);
+    --bs-table-bg: var(--bg-surface);
+    --bs-table-border-color: var(--border-default);
+    --bs-table-striped-bg: var(--bg-elevated);
+}
+
+/* ─── Smooth Transitions ─── */
+*,
+*::before,
+*::after {
+    transition-property: background-color, color, border-color, box-shadow, fill, stroke;
+    transition-duration: 0ms;
+    transition-timing-function: ease;
+}
+
+/* Only animate theme transitions when data-theme is set (after initial load) */
+[data-theme] *,
+[data-theme] *::before,
+[data-theme] *::after {
+    transition-duration: 200ms;
+}
+
+/* Exclude elements that should never transition (animations, transforms) */
+[data-theme] .no-theme-transition,
+[data-theme] .no-theme-transition *,
+[data-theme] [data-framer-motion],
+[data-theme] svg * {
+    transition-duration: 0ms !important;
+}

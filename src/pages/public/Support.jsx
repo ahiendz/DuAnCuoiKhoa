@@ -7,7 +7,6 @@ export default function Support() {
     const { addNotification } = useNotifications();
 
     // --- AI Chat State ---
-    // --- AI Chat State ---
     const [messages, setMessages] = useState(() => {
         try {
             const saved = localStorage.getItem('smp_ai_chat');
@@ -35,9 +34,7 @@ export default function Support() {
         }
     };
 
-    useEffect(() => {
-        scrollToBottom();
-    }, [messages, isTyping]);
+    useEffect(() => { scrollToBottom(); }, [messages, isTyping]);
 
     // Persist chat to local storage
     useEffect(() => {
@@ -68,40 +65,23 @@ export default function Support() {
         }
 
         try {
-            const token = localStorage.getItem('token');
-            // Format history for Gemini API (user and model)
-            // Skip the very first "Xin chào!" model message because Gemini API requires history to start with a 'user' turn.
             const validHistoryToSubmit = messages
                 .filter(m => m.role !== 'system' && !(m.role === 'model' && m.text?.includes('Xin chào! Tôi là trợ lý ảo')))
-                .map(m => ({
-                    role: m.role,
-                    parts: [{ text: m.text || (m.points ? m.points.join('\n') : '') }]
-                }));
+                .map(m => ({ role: m.role, parts: [{ text: m.text || (m.points ? m.points.join('\n') : '') }] }));
 
             const response = await fetch('/api/ai/chat', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ message: userMsg, history: validHistoryToSubmit })
             });
 
-            if (response.status === 401 || response.status === 403) {
-                throw new Error('Bạn không có quyền hoặc phiên đăng nhập đã hết hạn.');
-            }
+            if (response.status === 401 || response.status === 403) throw new Error('Phiên đăng nhập đã hết hạn.');
             if (!response.ok) throw new Error('Không thể kết nối đến AI');
 
             const data = await response.json();
-
-            // Handle new JSON schema { points } or fallback to { text }
             const newMessage = { role: 'model' };
-            if (data.points && Array.isArray(data.points)) {
-                newMessage.points = data.points;
-            } else {
-                newMessage.text = data.text || 'Khong co du lieu phan hoi';
-            }
-
+            if (data.points && Array.isArray(data.points)) newMessage.points = data.points;
+            else newMessage.text = data.text || 'Không có dữ liệu phản hồi';
             setMessages(prev => [...prev, newMessage]);
         } catch (error) {
             console.error('Chat error:', error);
@@ -115,7 +95,6 @@ export default function Support() {
         e.preventDefault();
         if (isSending) return;
         setIsSending(true);
-
         try {
             await emailjs.sendForm(
                 import.meta.env.VITE_EMAILJS_SERVICE_ID,
@@ -123,80 +102,91 @@ export default function Support() {
                 formRef.current,
                 import.meta.env.VITE_EMAILJS_PUBLIC_KEY
             );
-
-            // Show success dialog
             setShowSuccessDialog(true);
-
-            // Auto close after 5 seconds
-            setTimeout(() => {
-                setShowSuccessDialog(false);
-            }, 5000);
-
+            setTimeout(() => setShowSuccessDialog(false), 5000);
             formRef.current.reset();
         } catch (error) {
             console.error('Email error:', error);
-            addNotification(
-                'Không thể gửi tin nhắn. Vui lòng kiểm tra lại cấu hình hoặc thử lại sau.',
-                'error'
-            );
+            addNotification('Không thể gửi tin nhắn. Vui lòng thử lại sau.', 'error');
         } finally {
             setIsSending(false);
         }
     };
 
+    /* ─────────────────────── RENDER ─────────────────────── */
     return (
-        <div className="flex-1 w-full bg-slate-50 dark:bg-[#0B1120] flex flex-col transition-colors duration-300">
+        <div className="flex-1 w-full flex flex-col transition-colors duration-300"
+            style={{ background: 'var(--public-hero-bg)' }}>
+
             <div className="relative pb-12 px-4 sm:px-6 lg:px-8 pt-24 lg:pt-28">
-                {/* Background Orbs matching relative container layer */}
-                <div className="absolute top-0 left-[-10vw] w-[40vw] h-[40vw] bg-violet/20 blur-[120px] rounded-full pointer-events-none" />
-                <div className="absolute bottom-[-10vw] right-[-10vw] w-[40vw] h-[40vw] bg-indigo/20 blur-[120px] rounded-full pointer-events-none" />
+
+                {/* Background Orbs */}
+                <div className="absolute top-0 left-[-10vw] w-[40vw] h-[40vw] blur-[120px] rounded-full pointer-events-none"
+                    style={{ background: 'var(--icon-bg-violet)', opacity: 'var(--orb-opacity)' }} />
+                <div className="absolute bottom-[-10vw] right-[-10vw] w-[40vw] h-[40vw] blur-[120px] rounded-full pointer-events-none"
+                    style={{ background: 'var(--icon-bg-indigo)', opacity: 'var(--orb-opacity)' }} />
 
                 <div className="max-w-7xl mx-auto relative z-10">
+
+                    {/* Header */}
                     <div className="text-center mb-12">
-                        <h1 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">
-                            Trung tâm <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet to-indigo">Hỗ trợ</span>
+                        <h1 className="text-4xl md:text-5xl font-bold mb-4 tracking-tight"
+                            style={{ color: 'var(--public-text-primary)' }}>
+                            Trung tâm <span className="gradient-text">Hỗ trợ</span>
                         </h1>
-                        <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+                        <p className="text-lg max-w-2xl mx-auto"
+                            style={{ color: 'var(--public-text-body)' }}>
                             Hỏi đáp nhanh với Trợ lý AI hoặc liên hệ trực tiếp Quản trị viên cho các yêu cầu phức tạp.
                         </p>
                     </div>
 
-                    {/* Bento Grid Layout */}
+                    {/* Bento Grid */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch lg:h-[750px] mb-12">
 
-                        {/* Left Column: AI Chat */}
-                        <div className="flex flex-col bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-3xl shadow-xl dark:shadow-2xl overflow-hidden h-full">
-                            <div className="p-6 border-b border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-900/80 flex items-center justify-between gap-4">
+                        {/* ── Left: AI Chat ── */}
+                        <div className="flex flex-col rounded-3xl shadow-xl overflow-hidden h-full"
+                            style={{
+                                background: 'var(--glass-card-bg)',
+                                border: '1px solid var(--glass-card-border)',
+                                backdropFilter: 'blur(16px)'
+                            }}>
+
+                            {/* Chat header */}
+                            <div className="p-5 flex items-center justify-between gap-4"
+                                style={{ borderBottom: '1px solid var(--border-default)', background: 'var(--hover-bg)' }}>
                                 <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-full bg-violet/10 flex items-center justify-center border border-violet/20 flex-shrink-0">
+                                    <div className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 icon-box-violet">
                                         <Bot className="text-violet-500 w-6 h-6" />
                                     </div>
                                     <div>
-                                        <h2 className="text-xl font-semibold text-slate-800 dark:text-white leading-tight">Trợ lý ảo SMP</h2>
-                                        <p className="text-sm text-slate-500 dark:text-slate-400">Trực tuyến 24/7</p>
+                                        <h2 className="text-xl font-semibold leading-tight"
+                                            style={{ color: 'var(--glass-text-primary)' }}>Trợ lý ảo SMP</h2>
+                                        <p className="text-sm" style={{ color: 'var(--glass-text-muted)' }}>Trực tuyến 24/7</p>
                                     </div>
                                 </div>
                                 <button
                                     onClick={handleClearChat}
-                                    className="px-3 py-1.5 text-xs text-rose-500 hover:text-white hover:bg-rose-500 dark:text-rose-400 dark:hover:text-white dark:hover:bg-rose-600 rounded-lg transition-colors border border-rose-200 dark:border-rose-900 shadow-sm"
-                                    title="Xóa đoạn chat (Bộ nhớ tạm)"
-                                >
+                                    className="px-3 py-1.5 text-xs text-rose-500 hover:text-white hover:bg-rose-500 rounded-lg transition-colors"
+                                    style={{ border: '1px solid var(--icon-border-rose)' }}
+                                    title="Xóa đoạn chat">
                                     Xóa chat
                                 </button>
                             </div>
 
-                            <div ref={chatContainerRef} className="flex-1 p-6 overflow-y-auto space-y-4 custom-scrollbar">
+                            {/* Messages area */}
+                            <div ref={chatContainerRef}
+                                className="flex-1 p-5 overflow-y-auto space-y-4 custom-scrollbar">
                                 {messages.map((msg, idx) => (
                                     <div key={idx} className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                                         {msg.role === 'model' && (
-                                            <div className="w-8 h-8 rounded-full bg-violet/10 flex items-center justify-center border border-violet/20 flex-shrink-0 mt-1">
+                                            <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-1 icon-box-violet">
                                                 <Bot className="text-violet-500 w-4 h-4" />
                                             </div>
                                         )}
-                                        <div className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-sm ${msg.role === 'user'
-                                            ? 'bg-gradient-to-r from-violet to-indigo text-white rounded-tr-sm'
-                                            : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-white/5 rounded-tl-sm'
-                                            }`}>
+                                        <div className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-sm ${msg.role === 'user' ? 'rounded-tr-sm' : 'rounded-tl-sm'}`}
+                                            style={msg.role === 'user'
+                                                ? { background: 'linear-gradient(135deg, #7C3AED, #4F46E5)', color: '#fff' }
+                                                : { background: 'var(--bg-surface)', color: 'var(--text-primary)', border: '1px solid var(--border-default)' }}>
                                             {msg.points ? (
                                                 <ul className="space-y-2 text-sm sm:text-base leading-relaxed p-0 m-0">
                                                     {msg.points.map((point, pIdx) => (
@@ -213,40 +203,48 @@ export default function Support() {
                                             )}
                                         </div>
                                         {msg.role === 'user' && (
-                                            <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center border border-slate-300 dark:border-slate-600 flex-shrink-0 mt-1">
-                                                <User className="text-slate-500 dark:text-slate-300 w-4 h-4" />
+                                            <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-1"
+                                                style={{ background: 'var(--hover-bg)', border: '1px solid var(--border-default)' }}>
+                                                <User className="w-4 h-4" style={{ color: 'var(--text-secondary)' }} />
                                             </div>
                                         )}
                                     </div>
                                 ))}
                                 {isTyping && (
                                     <div className="flex gap-3 justify-start">
-                                        <div className="w-8 h-8 rounded-full bg-violet/10 flex items-center justify-center border border-violet/20 flex-shrink-0 mt-1">
+                                        <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-1 icon-box-violet">
                                             <Bot className="text-violet-500 w-4 h-4" />
                                         </div>
-                                        <div className="max-w-[75%] rounded-2xl px-5 py-4 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-white/5 rounded-tl-sm flex items-center gap-1.5">
-                                            <div className="w-1.5 h-1.5 bg-violet/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                                            <div className="w-1.5 h-1.5 bg-violet/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                                            <div className="w-1.5 h-1.5 bg-violet/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                                        <div className="max-w-[75%] rounded-2xl px-5 py-4 rounded-tl-sm flex items-center gap-1.5"
+                                            style={{ background: 'var(--hover-bg)', border: '1px solid var(--border-default)' }}>
+                                            <div className="w-1.5 h-1.5 bg-violet-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                                            <div className="w-1.5 h-1.5 bg-violet-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                                            <div className="w-1.5 h-1.5 bg-violet-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                                         </div>
                                     </div>
                                 )}
                                 <div ref={messagesEndRef} />
                             </div>
 
-                            <div className="p-4 bg-slate-50 dark:bg-slate-900/80 border-t border-slate-200 dark:border-white/10">
+                            {/* Input bar */}
+                            <div className="p-4" style={{ borderTop: '1px solid var(--border-default)', background: 'var(--hover-bg)' }}>
                                 <form onSubmit={handleSendMessage} className="flex gap-2">
                                     <input
                                         type="text"
                                         value={input}
                                         onChange={(e) => setInput(e.target.value)}
                                         placeholder="Nhập câu hỏi của bạn..."
-                                        className="flex-1 bg-white dark:bg-slate-950/50 border border-slate-300 dark:border-white/10 rounded-xl px-4 py-3 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-violet/50 transition-all dark:focus:border-violet/50"
+                                        className="flex-1 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-violet-500/50 transition-all"
+                                        style={{
+                                            background: 'var(--bg-surface)',
+                                            border: '1px solid var(--border-default)',
+                                            color: 'var(--text-primary)'
+                                        }}
                                     />
                                     <button
                                         type="submit"
                                         disabled={!input.trim() || isTyping}
-                                        className="bg-violet hover:bg-violet-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl px-4 py-3 flex items-center justify-center transition-colors shadow-md shadow-violet/20"
+                                        className="bg-violet-600 hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl px-4 py-3 flex items-center justify-center transition-colors shadow-md"
                                     >
                                         <Send className="w-5 h-5" />
                                     </button>
@@ -254,73 +252,89 @@ export default function Support() {
                             </div>
                         </div>
 
-                        {/* Right Column: Connect Form */}
-                        <div className="flex flex-col bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-3xl shadow-xl dark:shadow-2xl overflow-hidden h-full p-6 sm:p-8">
+                        {/* ── Right: Contact Form ── */}
+                        <div className="flex flex-col rounded-3xl shadow-xl overflow-hidden h-full p-6 sm:p-8"
+                            style={{
+                                background: 'var(--glass-card-bg)',
+                                border: '1px solid var(--glass-card-border)',
+                                backdropFilter: 'blur(16px)'
+                            }}>
                             <div className="mb-8">
-                                <div className="w-12 h-12 rounded-full bg-indigo/10 flex items-center justify-center border border-indigo/20 mb-4 inline-flex">
+                                <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4 icon-box-indigo">
                                     <Mail className="text-indigo-500 w-6 h-6" />
                                 </div>
-                                <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">Kết nối Quản trị viên</h2>
-                                <p className="text-slate-600 dark:text-slate-400">
+                                <h2 className="text-2xl font-bold mb-2"
+                                    style={{ color: 'var(--glass-text-primary)' }}>Kết nối Quản trị viên</h2>
+                                <p style={{ color: 'var(--glass-text-body)' }}>
                                     Hãy để lại thông tin nếu bạn cần báo giá, hợp tác, hoặc tư vấn chuyên sâu.
                                 </p>
                             </div>
 
                             <form ref={formRef} onSubmit={handleSendEmail} className="flex-1 flex flex-col gap-5 justify-between">
                                 <div className="space-y-5">
+                                    {/* Name */}
                                     <div>
-                                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                        <label className="block text-sm font-medium mb-1"
+                                            style={{ color: 'var(--glass-text-primary)' }}>
                                             Họ và tên <span className="text-red-500">*</span>
                                         </label>
                                         <input
-                                            type="text"
-                                            name="name"
-                                            required
+                                            type="text" name="name" required
                                             placeholder="Nguyễn Văn A"
-                                            className="w-full bg-slate-50 dark:bg-slate-950/50 border border-slate-300 dark:border-white/10 rounded-xl px-4 py-2.5 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo/50 transition-all dark:focus:border-indigo/50"
+                                            className="w-full rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+                                            style={{
+                                                background: 'var(--bg-elevated)',
+                                                border: '1px solid var(--border-default)',
+                                                color: 'var(--text-primary)'
+                                            }}
                                         />
                                     </div>
+                                    {/* Email */}
                                     <div>
-                                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                        <label className="block text-sm font-medium mb-1"
+                                            style={{ color: 'var(--glass-text-primary)' }}>
                                             Email <span className="text-red-500">*</span>
                                         </label>
                                         <input
-                                            type="email"
-                                            name="email"
-                                            required
+                                            type="email" name="email" required
                                             placeholder="email@truonghoc.vn"
-                                            className="w-full bg-slate-50 dark:bg-slate-950/50 border border-slate-300 dark:border-white/10 rounded-xl px-4 py-2.5 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo/50 transition-all dark:focus:border-indigo/50"
+                                            className="w-full rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+                                            style={{
+                                                background: 'var(--bg-elevated)',
+                                                border: '1px solid var(--border-default)',
+                                                color: 'var(--text-primary)'
+                                            }}
                                         />
                                     </div>
+                                    {/* Message */}
                                     <div className="flex-1">
-                                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                        <label className="block text-sm font-medium mb-1"
+                                            style={{ color: 'var(--glass-text-primary)' }}>
                                             Nội dung <span className="text-red-500">*</span>
                                         </label>
                                         <textarea
-                                            name="message"
-                                            required
+                                            name="message" required
                                             placeholder="Bạn cần hỗ trợ gì?"
                                             rows="4"
-                                            className="w-full bg-slate-50 dark:bg-slate-950/50 border border-slate-300 dark:border-white/10 rounded-xl px-4 py-2.5 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo/50 transition-all dark:focus:border-indigo/50 resize-none h-32 custom-scrollbar"
-                                        ></textarea>
+                                            className="w-full rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all resize-none h-32 custom-scrollbar"
+                                            style={{
+                                                background: 'var(--bg-elevated)',
+                                                border: '1px solid var(--border-default)',
+                                                color: 'var(--text-primary)'
+                                            }}
+                                        />
                                     </div>
                                 </div>
 
                                 <button
                                     type="submit"
                                     disabled={isSending}
-                                    className="w-full bg-indigo hover:bg-indigo-600 disabled:opacity-70 text-white font-medium rounded-xl px-6 py-3.5 flex items-center justify-center gap-2 transition-all shadow-lg shadow-indigo/25 mt-auto"
+                                    className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-70 text-white font-medium rounded-xl px-6 py-3.5 flex items-center justify-center gap-2 transition-all shadow-lg mt-auto"
                                 >
                                     {isSending ? (
-                                        <>
-                                            <Loader2 className="w-5 h-5 animate-spin" />
-                                            Đang gửi...
-                                        </>
+                                        <><Loader2 className="w-5 h-5 animate-spin" />Đang gửi...</>
                                     ) : (
-                                        <>
-                                            <Send className="w-5 h-5" />
-                                            Gửi yêu cầu
-                                        </>
+                                        <><Send className="w-5 h-5" />Gửi yêu cầu</>
                                     )}
                                 </button>
                             </form>
@@ -329,32 +343,34 @@ export default function Support() {
                 </div>
             </div>
 
-            {/* Success Dialog Modal */}
+            {/* Success Dialog */}
             {showSuccessDialog && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
-                    <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl shadow-2xl border border-slate-200 dark:border-white/10 p-6 sm:p-8 transform transition-all animate-in zoom-in-95 duration-300">
+                <div className="fixed inset-0 z-50 flex items-center justify-center px-4 backdrop-blur-sm animate-in fade-in duration-300"
+                    style={{ background: 'var(--overlay-bg)' }}>
+                    <div className="w-full max-w-sm rounded-3xl shadow-2xl p-6 sm:p-8 transform transition-all animate-in zoom-in-95 duration-300"
+                        style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}>
                         <div className="flex justify-end mb-2">
-                            <button
-                                onClick={() => setShowSuccessDialog(false)}
-                                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
-                            >
+                            <button onClick={() => setShowSuccessDialog(false)}
+                                className="transition-colors"
+                                style={{ color: 'var(--text-secondary)' }}>
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
                         <div className="flex flex-col items-center text-center">
-                            <div className="w-16 h-16 bg-green-100 dark:bg-green-500/20 rounded-full flex items-center justify-center mb-6 scale-110">
-                                <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
+                            <div className="w-16 h-16 rounded-full flex items-center justify-center mb-6"
+                                style={{ background: 'var(--icon-bg-emerald)' }}>
+                                <CheckCircle className="w-8 h-8 text-emerald-500" />
                             </div>
-                            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
+                            <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
                                 Gửi thành công!
                             </h3>
-                            <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-6">
+                            <p className="text-sm leading-relaxed mb-6" style={{ color: 'var(--text-secondary)' }}>
                                 Cảm ơn bạn đã liên hệ. Quản trị viên sẽ phản hồi bạn trong thời gian sớm nhất qua email.
                             </p>
                             <button
                                 onClick={() => setShowSuccessDialog(false)}
-                                className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-medium rounded-xl px-6 py-3 hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors"
-                            >
+                                className="w-full font-medium rounded-xl px-6 py-3 transition-colors"
+                                style={{ background: 'var(--color-primary)', color: '#fff' }}>
                                 Đóng
                             </button>
                         </div>

@@ -12,32 +12,32 @@ const FEATURES = [
 ];
 
 const COLORS = {
-    indigo: 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-500',
-    purple: 'bg-purple-50 dark:bg-purple-900/20 text-purple-500',
-    blue: 'bg-blue-50 dark:bg-blue-900/20 text-blue-500',
-    green: 'bg-green-50 dark:bg-green-900/20 text-green-500',
-    orange: 'bg-orange-50 dark:bg-orange-900/20 text-orange-500',
-    pink: 'bg-pink-50 dark:bg-pink-900/20 text-pink-500',
+    indigo: 'bg-indigo-500/10 text-indigo-500',
+    purple: 'bg-purple-500/10 text-purple-500',
+    blue: 'bg-blue-500/10 text-blue-500',
+    green: 'bg-green-500/10 text-green-500',
+    orange: 'bg-orange-500/10 text-orange-500',
+    pink: 'bg-pink-500/10 text-pink-500',
 };
 
 export default function Features() {
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
+        <div className="min-h-screen bg-[var(--bg-base)] pb-20">
             <section className="pt-32 pb-16 px-6 text-center">
-                <h1 className="text-4xl md:text-5xl font-bold text-slate-800 dark:text-white mb-4">Tính năng nổi bật</h1>
-                <p className="text-lg text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
+                <h1 className="text-4xl md:text-5xl font-bold text-[var(--text-primary)] mb-4">Tính năng nổi bật</h1>
+                <p className="text-lg text-[var(--text-secondary)] max-w-xl mx-auto">
                     Hệ thống quản lý giáo dục toàn diện với công nghệ hiện đại nhất
                 </p>
             </section>
 
             <section className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl">
                 {FEATURES.map(f => (
-                    <div key={f.title} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm hover:shadow-md transition-shadow">
+                    <div key={f.title} className="bg-[var(--bg-surface)] rounded-2xl border border-[var(--border-default)] p-6 shadow-sm hover:shadow-md transition-shadow">
                         <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${COLORS[f.color]}`}>
                             <f.icon size={24} />
                         </div>
-                        <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-2">{f.title}</h3>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">{f.desc}</p>
+                        <h3 className="text-lg font-bold text-[var(--text-primary)] mb-2">{f.title}</h3>
+                        <p className="text-sm text-[var(--text-secondary)]">{f.desc}</p>
                     </div>
                 ))}
             </section>
