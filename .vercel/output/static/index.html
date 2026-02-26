@@ -6,21 +6,20 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>School Manager Pro - Quản lý Học sinh & Điểm danh</title>
-  <script type="module" crossorigin src="/assets/index-CFspIl6z.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-TdnEOrIr.css">
+  <script type="module" crossorigin src="/assets/index-BUwV91Bh.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-8rM6Rwk7.css">
 </head>
 
 <body>
     <div id="root"></div>
 
     <script>
-        // Dark mode init to prevent flash
-        const stored = localStorage.getItem('theme-preference');
-        if (stored === 'dark' || (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark')
-        } else {
-            document.documentElement.classList.remove('dark')
-        }
+        // Theme init to prevent FOUC — runs synchronously before React
+        (function () {
+            var t = localStorage.getItem('theme-preference') || 'system';
+            var dark = t === 'dark' || (t === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+        })();
     </script>
 </body>
 
