@@ -29,4 +29,3 @@ databases:
   - name: school-manager-db
     plan: free
     region: singapore
-    postgresRole: school_admin
