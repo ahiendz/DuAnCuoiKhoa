@@ -42,7 +42,8 @@ find_parent.js
 reset_parent_password*.js
 list_*_models.js
 verify_tool_logic.js
-*.png
+# Only exclude root-level debug screenshots, NOT public/ assets
+/*.png
 anti-gravity-quota/
 DISK_SPACE_ALERT.md
 .tmp/
