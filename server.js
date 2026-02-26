@@ -224,8 +224,26 @@ app.get("/api/subjects", (req, res) => {
 });
 
 app.get("/api/teachers", async (req, res) => {
-  const teachers = await teacherService.loadTeachers();
+  const { subject, gender } = req.query;
+  let teachers = await teacherService.loadTeachers();
+  if (subject) teachers = teachers.filter(t => t.subject === subject);
+  if (gender) teachers = teachers.filter(t => t.gender === gender);
   return res.json(teachers);
+});
+
+app.get("/api/stats/teachers-by-subject", async (req, res) => {
+  try {
+    const teachers = await teacherService.loadTeachers();
+    const map = {};
+    teachers.forEach(t => {
+      const subj = t.subject || 'Khác';
+      map[subj] = (map[subj] || 0) + 1;
+    });
+    const data = Object.entries(map).map(([subject, count]) => ({ subject, count }));
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 app.post("/api/teachers", async (req, res) => {
@@ -347,9 +365,9 @@ app.get("/api/classes/export", async (req, res) => {
 });
 
 app.get("/api/students", async (req, res) => {
-  const { class_id } = req.query;
+  const { class_id, grade, gender } = req.query;
   try {
-    const students = await studentService.listStudents({ class_id });
+    const students = await studentService.listStudents({ class_id, grade, gender });
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     return res.json(students);
   } catch (error) {
@@ -430,11 +448,68 @@ app.get("/api/summary", async (req, res) => {
   const classes = await classService.loadClasses();
   const teachers = await teacherService.loadTeachers();
   const students = await studentService.listStudents();
+  // today's attendance count
+  let attendanceToday = 0;
+  try {
+    const today = new Date().toISOString().slice(0, 10);
+    const att = await db.query(
+      "SELECT COUNT(*) AS cnt FROM attendance WHERE date::date = $1 AND status = 'present'",
+      [today]
+    );
+    attendanceToday = Number(att.rows[0]?.cnt) || 0;
+  } catch (_) { }
   res.json({
     classes: classes.length,
     teachers: teachers.length,
-    students: students.length
+    students: students.length,
+    attendanceToday
   });
+});
+
+app.get("/api/stats/students-by-grade", async (req, res) => {
+  try {
+    const result = await db.query(`
+      SELECT c.grade_level AS grade, COUNT(s.id)::int AS count
+      FROM students s
+      JOIN classes c ON c.id = s.class_id
+      GROUP BY c.grade_level
+      ORDER BY c.grade_level;
+    `);
+    const total = result.rows.reduce((sum, r) => sum + r.count, 0);
+    const data = result.rows.map(r => ({
+      grade: r.grade,
+      name: `Khối ${r.grade}`,
+      count: r.count,
+      percent: total > 0 ? Math.round((r.count / total) * 100) : 0
+    }));
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/api/stats/top-classes", async (req, res) => {
+  try {
+    const { grade } = req.query;
+    const params = [];
+    let gradeWhere = '';
+    if (grade) {
+      params.push(Number(grade));
+      gradeWhere = `WHERE c.grade_level = $1`;
+    }
+    const result = await db.query(`
+      SELECT c.id, c.name, c.grade_level, COUNT(s.id)::int AS student_count
+      FROM classes c
+      LEFT JOIN students s ON s.class_id = c.id
+      ${gradeWhere}
+      GROUP BY c.id, c.name, c.grade_level
+      ORDER BY student_count DESC
+      LIMIT 10;
+    `, params);
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 app.get("/api/analytics/grades", async (req, res) => {
