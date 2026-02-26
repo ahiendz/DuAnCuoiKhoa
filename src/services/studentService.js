@@ -1,6 +1,12 @@
 import api from './api';
 
-export const getStudents = (classId) => api.get('/students', { params: classId ? { class_id: classId } : {} }).then(r => r.data);
+export const getStudents = (filters = {}) => {
+    // Support both legacy (classId string) and new (filters object) calling styles
+    const params = typeof filters === 'string'
+        ? (filters ? { class_id: filters } : {})
+        : Object.fromEntries(Object.entries(filters).filter(([, v]) => v !== '' && v !== undefined && v !== null));
+    return api.get('/students', { params }).then(r => r.data);
+};
 export const createStudent = (data) => api.post('/students', data).then(r => r.data);
 export const updateStudent = (id, data) => api.put(`/students/${id}`, data).then(r => r.data);
 export const deleteStudent = (id) => api.delete(`/students/${id}`).then(r => r.data);

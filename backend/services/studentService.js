@@ -93,7 +93,7 @@ async function generateStudentCode(client) {
 }
 
 async function listStudents(filter = {}) {
-  const { class_id } = filter;
+  const { class_id, grade, gender } = filter;
   let classInfo = null;
   if (class_id) {
     classInfo = await resolveClass(class_id);
@@ -104,11 +104,24 @@ async function listStudents(filter = {}) {
   }
 
   const params = [];
-  let where = "";
+  const conditions = [];
+
   if (classInfo) {
     params.push(classInfo.id);
-    where = "WHERE s.class_id = $1";
+    conditions.push(`s.class_id = $${params.length}`);
   }
+
+  if (grade) {
+    params.push(Number(grade));
+    conditions.push(`c.grade_level = $${params.length}`);
+  }
+
+  if (gender && ['male', 'female'].includes(gender)) {
+    params.push(gender);
+    conditions.push(`s.gender = $${params.length}`);
+  }
+
+  const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
 
   const query = `
     SELECT
@@ -120,6 +133,7 @@ async function listStudents(filter = {}) {
       s.class_id,
       s.image_url AS avatar_url,
       c.name AS class_name,
+      c.grade_level,
       par.parent_name,
       par.parent_email,
       par.parent_phone,
@@ -152,6 +166,7 @@ async function listStudents(filter = {}) {
     gender: row.gender || "",
     class_id: row.class_id,
     class_name: row.class_name || "",
+    grade_level: row.grade_level || null,
     avatar_url: row.avatar_url || null,
     parent_name: row.parent_name || "",
     parent_email: row.parent_email || "",
@@ -161,7 +176,7 @@ async function listStudents(filter = {}) {
 
   logDebug(classInfo ? "Filter students" : "List students", {
     count: students.length,
-    filter: class_id,
+    filter: { class_id, grade, gender },
     normalized: classInfo ? classInfo.name : null
   });
 
