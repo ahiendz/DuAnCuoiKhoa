@@ -48,3 +48,5 @@ DISK_SPACE_ALERT.md
 .tmp/
 *.log
 .vercel
+.vercel/output
+
