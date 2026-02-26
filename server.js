@@ -19,7 +19,23 @@ const noteRoutes = require("./backend/routes/noteRoutes");
 const aiRoutes = require("./backend/routes/ai.routes");
 
 const app = express();
-app.use(cors());
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  process.env.VERCEL_URL, // Tự động lấy URL từ env
+  "https://tempduan.vercel.app" // URL của bạn
+].filter(Boolean);
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true
+}));
 app.use(express.json({ limit: "10mb" }));
 app.use(express.static(__dirname));
 app.use("/api/parent", parentRoutes);

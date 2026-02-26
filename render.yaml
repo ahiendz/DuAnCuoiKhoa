@@ -1,0 +1,32 @@
+services:
+  # Dịch vụ Backend (Node.js + Python)
+  - type: web
+    name: school-manager-api
+    env: docker
+    plan: free # Có thể đổi thành starter nếu cần hiệu năng cao hơn cho face recognition
+    region: singapore # Chọn region gần Việt Nam nhất
+    dockerContext: .
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/subjects
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: school-manager-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: GEMINI_API_KEY
+        sync: false # User sẽ phải nhập thủ công trên Render Dashboard
+      - key: VERCEL_URL
+        sync: false # User nhập URL Vercel để config CORS
+
+databases:
+  # Cơ sở dữ liệu PostgreSQL
+  - name: school-manager-db
+    plan: free
+    region: singapore
+    postgresRole: school_admin

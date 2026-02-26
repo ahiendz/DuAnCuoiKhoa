@@ -1,7 +1,9 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: '/api',
+    // Nếu chạy ở local (Vite), nó sẽ dùng /api (proxy)
+    // Nếu chạy ở production (Vercel), nó sẽ dùng biến môi trường trỏ tới Render
+    baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
     headers: {
         'Content-Type': 'application/json',
     },
