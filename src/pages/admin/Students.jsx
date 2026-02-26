@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Plus, Search, Download, Upload, Pencil, Trash2, User, Eye, EyeOff
+  Plus, Search, Download, Upload, Pencil, Trash2, User, Eye, EyeOff, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import {
@@ -10,6 +10,7 @@ import {
 import { getClasses } from '@/services/classService';
 import Modal from '@/components/Modal';
 import ConfirmDialog from '@/components/ConfirmDialog';
+import FilterBar from '@/components/FilterBar';
 
 const SUBJECTS_PARENT_COLS = ['parent_name', 'parent_email', 'parent_phone', 'parent_relation'];
 
@@ -17,8 +18,10 @@ export default function Students() {
   const [students, setStudents] = useState([]);
   const [allStudents, setAllStudents] = useState([]);
   const [classes, setClasses] = useState([]);
-  const [classFilter, setClassFilter] = useState('');
+  const [filters, setFilters] = useState({ gender: '', grade: '', class_id: '' });
   const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 20;
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [importModal, setImportModal] = useState(false);
@@ -48,13 +51,14 @@ export default function Students() {
 
   useEffect(() => {
     load();
-  }, [classFilter]);
+    setPage(1);
+  }, [filters]);
 
   const load = async () => {
     setLoading(true);
     try {
       const [filtered, all, c] = await Promise.all([
-        getStudents(classFilter || undefined),
+        getStudents(filters),
         getStudents(),
         getClasses()
       ]);
@@ -107,7 +111,7 @@ export default function Students() {
       full_name: '',
       dob: '',
       gender: '',
-      class_id: classFilter || '',
+      class_id: filters.class_id || '',
       avatar_url: '',
       parent_email: '',
       parent_name: '',
@@ -306,7 +310,7 @@ export default function Students() {
         ? String(value).toLowerCase()
         : field === 'class_id'
           ? String(value).trim()
-        : value;
+          : value;
     const updated = rows.map((row, i) => (i === idx ? { ...row, [field]: normalized } : row));
     setRows(updated);
     recomputeErrors(updated);
@@ -390,78 +394,142 @@ export default function Students() {
           </button>
         </div>
       </div>
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-          <input
-            type="text"
-            placeholder="Tìm học sinh..."
-            className="input-field pl-10"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-        <select className="input-field w-auto min-w-[160px]" value={classFilter} onChange={(e) => setClassFilter(e.target.value)}>
-          <option value="">Tất cả lớp</option>
-          {classes.map((cls) => <option key={cls.id} value={cls.id}>{cls.name}</option>)}
-        </select>
+
+      <FilterBar
+        filters={filters}
+        onChange={(f) => { setFilters(f); setPage(1); }}
+        classes={classes}
+        showGender
+        showGrade
+        showClass
+      />
+
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+        <input
+          type="text"
+          placeholder="Tìm học sinh..."
+          className="input-field pl-10"
+          value={search}
+          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+        />
       </div>
 
-      {loading ? (
-        <div className="text-center py-10 text-slate-500">Đang tải...</div>
-      ) : (
-        <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border-default)] overflow-hidden shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-[var(--hover-bg)] border-b border-[var(--border-default)]">
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Avatar</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Mã HS</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Họ tên</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Ngày sinh</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Lớp</th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Thao tác</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--border-subtle)]">
-                {filteredStudents.map((student) => (
-                  <tr key={student.id} className="hover:bg-[var(--hover-bg)]/30 transition-colors">
-                    <td className="px-4 py-3">
-                      {student.avatar_url ? (
-                        <img src={student.avatar_url} alt="" className="w-8 h-8 rounded-full object-cover" />
-                      ) : (
-                        <div className="w-8 h-8 rounded-full bg-slate-200  flex items-center justify-center">
-                          <User size={14} className="text-slate-400" />
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-[var(--text-secondary)] font-mono text-xs">{student.student_code}</td>
-                    <td className="px-4 py-3 font-medium text-[var(--text-primary)]">{student.full_name}</td>
-                    <td className="px-4 py-3 text-[var(--text-secondary)]">{formatDob(student.dob)}</td>
-                    <td className="px-4 py-3">
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-green-500/10 text-green-500">
-                        {className(student)}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex justify-end gap-1">
-                        <button onClick={() => setViewing(student)} className="p-1.5 rounded-lg hover:bg-[var(--hover-bg)] text-slate-500 hover:text-indigo-500"><Eye size={16} /></button>
-                        <button onClick={() => openEdit(student)} className="p-1.5 rounded-lg hover:bg-[var(--hover-bg)] text-slate-500 hover:text-indigo-500"><Pencil size={16} /></button>
-                        <button onClick={() => setDeleteDialog({ open: true, id: student.id })} className="p-1.5 rounded-lg hover:bg-[var(--hover-bg)] text-slate-500 hover:text-red-500"><Trash2 size={16} /></button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-                {filteredStudents.length === 0 && (
-                  <tr>
-                    <td colSpan={6} className="text-center py-8 text-slate-400">Không có dữ liệu</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+      {(() => {
+        const searchFiltered = students.filter((s) => s.full_name?.toLowerCase().includes(search.toLowerCase()));
+        const totalPages = Math.max(1, Math.ceil(searchFiltered.length / PAGE_SIZE));
+        const safePage = Math.min(page, totalPages);
+        const paginated = searchFiltered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
+        return loading ? (
+          <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border-default)] overflow-hidden shadow-sm">
+            {[1, 2, 3, 4, 5].map(i => (
+              <div key={i} className="flex gap-4 px-4 py-4 border-b border-[var(--border-subtle)] animate-pulse">
+                <div className="w-8 h-8 rounded-full bg-slate-700" />
+                <div className="h-4 bg-slate-700 rounded w-20" />
+                <div className="h-4 bg-slate-700 rounded w-32" />
+                <div className="h-4 bg-slate-700 rounded w-20" />
+                <div className="h-4 bg-slate-700 rounded w-16" />
+              </div>
+            ))}
           </div>
-        </div>
-      )}
+        ) : (
+          <>
+            <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border-default)] overflow-hidden shadow-sm">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-[var(--hover-bg)] border-b border-[var(--border-default)]">
+                      {/* Merged Avatar + Name + Mã HS */}
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wide">Học sinh</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wide hidden sm:table-cell">Mã HS</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wide">Lớp</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wide">Giới tính</th>
+                      <th className="text-right px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wide">Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[var(--border-subtle)]">
+                    {paginated.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="text-center py-14">
+                          <div className="flex flex-col items-center gap-2 text-slate-400">
+                            <Search size={28} className="opacity-40" />
+                            <p className="text-sm">Không tìm thấy học sinh phù hợp bộ lọc.</p>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : paginated.map((student) => (
+                      <tr key={student.id} className="hover:bg-blue-900/10 transition-all duration-150">
+                        {/* Merged Avatar + Name + Mã HS */}
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-3">
+                            {student.avatar_url ? (
+                              <img src={student.avatar_url} alt="" className="w-9 h-9 rounded-full object-cover shrink-0" />
+                            ) : (
+                              <div className="w-9 h-9 rounded-full bg-slate-700 flex items-center justify-center shrink-0 text-slate-400 text-xs font-bold">
+                                {student.full_name?.charAt(0)?.toUpperCase() || '?'}
+                              </div>
+                            )}
+                            <div className="min-w-0">
+                              <p className="font-semibold text-[var(--text-primary)] truncate">{student.full_name}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-[var(--text-secondary)] font-mono text-xs hidden sm:table-cell">{student.student_code}</td>
+                        <td className="px-4 py-3">
+                          <span className="text-xs px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-400 font-medium">
+                            {className(student)}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${student.gender === 'male'
+                            ? 'bg-blue-500/15 text-blue-400'
+                            : student.gender === 'female'
+                              ? 'bg-pink-500/15 text-pink-400'
+                              : 'bg-slate-500/10 text-slate-400'
+                            }`}>
+                            {student.gender === 'male' ? 'Nam' : student.gender === 'female' ? 'Nữ' : '—'}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <div className="flex justify-end gap-1">
+                            <button onClick={() => setViewing(student)} className="p-1.5 rounded-lg hover:bg-[var(--hover-bg)] text-slate-500 hover:text-indigo-500 transition-colors"><Eye size={16} /></button>
+                            <button onClick={() => openEdit(student)} className="p-1.5 rounded-lg hover:bg-[var(--hover-bg)] text-slate-500 hover:text-indigo-500 transition-colors"><Pencil size={16} /></button>
+                            <button onClick={() => setDeleteDialog({ open: true, id: student.id })} className="p-1.5 rounded-lg hover:bg-[var(--hover-bg)] text-slate-500 hover:text-red-500 transition-colors"><Trash2 size={16} /></button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div >
+
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between text-sm text-[var(--text-secondary)]">
+                <span>{searchFiltered.length} học sinh &bull; Trang {safePage}/{totalPages}</span>
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                    disabled={safePage === 1}
+                    className="p-2 rounded-lg border border-[var(--border-default)] hover:bg-[var(--hover-bg)] disabled:opacity-40"
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+                  <button
+                    onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                    disabled={safePage === totalPages}
+                    className="p-2 rounded-lg border border-[var(--border-default)] hover:bg-[var(--hover-bg)] disabled:opacity-40"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                </div>
+              </div>
+            )
+            }
+          </>
+        );
+      })()}
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Sửa học sinh' : 'Thêm học sinh'}>
         {error && (
@@ -722,6 +790,6 @@ export default function Students() {
           </div>
         )}
       </Modal>
-    </div>
+    </div >
   );
 }
