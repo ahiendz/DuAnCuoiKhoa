@@ -1,12 +1,20 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Plus, Search, Download, Pencil, Trash2, Award, AlertTriangle } from 'lucide-react';
+import { Plus, Search, Download, Pencil, Trash2, Award, AlertTriangle, ArrowUpDown } from 'lucide-react';
 import { getTeachers, createTeacher, updateTeacher, deleteTeacher, exportTeachersCsv } from '@/services/teacherService';
+import { getClasses } from '@/services/classService';
 import Modal from '@/components/Modal';
 import ConfirmDialog from '@/components/ConfirmDialog';
+import FilterBar from '@/components/FilterBar';
+
+const fixedSubjects = ['Toán', 'Văn', 'Anh', 'KHTN'];
 
 export default function Teachers() {
     const [teachers, setTeachers] = useState([]);
+    const [classes, setClasses] = useState([]);
     const [search, setSearch] = useState('');
+    const [filters, setFilters] = useState({ subject: '', gender: '' });
+    const [sortKey, setSortKey] = useState('full_name');
+    const [sortDir, setSortDir] = useState('asc');
     const [loading, setLoading] = useState(true);
     const [modalOpen, setModalOpen] = useState(false);
     const [deleteDialog, setDeleteDialog] = useState({ open: false, id: null });
@@ -17,23 +25,29 @@ export default function Teachers() {
     const [errorModal, setErrorModal] = useState('');
     const [passwordModal, setPasswordModal] = useState({ open: false, value: '' });
 
-    const fixedSubjects = ['Toán', 'Văn', 'Anh', 'KHTN'];
-
     const load = async () => {
         setLoading(true);
         try {
-            const t = await getTeachers();
+            const [t, c] = await Promise.all([getTeachers(), getClasses()]);
             setTeachers(t);
+            setClasses(c);
         } catch { } finally { setLoading(false); }
     };
 
     useEffect(() => { load(); }, []);
 
+    // Resolve homeroom class name for teacher
+    const homeroomClassName = (teacher) => {
+        if (!teacher.is_homeroom) return null;
+        const cls = classes.find(c => String(c.homeroom_teacher_id) === String(teacher.id));
+        return cls ? cls.name : '—';
+    };
+
     const teacherMeta = useMemo(() => teachers.map(t => {
-        const load = (t.teaching_classes || []).length + (t.is_homeroom ? 1 : 0);
-        const isFull = load >= 4;
-        const isUnassigned = (t.teaching_classes || []).length === 0 && !t.is_homeroom;
-        return { ...t, load, isFull, isUnassigned };
+        const classCount = (t.teaching_classes || []).length;
+        const isOverloaded = classCount > 4;
+        const isFull = classCount === 4;
+        return { ...t, classCount, isOverloaded, isFull };
     }), [teachers]);
 
     const openAdd = () => {
@@ -60,7 +74,6 @@ export default function Teachers() {
         setSaving(true);
         setError('');
         try {
-            console.log("Teacher Payload:", form);
             const response = editing
                 ? await updateTeacher(editing.id, form)
                 : await createTeacher(form);
@@ -68,7 +81,6 @@ export default function Teachers() {
             if (response.generatedPassword) {
                 setPasswordModal({ open: true, value: response.generatedPassword });
             }
-
             setModalOpen(false);
             load();
         } catch (err) {
@@ -87,14 +99,67 @@ export default function Teachers() {
         }
     };
 
-    const filtered = teacherMeta.filter(t => t.full_name?.toLowerCase().includes(search.toLowerCase()));
+    const handleSort = (key) => {
+        if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+        else { setSortKey(key); setSortDir('asc'); }
+    };
+
+    const SortIcon = ({ col }) => (
+        <ArrowUpDown size={12} className={`inline ml-1 ${sortKey === col ? 'text-indigo-400' : 'text-slate-600'}`} />
+    );
+
+    const filtered = useMemo(() => {
+        let list = teacherMeta.filter(t => {
+            const matchSearch = t.full_name?.toLowerCase().includes(search.toLowerCase());
+            const matchSubject = !filters.subject || t.subject === filters.subject;
+            const matchGender = !filters.gender || t.gender === filters.gender;
+            return matchSearch && matchSubject && matchGender;
+        });
+        return [...list].sort((a, b) => {
+            let va = (sortKey === 'classCount' ? a.classCount : a[sortKey]) ?? '';
+            let vb = (sortKey === 'classCount' ? b.classCount : b[sortKey]) ?? '';
+            if (typeof va === 'string') va = va.toLowerCase();
+            if (typeof vb === 'string') vb = vb.toLowerCase();
+            if (va < vb) return sortDir === 'asc' ? -1 : 1;
+            if (va > vb) return sortDir === 'asc' ? 1 : -1;
+            return 0;
+        });
+    }, [teacherMeta, search, filters, sortKey, sortDir]);
+
+    const LoadingSkeleton = () => (
+        <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border-default)] overflow-hidden shadow-sm">
+            {[1, 2, 3, 4, 5].map(i => (
+                <div key={i} className="flex gap-4 px-4 py-4 border-b border-[var(--border-subtle)] animate-pulse">
+                    <div className="h-4 bg-slate-700 rounded w-32" />
+                    <div className="h-4 bg-slate-700 rounded w-40" />
+                    <div className="h-4 bg-slate-700 rounded w-12" />
+                    <div className="h-4 bg-slate-700 rounded w-16" />
+                    <div className="h-4 bg-slate-700 rounded w-12" />
+                    <div className="h-4 bg-slate-700 rounded w-20" />
+                </div>
+            ))}
+        </div>
+    );
+
+    const GenderBadge = ({ gender }) => {
+        if (gender === 'male') return (
+            <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-400 font-medium">Nam</span>
+        );
+        if (gender === 'female') return (
+            <span className="text-xs px-2 py-0.5 rounded-full bg-pink-500/15 text-pink-400 font-medium">Nữ</span>
+        );
+        return <span className="text-slate-500 text-xs">—</span>;
+    };
+
+    const thCls = "text-left px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wide cursor-pointer select-none hover:text-[var(--text-primary)] transition-colors";
+    const thClsFixed = "text-left px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wide";
 
     return (
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h2 className="text-2xl font-bold text-[var(--text-primary)]">Quản lý Giáo viên</h2>
-                    <p className="text-[var(--text-secondary)] text-sm">{teachers.length} giáo viên</p>
+                    <p className="text-[var(--text-secondary)] text-sm">{teachers.length} giáo viên trong hệ thống</p>
                 </div>
                 <div className="flex gap-2">
                     <button onClick={exportTeachersCsv} className="px-3 py-2 rounded-lg border border-[var(--border-default)] text-[var(--text-secondary)] hover:bg-[var(--hover-bg)] text-sm flex items-center gap-2">
@@ -106,59 +171,106 @@ export default function Teachers() {
                 </div>
             </div>
 
+            <FilterBar
+                filters={filters}
+                onChange={setFilters}
+                showSubject
+                showGender
+            />
+
             <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input type="text" placeholder="Tìm giáo viên..." className="input-field pl-10" value={search} onChange={e => setSearch(e.target.value)} />
             </div>
 
-            {loading ? <div className="text-center py-10 text-slate-500">Đang tải...</div> : (
+            {loading ? <LoadingSkeleton /> : (
                 <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border-default)] overflow-hidden shadow-sm">
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                             <thead>
                                 <tr className="bg-[var(--hover-bg)] border-b border-[var(--border-default)]">
-                                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Họ tên</th>
-                                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Email</th>
-                                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Môn</th>
-                                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Số lớp</th>
-                                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">GVCN</th>
-                                    <th className="text-right px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Thao tác</th>
+                                    {/* Column order: Họ tên | Email | Giới tính | Môn | Số lớp | GVCN | Thao tác */}
+                                    <th className={thCls} onClick={() => handleSort('full_name')}>
+                                        Họ tên <SortIcon col="full_name" />
+                                    </th>
+                                    <th className={`${thClsFixed} hidden md:table-cell`}>Email</th>
+                                    <th className={thClsFixed}>Giới tính</th>
+                                    <th className={thCls} onClick={() => handleSort('subject')}>
+                                        Môn <SortIcon col="subject" />
+                                    </th>
+                                    <th className={thCls} onClick={() => handleSort('classCount')}>
+                                        Số lớp <SortIcon col="classCount" />
+                                    </th>
+                                    <th className={thClsFixed}>GVCN lớp</th>
+                                    <th className="text-right px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wide">Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-[var(--border-subtle)]">
                                 {filtered.map(t => (
-                                    <tr key={t.id} className="hover:bg-[var(--hover-bg)]/30 transition-colors">
-                                        <td className="px-4 py-3 font-medium text-[var(--text-primary)]">{t.full_name}</td>
-                                        <td className="px-4 py-3 text-[var(--text-secondary)]">{t.contact_email || '—'}</td>
-                                        <td className="px-4 py-3">
-                                            <span
-                                                className={`text-xs px-2 py-0.5 rounded-full ${t.isFull
-                                                        ? 'bg-red-500/10 text-red-500 font-semibold'
-                                                        : 'bg-blue-500/10 text-blue-500'
-                                                    }`}
-                                            >
-                                                {t.subject} {t.isFull && '[FULL]'}
+                                    <tr key={t.id} className="hover:bg-blue-900/10 transition-all duration-150">
+                                        <td className="px-4 py-3.5">
+                                            <span className="font-semibold text-[var(--text-primary)]">{t.full_name}</span>
+                                        </td>
+                                        <td className="px-4 py-3.5 text-[var(--text-secondary)] text-xs hidden md:table-cell">{t.contact_email || '—'}</td>
+                                        <td className="px-4 py-3.5">
+                                            <GenderBadge gender={t.gender} />
+                                        </td>
+                                        <td className="px-4 py-3.5">
+                                            <span className="text-xs px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-400 font-medium">
+                                                {t.subject || '—'}
                                             </span>
                                         </td>
-                                        <td className="px-4 py-3 text-[var(--text-secondary)]">{(t.teaching_classes || []).length}/4</td>
-                                        <td className="px-4 py-3">
-                                            {t.is_homeroom ? <Award size={16} className="text-yellow-500" /> : <span className="text-slate-300">—</span>}
+                                        <td className="px-4 py-3.5">
+                                            <div className="flex items-center gap-1.5">
+                                                <span className={`text-sm font-semibold tabular-nums ${t.isOverloaded ? 'text-red-500' : t.isFull ? 'text-amber-500' : 'text-[var(--text-secondary)]'}`}>
+                                                    {t.classCount} / 4
+                                                </span>
+                                                {t.isOverloaded && (
+                                                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-500/15 text-red-500 font-semibold flex items-center gap-0.5">
+                                                        <AlertTriangle size={10} /> Quá tải
+                                                    </span>
+                                                )}
+                                            </div>
                                         </td>
-                                        <td className="px-4 py-3 text-right">
+                                        <td className="px-4 py-3.5">
+                                            {t.is_homeroom ? (
+                                                <div className="flex items-center gap-1.5">
+                                                    <Award size={13} className="text-yellow-500 shrink-0" />
+                                                    <span className="text-xs text-[var(--text-secondary)]">{homeroomClassName(t)}</span>
+                                                </div>
+                                            ) : (
+                                                <span className="text-slate-500 text-xs">—</span>
+                                            )}
+                                        </td>
+                                        <td className="px-4 py-3.5 text-right">
                                             <div className="flex justify-end gap-1">
-                                                <button onClick={() => openEdit(t)} className="p-1.5 rounded-lg hover:bg-[var(--hover-bg)] text-slate-500 hover:text-indigo-500"><Pencil size={16} /></button>
-                                                <button onClick={() => setDeleteDialog({ open: true, id: t.id })} className="p-1.5 rounded-lg hover:bg-[var(--hover-bg)] text-slate-500 hover:text-red-500"><Trash2 size={16} /></button>
+                                                <button onClick={() => openEdit(t)} className="p-1.5 rounded-lg hover:bg-[var(--hover-bg)] text-slate-500 hover:text-indigo-500 transition-colors">
+                                                    <Pencil size={16} />
+                                                </button>
+                                                <button onClick={() => setDeleteDialog({ open: true, id: t.id })} className="p-1.5 rounded-lg hover:bg-[var(--hover-bg)] text-slate-500 hover:text-red-500 transition-colors">
+                                                    <Trash2 size={16} />
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
                                 ))}
-                                {filtered.length === 0 && <tr><td colSpan={6} className="text-center py-8 text-slate-400">Không có dữ liệu</td></tr>}
+                                {filtered.length === 0 && (
+                                    <tr>
+                                        <td colSpan={7} className="text-center py-12">
+                                            <div className="flex flex-col items-center gap-2 text-slate-400">
+                                                <Search size={28} className="opacity-40" />
+                                                <span className="text-sm">Không tìm thấy giáo viên phù hợp</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )}
                             </tbody>
                         </table>
                     </div>
                 </div>
             )}
 
+            {/* Add/Edit Modal */}
             <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Sửa giáo viên' : 'Thêm giáo viên'}>
                 {error && <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 text-red-500 text-sm rounded-lg">{error}</div>}
                 <div className="space-y-4">
@@ -201,13 +313,14 @@ export default function Teachers() {
                     </div>
                     <div className="flex justify-end gap-3 pt-4 border-t border-[var(--border-default)]">
                         <button onClick={() => setModalOpen(false)} className="px-4 py-2 rounded-lg border border-[var(--border-default)] text-[var(--text-secondary)] text-sm">Hủy</button>
-                        <button onClick={handleSave} disabled={saving} className="btn-primary text-sm">{saving ? 'Đang lưu...' : 'Lưu'}</button>
+                        <button onClick={handleSave} disabled={saving} className="btn-primary text-sm">
+                            {saving ? 'Đang lưu...' : 'Lưu'}
+                        </button>
                     </div>
                 </div>
             </Modal>
 
-            <ConfirmDialog open={deleteDialog.open} onClose={() => setDeleteDialog({ open: false, id: null })} onConfirm={handleDelete}
-                message="Bạn có chắc muốn xóa giáo viên này?" />
+            <ConfirmDialog open={deleteDialog.open} onClose={() => setDeleteDialog({ open: false, id: null })} onConfirm={handleDelete} message="Bạn có chắc muốn xóa giáo viên này?" />
 
             <Modal open={!!errorModal} onClose={() => setErrorModal('')} title="Không thể xóa">
                 <div className="flex items-start gap-3 text-red-500 bg-red-500/10 border border-red-500/20 rounded-xl p-3">
@@ -220,14 +333,9 @@ export default function Teachers() {
                 <p className="text-sm text-slate-300">Hệ thống đã tạo mật khẩu:</p>
                 <p className="mt-2 text-lg font-semibold text-white font-mono">{passwordModal.value}</p>
                 <div className="flex justify-end mt-4">
-                    <button
-                        onClick={() => setPasswordModal({ open: false, value: '' })}
-                        className="btn-primary px-4 py-2 text-sm"
-                    >
-                        Đã hiểu
-                    </button>
+                    <button onClick={() => setPasswordModal({ open: false, value: '' })} className="btn-primary px-4 py-2 text-sm">Đã hiểu</button>
                 </div>
             </Modal>
-        </div >
+        </div>
     );
 }
