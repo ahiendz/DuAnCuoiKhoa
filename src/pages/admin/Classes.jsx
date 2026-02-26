@@ -4,11 +4,13 @@ import { getClasses, createClass, updateClass, deleteClass, exportClassesCsv } f
 import { getTeachers } from '@/services/teacherService';
 import Modal from '@/components/Modal';
 import ConfirmDialog from '@/components/ConfirmDialog';
+import FilterBar from '@/components/FilterBar';
 
 export default function Classes() {
     const [classes, setClasses] = useState([]);
     const [teachers, setTeachers] = useState([]);
     const fixedSubjects = ['Toán', 'Văn', 'Anh', 'KHTN'];
+    const [filters, setFilters] = useState({ grade: '' });
     const [search, setSearch] = useState('');
     const [loading, setLoading] = useState(true);
     const [modalOpen, setModalOpen] = useState(false);
@@ -158,7 +160,11 @@ export default function Classes() {
         return t ? t.full_name : '—';
     };
 
-    const filtered = classes.filter(c => c.name?.toLowerCase().includes(search.toLowerCase()));
+    const filtered = classes.filter(c => {
+        const matchSearch = c.name?.toLowerCase().includes(search.toLowerCase());
+        const matchGrade = !filters.grade || String(c.grade_level) === String(filters.grade);
+        return matchSearch && matchGrade;
+    });
 
     return (
         <div className="space-y-6">
@@ -177,48 +183,82 @@ export default function Classes() {
                 </div>
             </div>
 
+            <FilterBar
+                filters={filters}
+                onChange={setFilters}
+                showGrade
+            />
+
             <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                <input type="text" placeholder="Tìm kiếm..." className="input-field pl-10" value={search} onChange={e => setSearch(e.target.value)} />
+                <input type="text" placeholder="Tìm kiếm lớp..." className="input-field pl-10" value={search} onChange={e => setSearch(e.target.value)} />
             </div>
 
-            {loading ? <div className="text-center py-10 text-slate-500">Đang tải...</div> : (
+            {loading ? (
+                <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border-default)] overflow-hidden shadow-sm">
+                    {[1, 2, 3, 4, 5].map(i => (
+                        <div key={i} className="flex gap-4 px-4 py-4 border-b border-[var(--border-subtle)] animate-pulse">
+                            <div className="h-4 bg-slate-700 rounded w-16" />
+                            <div className="h-4 bg-slate-700 rounded w-12" />
+                            <div className="h-4 bg-slate-700 rounded w-32" />
+                            <div className="h-4 bg-slate-700 rounded flex-1" />
+                        </div>
+                    ))}
+                </div>
+            ) : (
                 <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border-default)] overflow-hidden shadow-sm">
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                             <thead>
                                 <tr className="bg-[var(--hover-bg)] border-b border-[var(--border-default)]">
-                                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Tên lớp</th>
-                                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Khối</th>
-                                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">GVCN</th>
-                                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">GV Bộ môn</th>
-                                    <th className="text-right px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Thao tác</th>
+                                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wide">Tên lớp</th>
+                                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wide">Khối</th>
+                                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wide">GVCN</th>
+                                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wide">GV Toán</th>
+                                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wide">GV Văn</th>
+                                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wide">GV Anh</th>
+                                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wide">GV KHTN</th>
+                                    <th className="text-right px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wide">Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-[var(--border-subtle)]">
                                 {filtered.map(cls => (
                                     <tr key={cls.id} className="hover:bg-[var(--hover-bg)]/30 transition-colors">
-                                        <td className="px-4 py-3 font-medium text-[var(--text-primary)]">{cls.name}</td>
-                                        <td className="px-4 py-3 text-[var(--text-secondary)]">{cls.grade_level}</td>
-                                        <td className="px-4 py-3 text-[var(--text-secondary)]">{teacherName(cls.homeroom_teacher_id)}</td>
+                                        <td className="px-4 py-3 font-semibold text-[var(--text-primary)]">{cls.name}</td>
                                         <td className="px-4 py-3">
-                                            <div className="flex flex-wrap gap-1">
-                                                {Object.entries(cls.subject_teachers || {}).map(([subj, tid]) => (
-                                                    <span key={subj} className="text-xs px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-500">
-                                                        {subj}: {teacherName(tid)}
-                                                    </span>
-                                                ))}
-                                            </div>
+                                            <span className="text-xs px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-400 font-medium">
+                                                Khối {cls.grade_level}
+                                            </span>
                                         </td>
+                                        <td className="px-4 py-3 text-[var(--text-secondary)]">{teacherName(cls.homeroom_teacher_id)}</td>
+                                        {['Toán', 'Văn', 'Anh', 'KHTN'].map(subj => {
+                                            const tid = (cls.subject_teachers || {})[subj];
+                                            const name = tid ? teacherName(tid) : null;
+                                            return (
+                                                <td key={subj} className="px-4 py-3">
+                                                    {name
+                                                        ? <span className="text-sm text-[var(--text-secondary)]">{name}</span>
+                                                        : <span className="text-slate-600 text-sm">—</span>
+                                                    }
+                                                </td>
+                                            );
+                                        })}
                                         <td className="px-4 py-3 text-right">
                                             <div className="flex justify-end gap-1">
                                                 <button onClick={() => openEdit(cls)} className="p-1.5 rounded-lg hover:bg-[var(--hover-bg)] text-slate-500 hover:text-indigo-500"><Pencil size={16} /></button>
-                                            <button onClick={() => setDeleteDialog({ open: true, id: cls.id, stage: 'warn' })} className="p-1.5 rounded-lg hover:bg-[var(--hover-bg)] text-slate-500 hover:text-red-500"><Trash2 size={16} /></button>
+                                                <button onClick={() => setDeleteDialog({ open: true, id: cls.id, stage: 'warn' })} className="p-1.5 rounded-lg hover:bg-[var(--hover-bg)] text-slate-500 hover:text-red-500"><Trash2 size={16} /></button>
                                             </div>
                                         </td>
                                     </tr>
                                 ))}
-                                {filtered.length === 0 && <tr><td colSpan={5} className="text-center py-8 text-slate-400">Không có dữ liệu</td></tr>}
+                                {filtered.length === 0 && (
+                                    <tr><td colSpan={8} className="text-center py-12">
+                                        <div className="flex flex-col items-center gap-2 text-slate-400">
+                                            <Search size={28} className="opacity-40" />
+                                            <span className="text-sm">Không tìm thấy lớp nào phù hợp</span>
+                                        </div>
+                                    </td></tr>
+                                )}
                             </tbody>
                         </table>
                     </div>
@@ -253,23 +293,23 @@ export default function Classes() {
                             value={form.homeroom_teacher_id}
                             onChange={e => handleHomeroomChange(e.target.value)}
                         >
-                                <option value="">Chọn GVCN</option>
-                                {sortGvcnOptions(teacherMeta).map(t => {
-                                    const disableFull = t.isFull && String(form.homeroom_teacher_id) !== String(t.id);
-                                    return (
-                                        <option
-                                            key={t.id}
-                                            value={t.id}
-                                            disabled={disableFull}
-                                            style={{
-                                                fontWeight: t.isUnassigned || isGvcnElsewhere(t) ? '700' : '500',
-                                                color: t.isFull ? '#ef4444' : undefined
-                                            }}
-                                        >
-                                            {renderGvcnLabel(t)}
-                                        </option>
-                                    );
-                                })}
+                            <option value="">Chọn GVCN</option>
+                            {sortGvcnOptions(teacherMeta).map(t => {
+                                const disableFull = t.isFull && String(form.homeroom_teacher_id) !== String(t.id);
+                                return (
+                                    <option
+                                        key={t.id}
+                                        value={t.id}
+                                        disabled={disableFull}
+                                        style={{
+                                            fontWeight: t.isUnassigned || isGvcnElsewhere(t) ? '700' : '500',
+                                            color: t.isFull ? '#ef4444' : undefined
+                                        }}
+                                    >
+                                        {renderGvcnLabel(t)}
+                                    </option>
+                                );
+                            })}
                         </select>
                     </div>
                     <div>
